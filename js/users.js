@@ -1,14 +1,19 @@
-// ===============================
-// DATABASE USER
-// ===============================
+// ======================================
+// USERS DATABASE
+// ======================================
 
 const USERS = [
 
 {
-    username: "admin",
+    id:1,
 
-    password:
-    "240be518fabd2724ddb6f04eebcdbf1d75b21f5d5f5f7f4d4f8f9e5d7c0b7c56"
-},
+    username:"admin",
+
+    passwordHash:"",
+
+    role:"admin",
+
+    active:true
+}
 
 ];
