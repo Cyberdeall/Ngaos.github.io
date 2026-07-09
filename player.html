@@ -6,88 +6,147 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+content="width=device-width, initial-scale=1.0">
 
 <title>NGAOS AL FALAH PLOSO</title>
 
-<style>
-
-body{
-
-    margin:0;
-    padding:0;
-
-    background:#111;
-
-    color:#fff;
-
-    font-family:Arial,Helvetica,sans-serif;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    height:100vh;
-
-}
-
-.container{
-
-    text-align:center;
-
-    width:90%;
-
-    max-width:400px;
-
-}
-
-button{
-
-    margin-top:20px;
-
-    padding:12px 20px;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    background:#e53935;
-
-    color:#fff;
-
-    font-size:16px;
-
-}
-
-button:hover{
-
-    opacity:.9;
-
-}
-
-</style>
+<link rel="stylesheet" href="css/player.css">
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="player-container">
 
-<h1 id="title">
-NGAOS AL FALAH PLOSO
-</h1>
+    <div class="card">
 
-<p id="welcome">
-Memuat...
-</p>
+        <!-- Logo -->
 
-<button id="logoutButton">
-Logout
-</button>
+        <div class="logo">
+
+            📻
+
+        </div>
+
+        <!-- Nama -->
+
+        <h1 id="appName">
+
+            NGAOS AL FALAH PLOSO
+
+        </h1>
+
+        <p id="appDesc">
+
+            TAFSIR JALALAIN DAN SHAHIH BUKHARI
+
+        </p>
+
+        <!-- Status -->
+
+        <div class="status">
+
+            <span id="liveDot"></span>
+
+            <span id="liveText">
+
+                OFFLINE
+
+            </span>
+
+        </div>
+
+        <!-- Cover -->
+
+        <div class="cover">
+
+            <img
+                id="coverImage"
+                src="assets/cover.jpg"
+                alt="Cover">
+
+        </div>
+
+        <!-- Audio -->
+
+        <audio
+            id="radioPlayer"
+            preload="none">
+        </audio>
+
+        <!-- Tombol -->
+
+        <div class="controls">
+
+            <button
+                id="playButton">
+
+                ▶ PLAY
+
+            </button>
+
+            <button
+                id="stopButton">
+
+                ■ STOP
+
+            </button>
+
+        </div>
+
+        <!-- Volume -->
+
+        <div class="volume">
+
+            <label>
+
+                Volume
+
+            </label>
+
+            <input
+                type="range"
+                id="volumeSlider"
+                min="0"
+                max="100"
+                value="100">
+
+        </div>
+
+        <!-- Loading -->
+
+        <div
+            id="loading"
+            class="loading">
+
+            Menghubungkan...
+
+        </div>
+
+        <!-- User -->
+
+        <div class="user">
+
+            Login sebagai
+
+            <strong id="currentUser">
+
+                -
+
+            </strong>
+
+        </div>
+
+        <!-- Logout -->
+
+        <button
+            id="logoutButton">
+
+            Logout
+
+        </button>
+
+    </div>
 
 </div>
 
@@ -97,71 +156,15 @@ Logout
 
 <script>
 
-// =====================================
-// WAJIB LOGIN
-// =====================================
-
 if(!checkLogin()){
 
-    window.location.replace("index.html");
+    window.location.replace(CONFIG.LOGIN_PAGE);
 
 }
-
-// =====================================
-// AMBIL USER
-// =====================================
-
-const user=getCurrentUser();
-
-if(user){
-
-    document.getElementById("welcome").textContent=
-    "Selamat datang, "+user.username;
-
-}
-
-// =====================================
-// TOMBOL LOGOUT
-// =====================================
-
-document
-.getElementById("logoutButton")
-.addEventListener("click",function(){
-
-    logout();
-
-});
-
-// =====================================
-// ANTI BACK
-// =====================================
-
-history.pushState(null,null,location.href);
-
-window.addEventListener(
-"popstate",
-function(){
-
-    history.pushState(
-        null,
-        null,
-        location.href
-    );
-
-}
-);
-
-// =====================================
-// REFRESH SESSION
-// =====================================
-
-setInterval(function(){
-
-    refreshSession();
-
-},60000);
 
 </script>
+
+<script src="js/player.js"></script>
 
 </body>
 
