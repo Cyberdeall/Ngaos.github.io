@@ -1,6 +1,6 @@
 // =========================================
 // CONFIG.JS
-// Final Version 1.0
+// Final Version 2.0
 // =========================================
 
 const CONFIG = {
@@ -12,6 +12,10 @@ const CONFIG = {
     STREAM_URL:
         "https://uk14freenew.listen2myradio.com/live.mp3?typeportmount=s1_27764_stream_367452469",
 
-    SESSION_HOURS: 4
+    SESSION_HOURS: 4,
+
+    REMEMBER_KEY: "remember_username",
+
+    SESSION_KEY: "radio_session"
 
 };
