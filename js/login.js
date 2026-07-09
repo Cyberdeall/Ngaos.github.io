@@ -1,71 +1,138 @@
-// ===============================
-// LOGIN
-// ===============================
+// =========================================
+// LOGIN.JS
+// Final Version 1.0
+// =========================================
 
-const form = document.getElementById("loginForm");
+document.addEventListener("DOMContentLoaded", function(){
 
-form.addEventListener("submit", async function(e){
-
-    e.preventDefault();
+    const form = document.getElementById("loginForm");
 
     const username =
-        document.getElementById("username").value.trim();
+        document.getElementById("username");
 
     const password =
-        document.getElementById("password").value;
+        document.getElementById("password");
 
     const remember =
-        document.getElementById("remember").checked;
+        document.getElementById("remember");
 
     const message =
         document.getElementById("message");
 
-    const success =
-        await login(username,password);
+    const submitButton =
+        form.querySelector("button[type='submit']");
 
-    if(success){
+    // ----------------------------
+    // Remember Username
+    // ----------------------------
 
-        if(remember){
+    const savedUser =
+        localStorage.getItem("remember_username");
 
-            localStorage.setItem(
-                "remember_user",
-                username
-            );
+    if(savedUser){
 
-        }else{
+        username.value = savedUser;
 
-            localStorage.removeItem(
-                "remember_user"
-            );
+        remember.checked = true;
+
+    }
+
+    // ----------------------------
+    // Submit Login
+    // ----------------------------
+
+    form.addEventListener("submit", async function(event){
+
+        event.preventDefault();
+
+        message.textContent = "";
+
+        const user =
+            username.value.trim();
+
+        const pass =
+            password.value;
+
+        if(user===""){
+
+            message.textContent =
+                "Username wajib diisi.";
+
+            username.focus();
+
+            return;
 
         }
 
-        window.location.href="player.html";
+        if(pass===""){
 
-    }else{
+            message.textContent =
+                "Password wajib diisi.";
 
-        message.innerHTML =
-        "Username atau Password salah";
+            password.focus();
 
-    }
+            return;
+
+        }
+
+        submitButton.disabled = true;
+
+        submitButton.textContent =
+            "Memproses...";
+
+        try{
+
+            const success =
+                await login(user,pass);
+
+            if(success){
+
+                if(remember.checked){
+
+                    localStorage.setItem(
+                        "remember_username",
+                        user
+                    );
+
+                }else{
+
+                    localStorage.removeItem(
+                        "remember_username"
+                    );
+
+                }
+
+                window.location.replace(
+                    "player.html"
+                );
+
+                return;
+
+            }
+
+            message.textContent =
+                "Username atau password salah.";
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            message.textContent =
+                "Terjadi kesalahan.";
+
+        }
+
+        finally{
+
+            submitButton.disabled = false;
+
+            submitButton.textContent =
+                "LOGIN";
+
+        }
+
+    });
 
 });
-
-// ===============================
-// REMEMBER USER
-// ===============================
-
-window.onload=function(){
-
-    const saved=
-        localStorage.getItem("remember_user");
-
-    if(saved){
-
-        document.getElementById("username").value=saved;
-
-        document.getElementById("remember").checked=true;
-
-    }
-
-}
