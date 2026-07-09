@@ -1,9 +1,14 @@
-// =======================================
+// =========================================
 // AUTH.JS
-// Sistem Login Final
-// =======================================
+// Final Version 1.0
+// =========================================
 
-// Membuat session
+const SESSION_KEY = "radio_session";
+
+// =========================================
+// CREATE SESSION
+// =========================================
+
 function createSession(user){
 
     const session = {
@@ -23,20 +28,20 @@ function createSession(user){
     };
 
     localStorage.setItem(
-        "radio_session",
+        SESSION_KEY,
         JSON.stringify(session)
     );
 
 }
 
-// --------------------------------------
-// Mengambil session
-// --------------------------------------
+// =========================================
+// GET SESSION
+// =========================================
 
 function getSession(){
 
     const raw =
-        localStorage.getItem("radio_session");
+        localStorage.getItem(SESSION_KEY);
 
     if(!raw){
 
@@ -48,7 +53,11 @@ function getSession(){
 
         return JSON.parse(raw);
 
-    }catch(e){
+    }
+
+    catch(error){
+
+        localStorage.removeItem(SESSION_KEY);
 
         return null;
 
@@ -56,77 +65,57 @@ function getSession(){
 
 }
 
-// --------------------------------------
-// Menghapus session
-// --------------------------------------
+// =========================================
+// IS LOGGED IN
+// =========================================
 
-function logout(){
+function isLoggedIn(){
 
-    localStorage.removeItem(
-        "radio_session"
-    );
-
-    location.href="index.html";
-
-}
-
-// --------------------------------------
-// Cek login
-// --------------------------------------
-
-function checkLogin(){
-
-    const session =
-        getSession();
+    const session = getSession();
 
     if(!session){
 
-        location.href="index.html";
-
-        return;
+        return false;
 
     }
 
-    if(session.login!==true){
+    if(session.login !== true){
 
-        logout();
-
-        return;
+        return false;
 
     }
 
-    if(Date.now()>session.expire){
+    if(Date.now() > session.expire){
 
-        logout();
-
-        return;
+        return false;
 
     }
+
+    return true;
 
 }
 
-// --------------------------------------
-// Login
-// --------------------------------------
+// =========================================
+// LOGIN
+// =========================================
 
-async function login(
-    username,
-    password
-){
+async function login(username,password){
+
+    username = username.trim();
 
     const hash =
         await sha256(password);
 
     const user =
-        USERS.find(u=>{
+        USERS.find(function(item){
 
-            return(
+            return (
 
-                u.username===username &&
+                item.username === username &&
 
-                u.passwordHash===hash &&
+                item.passwordHash === hash &&
 
-                u.active===true
+                item.active === true
 
             );
 
@@ -141,5 +130,121 @@ async function login(
     createSession(user);
 
     return true;
+
+}
+
+// =========================================
+// CHECK LOGIN
+// =========================================
+
+function checkLogin(){
+
+    const session =
+        getSession();
+
+    if(!session){
+
+        logout();
+
+        return false;
+
+    }
+
+    if(session.login !== true){
+
+        logout();
+
+        return false;
+
+    }
+
+    if(Date.now() > session.expire){
+
+        logout();
+
+        return false;
+
+    }
+
+    const user =
+        USERS.find(function(item){
+
+            return item.username === session.username;
+
+        });
+
+    if(!user){
+
+        logout();
+
+        return false;
+
+    }
+
+    if(user.active !== true){
+
+        logout();
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+// =========================================
+// GET CURRENT USER
+// =========================================
+
+function getCurrentUser(){
+
+    const session =
+        getSession();
+
+    if(!session){
+
+        return null;
+
+    }
+
+    return USERS.find(function(item){
+
+        return item.username === session.username;
+
+    });
+
+}
+
+// =========================================
+// LOGOUT
+// =========================================
+
+function logout(){
+
+    localStorage.removeItem(SESSION_KEY);
+
+    window.location.replace("index.html");
+
+}
+
+// =========================================
+// REFRESH SESSION
+// =========================================
+
+function refreshSession(){
+
+    const user =
+        getCurrentUser();
+
+    if(!user){
+
+        logout();
+
+        return;
+
+    }
+
+    createSession(user);
 
 }
