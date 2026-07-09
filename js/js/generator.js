@@ -47,15 +47,31 @@ document.getElementById("output").value=text;
 
 document
 .getElementById("copy")
-.addEventListener("click",()=>{
+.addEventListener("click", async () => {
 
-const out=
-document.getElementById("output");
+    const output = document.getElementById("output");
 
-out.select();
+    try {
 
-document.execCommand("copy");
+        if (navigator.clipboard && window.isSecureContext) {
 
-alert("Berhasil disalin");
+            await navigator.clipboard.writeText(output.value);
+
+        } else {
+
+            output.select();
+            document.execCommand("copy");
+
+        }
+
+        alert("Berhasil disalin");
+
+    } catch (err) {
+
+        alert("Gagal menyalin");
+
+        console.error(err);
+
+    }
 
 });
