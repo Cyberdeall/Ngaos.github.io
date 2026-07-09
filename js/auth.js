@@ -1,6 +1,6 @@
 // =========================================
 // AUTH.JS
-// Final Version 1.0
+// Final Version 1.1
 // =========================================
 
 const SESSION_KEY = "radio_session";
@@ -11,6 +11,8 @@ const SESSION_KEY = "radio_session";
 
 function createSession(user){
 
+    const now = Date.now();
+
     const session = {
 
         username: user.username,
@@ -19,11 +21,9 @@ function createSession(user){
 
         login: true,
 
-        loginTime: Date.now(),
+        loginTime: now,
 
-        expire:
-            Date.now() +
-            (CONFIG.SESSION_HOURS * 60 * 60 * 1000)
+        expire: now + (CONFIG.SESSION_HOURS * 60 * 60 * 1000)
 
     };
 
@@ -40,22 +40,17 @@ function createSession(user){
 
 function getSession(){
 
-    const raw =
-        localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
 
     if(!raw){
-
         return null;
-
     }
 
     try{
 
         return JSON.parse(raw);
 
-    }
-
-    catch(error){
+    }catch(error){
 
         localStorage.removeItem(SESSION_KEY);
 
@@ -74,21 +69,29 @@ function isLoggedIn(){
     const session = getSession();
 
     if(!session){
-
         return false;
-
     }
 
     if(session.login !== true){
-
         return false;
-
     }
 
     if(Date.now() > session.expire){
-
         return false;
+    }
 
+    const user = USERS.find(function(item){
+
+        return item.username === session.username;
+
+    });
+
+    if(!user){
+        return false;
+    }
+
+    if(user.active !== true){
+        return false;
     }
 
     return true;
@@ -103,23 +106,21 @@ async function login(username,password){
 
     username = username.trim();
 
-    const hash =
-        await sha256(password);
+    const hash = await sha256(password);
 
-    const user =
-        USERS.find(function(item){
+    const user = USERS.find(function(item){
 
-            return (
+        return (
 
-                item.username === username &&
+            item.username === username &&
 
-                item.passwordHash === hash &&
+            item.passwordHash === hash &&
 
-                item.active === true
+            item.active === true
 
-            );
+        );
 
-        });
+    });
 
     if(!user){
 
@@ -139,49 +140,7 @@ async function login(username,password){
 
 function checkLogin(){
 
-    const session =
-        getSession();
-
-    if(!session){
-
-        logout();
-
-        return false;
-
-    }
-
-    if(session.login !== true){
-
-        logout();
-
-        return false;
-
-    }
-
-    if(Date.now() > session.expire){
-
-        logout();
-
-        return false;
-
-    }
-
-    const user =
-        USERS.find(function(item){
-
-            return item.username === session.username;
-
-        });
-
-    if(!user){
-
-        logout();
-
-        return false;
-
-    }
-
-    if(user.active !== true){
+    if(!isLoggedIn()){
 
         logout();
 
@@ -199,20 +158,50 @@ function checkLogin(){
 
 function getCurrentUser(){
 
-    const session =
-        getSession();
-
-    if(!session){
+    if(!isLoggedIn()){
 
         return null;
 
     }
+
+    const session = getSession();
 
     return USERS.find(function(item){
 
         return item.username === session.username;
 
     });
+
+}
+
+// =========================================
+// REFRESH SESSION
+// =========================================
+
+function refreshSession(){
+
+    const user = getCurrentUser();
+
+    if(!user){
+
+        logout();
+
+        return false;
+
+    }
+
+    const session = getSession();
+
+    session.expire =
+        Date.now() +
+        (CONFIG.SESSION_HOURS * 60 * 60 * 1000);
+
+    localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify(session)
+    );
+
+    return true;
 
 }
 
@@ -225,26 +214,5 @@ function logout(){
     localStorage.removeItem(SESSION_KEY);
 
     window.location.replace("index.html");
-
-}
-
-// =========================================
-// REFRESH SESSION
-// =========================================
-
-function refreshSession(){
-
-    const user =
-        getCurrentUser();
-
-    if(!user){
-
-        logout();
-
-        return;
-
-    }
-
-    createSession(user);
 
 }
