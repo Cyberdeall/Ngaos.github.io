@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>AFS Generator</title>
+
+<style>
+
+body{
+
+font-family:Arial,sans-serif;
+
+background:#f5f5f5;
+
+padding:25px;
+
+}
+
+.container{
+
+max-width:600px;
+
+margin:auto;
+
+background:#fff;
+
+padding:25px;
+
+border-radius:10px;
+
+box-shadow:0 5px 15px rgba(0,0,0,.15);
+
+}
+
+input,select,button,textarea{
+
+width:100%;
+
+padding:12px;
+
+margin-top:10px;
+
+box-sizing:border-box;
+
+}
+
+textarea{
+
+height:180px;
+
+resize:none;
+
+}
+
+button{
+
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Generator User</h2>
+
+<input id="username" placeholder="Username">
+
+<input id="password" type="password" placeholder="Password">
+
+<select id="role">
+
+<option value="admin">Admin</option>
+
+<option value="user">User</option>
+
+</select>
+
+<label>
+
+<input id="active" type="checkbox" checked>
+
+Aktif
+
+</label>
+
+<button id="generate">
+
+Generate
+
+</button>
+
+<textarea id="output" readonly></textarea>
+
+<button id="copy">
+
+Copy
+
+</button>
+
+</div>
+
+<script src="js/crypto.js"></script>
+
+<script src="js/generator.js"></script>
+
+</body>
+
+</html>
