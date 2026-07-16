@@ -6,7 +6,7 @@ const USER_DATA = Object.freeze({
     DAFTAR_USER: [
         {
             USERNAME: "PPTAALFALAH", // Akun Utama Anda
-            PASSWORD_HASH: "cc2cc8e2501a4fbda1a1f9e2b173523fc6c39b6f376cfb940026b91176b6b772"
+            PASSWORD_HASH: "a0864e3ebd760eea3c1c4a60d232f47d3294f6978bcc6ac8b8dc89f4394de793"
         },
         {
             USERNAME: "SANTRI_PLOSO", // Contoh User Tambahan 1 (Password: santri2026)
