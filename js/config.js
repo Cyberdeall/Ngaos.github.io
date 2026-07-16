@@ -1,6 +1,6 @@
 // =========================================
 // CONFIG.JS
-// Final Version 3.0
+// Final Version 3.0 - ArenaStreaming Updated
 // =========================================
 
 const CONFIG = Object.freeze({
@@ -19,8 +19,8 @@ const CONFIG = Object.freeze({
     // Audio Stream
     // ============================
 
-    STREAM_URL:
-        "https://uk14freenew.listen2myradio.com/live.mp3?typeportmount=s1_27764_stream_367452469",
+    // URL Lama Listen2MyRadio yang mati telah diganti ke Server HTTPS Resmi ArenaStreaming Anda
+    STREAM_URL: "https://arenastreaming.com",
 
     // ============================
     // Session
