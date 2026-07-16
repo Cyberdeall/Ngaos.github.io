@@ -12,7 +12,7 @@ const USER_DATA = Object.freeze({
         {
             USERNAME: "PPTA",
             PASSWORD_HASH: "a0864e3ebd760eea3c1c4a60d232f47d3294f6978bcc6ac8b8dc89f4394de793", // 
-            STATUS: "NONAKTIF" // Akun ini dikunci/dinonaktifkan (Otomatis ditolak saat login)
+            STATUS: "AKTIF" // Akun ini dikunci/dinonaktifkan (Otomatis ditolak saat login)
         }
         // Silakan tambah baris baru di bawah ini menggunakan kode hijau dari generator.html. jangan lupa tanda koma setelah kurung kurawal apabila masih ada user di bawahnya.
     ]
