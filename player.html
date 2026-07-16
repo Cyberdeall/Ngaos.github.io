@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ngaos Al Falah Ploso - Player</title>
-    <!-- Font Awesome untuk ikon tombol -->
+    <!-- Perbaikan Link Font Awesome agar ikon tombol muncul -->
     <link rel="stylesheet" href="https://cloudflare.com">
     
     <style>
-        /* KODE DESAIN CSS LANGSUNG DI SINI AGAR TIDAK EROR */
         * {
             margin: 0;
             padding: 0;
@@ -191,6 +190,7 @@
             font-size: 16px;
         }
 
+        /* Kelanjutan kode yang terpotong */
         .btn-main {
             background: #ff5722;
             border: none;
@@ -200,7 +200,7 @@
             color: #ffffff;
             font-size: 24px;
             cursor: pointer;
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848, inset 2px 2px 4px rgba(255,255,255,0.2);
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -237,7 +237,6 @@
 
         <div class="circle-outer">
             <div class="circle-inner">
-                <!-- Jika gambar logo belum ada, dia akan menampilkan ikon radio default -->
                 <img src="logo-alfalah.png" alt="📻" id="radioCover" class="rotating" onerror="this.src='https://icons8.com';">
             </div>
         </div>
@@ -268,6 +267,8 @@
         <button class="btn-logout" onclick="logout()">LOGOUT</button>
     </div>
 
+    <!-- Menghubungkan config.js modular Anda agar terbaca oleh player.js -->
+    <script src="js/config.js"></script>
     <script src="player.js"></script>
 </body>
 </html>
