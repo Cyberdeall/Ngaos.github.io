@@ -1,19 +1,13 @@
-// ======================================
-// SHA-256 Hash Generator
-// ======================================
-
-async function sha256(text) {
-
-    const encoder = new TextEncoder();
-
-    const data = encoder.encode(text);
-
-    const hash = await crypto.subtle.digest("SHA-256", data);
-
-    const bytes = Array.from(new Uint8Array(hash));
-
-    return bytes
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-
-}
+// =========================================================================
+// CRYPTO.JS - Mesin Enkripsi SHA-256 untuk Pengamanan Validasi Kata Sandi
+// =========================================================================
+const CryptoEngine = {
+    sha256: function(string) {
+        const utf8 = new TextEncoder().encode(string);
+        return crypto.subtle.digest('SHA-256', utf8).then(hashBuffer => {
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        });
+    }
+};
