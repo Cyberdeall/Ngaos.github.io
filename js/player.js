@@ -1,351 +1,81 @@
-// =========================================
-// PLAYER.JS
-// Final Version 1.0
-// Bagian 1
-// =========================================
+// Link Streaming HTTPS Resmi dari ArenaStreaming Anda
+const STREAM_URL = "https://arenastreaming.com";
 
-document.addEventListener("DOMContentLoaded", () => {
+let audio = null;
+let isPlaying = false;
+let timerInterval = null;
+let secondsElapsed = 0;
 
-    // ============================
-    // WAJIB LOGIN
-    // ============================
+const playBtn = document.getElementById("playBtn");
+const playIcon = document.getElementById("playIcon");
+const statusIndicator = document.getElementById("statusIndicator");
+const radioCover = document.getElementById("radioCover");
+const streamTime = document.getElementById("streamTime");
 
-    if (!checkLogin()) {
-        window.location.replace(CONFIG.LOGIN_PAGE);
-        return;
-    }
-
-    // ============================
-    // ELEMENT
-    // ============================
-
-    const audio = document.getElementById("radioPlayer");
-
-    const playButton = document.getElementById("playButton");
-
-    const volumeSlider = document.getElementById("volumeSlider");
-
-    const loading = document.getElementById("loading");
-
-    const liveText = document.getElementById("liveText");
-
-    const liveDot = document.getElementById("liveDot");
-
-    const logoutButton = document.getElementById("logoutButton");
-
-    const currentUser = document.getElementById("currentUser");
-
-    // ============================
-    // USER
-    // ============================
-
-    const user = getCurrentUser();
-
-    if (user) {
-
-        currentUser.textContent = user.username;
-
-    }
-
-    // ============================
-    // AUDIO
-    // ============================
-
-    audio.src = CONFIG.STREAM_URL;
-
-    audio.preload = "none";
-
-    audio.crossOrigin = "anonymous";
-
-    // ============================
-    // VOLUME
-    // ============================
-
-    const savedVolume =
-        localStorage.getItem("radio_volume");
-
-    if (savedVolume !== null) {
-
-        audio.volume = Number(savedVolume);
-
-        volumeSlider.value =
-            Number(savedVolume) * 100;
-
+function toggleRadio() {
+    if (!isPlaying) {
+        startStreaming();
     } else {
-
-        audio.volume = 1;
-
+        stopStreaming();
     }
+}
 
-    // ============================
-    // STATUS
-    // ============================
+function startStreaming() {
+    statusIndicator.innerText = "Menghubungkan...";
+    statusIndicator.className = "status-text text-connecting";
+    playIcon.className = "fas fa-spinner fa-spin"; // Mengubah icon menjadi loading berputar
 
-    let reconnectTimer = null;
+    // Memutus cache dengan parameter unik agar siaran selalu aktual (anti-delay)
+    audio = new Audio(STREAM_URL + "?cb=" + Date.now());
+    
+    audio.play().then(() => {
+        isPlaying = true;
+        statusIndicator.innerText = "🔴 LIVE STREAMING";
+        statusIndicator.className = "status-text text-live";
+        playIcon.className = "fas fa-pause"; // Mengubah icon menjadi pause
+        radioCover.style.animationPlayState = "running"; // Putar lingkaran gambar
+        startTimer();
+    }).catch(err => {
+        console.error("Gagal memutar:", err);
+        statusIndicator.innerText = "Gagal terhubung ke server.";
+        statusIndicator.className = "status-text text-muted";
+        playIcon.className = "fas fa-play";
+    });
+}
 
-    let playing = false;
-
-    function setOffline() {
-
-        liveText.textContent = "OFFLINE";
-
-        liveDot.style.background = "#808080";
-
-    }
-
-    function setConnecting() {
-
-        loading.style.display = "block";
-
-        liveText.textContent = "CONNECTING";
-
-        liveDot.style.background = "#facc15";
-
-    }
-
-    function setOnline() {
-
-        loading.style.display = "none";
-
-        liveText.textContent = "LIVE";
-
-        liveDot.style.background = "#22c55e";
-
-    }
-    // ============================
-    // PLAY
-    // ============================
-
-    async function startPlayer() {
-
-        try {
-
-            setConnecting();
-
-            await audio.play();
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            loading.style.display = "none";
-
-            setOffline();
-
-            playButton.textContent = "▶ PLAY";
-
-            playing = false;
-
-        }
-
-    }
-
-    // ============================
-    // PAUSE
-    // ============================
-
-    function stopPlayer() {
-
+function stopStreaming() {
+    if (audio) {
         audio.pause();
-
-        playButton.textContent = "▶ PLAY";
-
-        loading.style.display = "none";
-
-        setOffline();
-
-        playing = false;
-
+        audio.src = "";
+        audio.load(); // Putus total koneksi internet agar hemat kuota pengguna
+        audio = null;
     }
-
-    // ============================
-    // PLAY BUTTON
-    // ============================
-
-    playButton.addEventListener("click", async function () {
-
-        if (!playing) {
-
-            playing = true;
-
-            playButton.textContent = "❚❚ PAUSE";
-
-            await startPlayer();
-
-        } else {
-
-            stopPlayer();
-
-        }
-
-    });
-
-    // ============================
-    // VOLUME
-    // ============================
-
-    volumeSlider.addEventListener("input", function () {
-
-        const volume = this.value / 100;
-
-        audio.volume = volume;
-
-        localStorage.setItem(
-            "radio_volume",
-            volume
-        );
-
-    });
-
-    // ============================
-    // AUDIO EVENTS
-    // ============================
-
-    audio.addEventListener("playing", function () {
-
-        setOnline();
-
-    });
-
-    audio.addEventListener("waiting", function () {
-
-        setConnecting();
-
-    });
-
-    audio.addEventListener("stalled", function () {
-
-        setConnecting();
-
-    });
-
-    audio.addEventListener("loadstart", function () {
-
-        setConnecting();
-
-    });
-
-    audio.addEventListener("pause", function () {
-
-        if (!audio.ended) {
-
-            setOffline();
-
-        }
-
-    });
-
-    audio.addEventListener("ended", function () {
-
-        if (playing) {
-
-            reconnect();
-
-        }
-
-    });
-
-    audio.addEventListener("error", function () {
-
-        reconnect();
-
-    });
-
-    // ============================
-    // AUTO RECONNECT
-    // ============================
-
-    function reconnect() {
-
-        if (!playing) {
-
-            return;
-
-        }
-
-        clearTimeout(reconnectTimer);
-
-        setConnecting();
-
-        reconnectTimer = setTimeout(async function () {
-
-            audio.load();
-
-            await startPlayer();
-
-        }, 5000);
-
-    }
-
-    // ============================
-    // LOGOUT
-    // ============================
-
-    logoutButton.addEventListener("click", function () {
-
-        stopPlayer();
-
-        logout();
-
-    });
-
-    // ============================
-    // REFRESH SESSION
-    // ============================
-
-    setInterval(function () {
-
-        refreshSession();
-
-    }, 60000);
-        // ============================
-    // ANTI BACK
-    // ============================
-
-    history.pushState(null, null, location.href);
-
-    window.addEventListener("popstate", function () {
-
-        history.pushState(null, null, location.href);
-
-    });
-
-    // ============================
-    // PAGE HIDDEN
-    // ============================
-
-    document.addEventListener("visibilitychange", function () {
-
-        if (document.visibilityState === "visible") {
-
-            if (isLoggedIn()) {
-
-                refreshSession();
-
-            }
-
-        }
-
-    });
-
-    // ============================
-    // BEFORE UNLOAD
-    // ============================
-
-    window.addEventListener("beforeunload", function () {
-
-        clearTimeout(reconnectTimer);
-
-    });
-
-    // ============================
-    // INITIALIZE
-    // ============================
-
-    setOffline();
-
-    loading.style.display = "none";
-
-});
+    isPlaying = false;
+    statusIndicator.innerText = "Siaran Dihentikan";
+    statusIndicator.className = "status-text text-muted";
+    playIcon.className = "fas fa-play";
+    radioCover.style.animationPlayState = "paused"; // Hentikan lingkaran gambar
+    stopTimer();
+}
+
+// Menghitung Durasi Mendengar Virtual
+function startTimer() {
+    secondsElapsed = 0;
+    timerInterval = setInterval(() => {
+        secondsElapsed++;
+        let mins = Math.floor(secondsElapsed / 60);
+        let secs = secondsElapsed % 60;
+        streamTime.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    streamTime.innerText = "0:00";
+}
+
+// Fungsi kembali ke halaman login
+function logout() {
+    // Sesuaikan nama file login Anda, misal index.html atau login.html
+    window.location.href = "index.html"; 
+}
