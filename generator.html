@@ -1,118 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>AFS Generator</title>
-
-<style>
-
-body{
-
-font-family:Arial,sans-serif;
-
-background:#f5f5f5;
-
-padding:25px;
-
-}
-
-.container{
-
-max-width:600px;
-
-margin:auto;
-
-background:#fff;
-
-padding:25px;
-
-border-radius:10px;
-
-box-shadow:0 5px 15px rgba(0,0,0,.15);
-
-}
-
-input,select,button,textarea{
-
-width:100%;
-
-padding:12px;
-
-margin-top:10px;
-
-box-sizing:border-box;
-
-}
-
-textarea{
-
-height:180px;
-
-resize:none;
-
-}
-
-button{
-
-cursor:pointer;
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHA-256 Password Generator - Al Falah</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .gen-container {
+            background: #232732; width: 100%; max-width: 500px; border-radius: 40px; padding: 40px 30px;
+            box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; text-align: center;
+        }
+        
+        h2 { color: #ffffff; font-size: 20px; margin-bottom: 5px; letter-spacing: 0.5px; }
+        p { color: #8a92a6; font-size: 13px; margin-bottom: 30px; }
+        
+        .input-area { width: 100%; padding: 15px; background: #1e222b; border: none; border-radius: 20px; color: #ffffff; font-size: 14px; box-shadow: inset 4px 4px 8px #14161c, inset -4px -4px 8px #2a2f3d; outline: none; margin-bottom: 20px; text-align: center; }
+        
+        .result-box { background: #14161c; border-radius: 20px; padding: 20px; margin-top: 10px; position: relative; display: none; text-align: left; }
+        .result-title { color: #ff5722; font-size: 12px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+        .result-text { color: #4caf50; font-family: 'Courier New', Courier, monospace; font-size: 13px; word-break: break-all; font-weight: bold; padding-right: 40px; }
+        
+        .btn-copy { position: absolute; right: 15px; top: 40px; background: transparent; border: none; color: #8a92a6; cursor: pointer; font-size: 18px; }
+        .btn-copy:hover { color: #ff5722; }
+        
+        .toast { color: #ffca28; font-size: 12px; margin-top: 10px; font-weight: 500; display: none; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <div class="gen-container">
+        <h2>SHA-256 PASSWORD GENERATOR</h2>
+        <p>Ketik password asli di bawah untuk diubah menjadi kode enkripsi</p>
 
-<h2>Generator User</h2>
+        <!-- Input password asli oleh Anda -->
+        <input type="text" id="rawPassword" class="input-area" placeholder="Ketik Password Di Sini..." oninput="generateHash()">
 
-<input id="username" placeholder="Username">
+        <!-- Kotak hasil output yang otomatis muncul -->
+        <div class="result-box" id="outputBox">
+            <div class="result-title">KODE HASH SHA-256 (TEMPEL KE USERS.JS):</div>
+            <div class="result-text" id="hashResult"></div>
+            <button class="btn-copy" onclick="salinKode()" title="Salin Kode"><i class="far fa-copy"></i></button>
+        </div>
+        <div class="toast" id="toastMsg">✓ Kode berhasil disalin!</div>
+    </div>
 
-<input id="password" type="password" placeholder="Password">
+    <script>
+        // Logika enkripsi SHA-256 asinkron bawaan browser
+        async function generateHash() {
+            const inputTxt = document.getElementById("rawPassword").value;
+            const outputBox = document.getElementById("outputBox");
+            const hashResult = document.getElementById("hashResult");
+            
+            if (inputTxt.length === 0) {
+                outputBox.style.display = "none";
+                return;
+            }
 
-<select id="role">
+            const msgBuffer = new TextEncoder().encode(inputTxt);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-<option value="admin">Admin</option>
+            hashResult.innerText = hashHex;
+            outputBox.style.display = "block";
+        }
 
-<option value="user">User</option>
-
-</select>
-
-<label>
-
-<input id="active" type="checkbox" checked>
-
-Aktif
-
-</label>
-
-<button id="generate">
-
-Generate
-
-</button>
-
-<textarea id="output" readonly></textarea>
-
-<button id="copy">
-
-Copy
-
-</button>
-
-</div>
-
-<script src="js/crypto.js"></script>
-
-<script src="js/generator.js"></script>
-
+        // Fungsi klik tombol langsung salin teks otomatis
+        function salinKode() {
+            const teksKode = document.getElementById("hashResult").innerText;
+            navigator.clipboard.writeText(teksKode).then(() => {
+                const toast = document.getElementById("toastMsg");
+                toast.style.display = "block";
+                setTimeout(() => { toast.style.display = "none"; }, 2000);
+            });
+        }
+    </script>
 </body>
-
 </html>
