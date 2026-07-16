@@ -1,163 +1,68 @@
-// =========================================
-// LOGIN.JS
-// Final Version 2.0
-// =========================================
+// =========================================================================
+// LOGIN.JS - Pengendali Form Input, Validasi Enkripsi, & Fitur Remember Me
+// =========================================================================
+document.addEventListener("DOMContentLoaded", function() {
+    const loginForm = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("username");
+    const rememberCheckbox = document.getElementById("remember");
+    const messageOutput = document.getElementById("message");
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    // ----------------------------
-    // Jika sudah login
-    // ----------------------------
-
-    if (isLoggedIn()) {
-
-        window.location.replace("player.html");
-
-        return;
-
+    // Memeriksa dan memuat data Remember Me saat halaman terbuka
+    const savedUsername = localStorage.getItem(CONFIG.REMEMBER_KEY);
+    if (savedUsername) {
+        usernameInput.value = savedUsername;
+        rememberCheckbox.checked = true;
     }
 
-    const form = document.getElementById("loginForm");
-
-    const username = document.getElementById("username");
-
-    const password = document.getElementById("password");
-
-    const remember = document.getElementById("remember");
-
-    const message = document.getElementById("message");
-
-    const submitButton =
-        form.querySelector("button[type='submit']");
-
-    // ----------------------------
-    // Remember Username
-    // ----------------------------
-
-    const savedUser =
-        localStorage.getItem(CONFIG.REMEMBER_KEY);
-
-    if (savedUser) {
-
-        username.value = savedUser;
-
-        remember.checked = true;
-
-    }
-
-    // ----------------------------
-    // Clear Message
-    // ----------------------------
-
-    function showMessage(text, color = "#ff4444") {
-
-        message.textContent = text;
-
-        message.style.color = color;
-
-    }
-
-    // ----------------------------
-    // Submit Login
-    // ----------------------------
-
-    form.addEventListener("submit", async function (event) {
-
-        event.preventDefault();
-
-        showMessage("");
-
-        const user = username.value.trim();
-
-        const pass = password.value;
-
-        if (user === "") {
-
-            showMessage("Username wajib diisi.");
-
-            username.focus();
-
-            return;
-
-        }
-
-        if (pass === "") {
-
-            showMessage("Password wajib diisi.");
-
-            password.focus();
-
-            return;
-
-        }
-
-        submitButton.disabled = true;
-
-        submitButton.textContent = "MEMPROSES...";
-
+    // Mencegah bypass jika user yang sudah login sah malah membuka halaman login kembali
+    if (localStorage.getItem(CONFIG.SESSION_KEY)) {
         try {
+            const session = JSON.parse(localStorage.getItem(CONFIG.SESSION_KEY));
+            if (Date.now() < session.expireTime) {
+                window.location.href = CONFIG.PLAYER_PAGE;
+            }
+        } catch(e) {}
+    }
 
-            const success =
-                await login(user, pass);
+    loginForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        messageOutput.style.display = "none";
 
-            if (success) {
+        const usernameVal = usernameInput.value.trim();
+        const passwordVal = document.getElementById("password").value;
 
-                if (remember.checked) {
+        if (!usernameVal || !passwordVal) {
+            tampilkanError("Semua kolom input wajib diisi!");
+            return;
+        }
 
-                    localStorage.setItem(
-                        CONFIG.REMEMBER_KEY,
-                        user
-                    );
+        // Jalankan pencocokan enkripsi SHA-256 secara asinkronus
+        CryptoEngine.sha256(passwordVal).then(inputPasswordHash => {
+            if (usernameVal === USER_DATA.USERNAME && inputPasswordHash === USER_DATA.PASSWORD_HASH) {
+                
+                // 1. Buat token sesi aktif
+                Auth.createSession(usernameVal);
 
+                // 2. Eksekusi penyimpanan Remember Me
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem(CONFIG.REMEMBER_KEY, usernameVal);
                 } else {
-
-                    localStorage.removeItem(
-                        CONFIG.REMEMBER_KEY
-                    );
-
+                    localStorage.removeItem(CONFIG.REMEMBER_KEY);
                 }
 
-                showMessage(
-                    "Login berhasil...",
-                    "#00aa55"
-                );
-
-                setTimeout(function () {
-
-                    window.location.replace(
-                        "player.html"
-                    );
-
-                }, 300);
-
-                return;
-
+                // 3. Alihkan pengguna masuk ke halaman dalam
+                window.location.href = CONFIG.PLAYER_PAGE;
+            } else {
+                tampilkanError("Username atau Password salah!");
             }
-
-            showMessage(
-                "Username atau password salah."
-            );
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            showMessage(
-                "Terjadi kesalahan sistem."
-            );
-
-        }
-
-        finally {
-
-            submitButton.disabled = false;
-
-            submitButton.textContent = "LOGIN";
-
-        }
-
+        }).catch(err => {
+            console.error(err);
+            tampilkanError("Terjadi kesalahan sistem keamanan enkripsi.");
+        });
     });
 
+    function tampilkanError(teks) {
+        messageOutput.innerText = teks;
+        messageOutput.style.display = "block";
+    }
 });
