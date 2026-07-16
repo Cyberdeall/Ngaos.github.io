@@ -4,257 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ngaos Al Falah Ploso - Player</title>
-    <!-- FIX: Link Font Awesome resmi agar semua icon tombol muncul sempurna -->
     <link rel="stylesheet" href="https://cloudflare.com">
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: #1e222b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .player-container {
-            background: #232732;
-            width: 100%;
-            max-width: 380px;
-            border-radius: 40px;
-            padding: 30px;
-            box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848;
-            text-align: center;
-            position: relative;
+            background: #232732; width: 100%; max-width: 380px; border-radius: 40px; padding: 30px;
+            box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; text-align: center; position: relative;
         }
-
-        .player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .live-badge {
-            color: #ff5722;
-            font-weight: bold;
-            letter-spacing: 2px;
-            font-size: 14px;
-        }
-
+        .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
         .btn-mini {
-            background: #232732;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            color: #ff5722;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%; color: #ff5722;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-
         .circle-outer {
-            width: 220px;
-            height: 220px;
-            margin: 0 auto 25px auto;
-            border-radius: 50%;
-            background: #232732;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
-            position: relative;
+            width: 220px; height: 220px; margin: 0 auto 25px auto; border-radius: 50%; background: #232732;
+            display: flex; align-items: center; justify-content: center; box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848; position: relative;
         }
-
         .circle-inner {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848;
-            border: 3px solid #1e222b;
-            background: #14161c;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 150px; height: 150px; border-radius: 50%; overflow: hidden; box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848;
+            border: 3px solid #1e222b; background: #14161c; display: flex; align-items: center; justify-content: center;
         }
-
-        .circle-inner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .rotating {
-            animation: spin 15s linear infinite;
-            animation-play-state: paused;
-        }
-
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        .radio-info h2 {
-            color: #ffffff;
-            font-size: 20px;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-        }
-
-        .radio-info p {
-            color: #8a92a6;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .status-text {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
+        .circle-inner img { width: 100%; height: 100%; object-fit: cover; }
+        .rotating { animation: spin 15s linear infinite; animation-play-state: paused; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .radio-info h2 { color: #ffffff; font-size: 20px; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .radio-info p { color: #8a92a6; font-size: 13px; margin-bottom: 15px; }
+        .status-text { display: block; font-size: 14px; font-weight: 500; }
         .text-muted { color: #ffe0b2; }
         .text-connecting { color: #ffca28; }
         .text-live { color: #4caf50; font-weight: bold; }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 25px 0;
-        }
-
-        .time-text {
-            color: #8a92a6;
-            font-size: 12px;
-        }
-
-        .live-text {
-            color: #ff5722;
-            font-weight: bold;
-        }
-
-        .slider-bar {
-            flex: 1;
-            height: 6px;
-            background: #14161c;
-            border-radius: 3px;
-            margin: 0 15px;
-            position: relative;
-        }
-
-        .slider-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff5722, #ff7043);
-            border-radius: 3px;
-        }
-
-        .slider-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ffca28;
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px #ff5722;
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            margin-bottom: 25px;
-        }
-
+        .progress-container { display: flex; align-items: center; justify-content: space-between; margin: 25px 0; }
+        .time-text { color: #8a92a6; font-size: 12px; }
+        .live-text { color: #ff5722; font-weight: bold; }
+        .slider-bar { flex: 1; height: 6px; background: #14161c; border-radius: 3px; margin: 0 15px; position: relative; }
+        .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 100%; }
+        .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 25px; }
         .btn-control {
-            background: #232732;
-            border: none;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            color: #ff5722;
-            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848;
-            cursor: pointer;
-            font-size: 16px;
+            background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%; color: #ff5722;
+            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; font-size: 16px;
         }
-
         .btn-main {
-            background: #ff5722;
-            border: none;
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            color: #ffffff;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s ease;
+            background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; color: #ffffff; font-size: 24px; cursor: pointer;
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease;
         }
-
-        .btn-main:active {
-            transform: scale(0.95);
-        }
-
+        .btn-main:active { transform: scale(0.95); }
         .btn-logout {
-            background: #c62828;
-            border: none;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 4px 4px 8px #14161c;
-            margin-top: 10px;
+            background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px;
+            font-weight: bold; font-size: 12px; letter-spacing: 1px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px;
         }
     </style>
 </head>
 <body>
-
     <div class="player-container">
         <div class="player-header">
             <button class="btn-mini"><i class="fas fa-volume-up"></i></button>
-            <span class="live-badge">LIVE</span>
+            <span class="live-badge">LIVE AUDIO</span>
             <button class="btn-mini"><i class="fas fa-bars"></i></button>
         </div>
-
         <div class="circle-outer">
             <div class="circle-inner">
                 <img src="logo-alfalah.png" alt="📻" id="radioCover" class="rotating" onerror="this.src='https://icons8.com';">
             </div>
         </div>
-
         <div class="radio-info">
             <h2>NGAOS AL FALAH PLOSO</h2>
             <p>TAFSIR JALALAIN & SHAHIH BUKHARI</p>
             <span id="statusIndicator" class="status-text text-muted">Klik Play untuk Mendengar</span>
         </div>
-
         <div class="progress-container">
             <span class="time-text" id="streamTime">0:00</span>
-            <div class="slider-bar">
-                <div class="slider-fill" style="width: 75%;"></div>
-                <div class="slider-thumb" style="left: 75%;"></div>
-            </div>
+            <div class="slider-bar"><div class="slider-fill"></div></div>
             <span class="time-text live-text">Live</span>
         </div>
-
         <div class="player-controls">
             <button class="btn-control"><i class="fas fa-backward"></i></button>
             <button class="btn-main" id="playBtn" onclick="toggleRadio()">
@@ -262,16 +85,104 @@
             </button>
             <button class="btn-control"><i class="fas fa-forward"></i></button>
         </div>
-        
-        <button class="btn-logout" onclick="logout()">LOGOUT</button>
+        <button class="btn-logout" onclick="prosesLogoutKeamanan()">LOGOUT</button>
     </div>
 
-    <!-- FIX: Memanggil seluruh berkas sistem keamanan modular Anda dengan urutan yang benar -->
+    <!-- Pemuatan Skrip Keamanan Terbuka Sebelum Player Aktif -->
     <script src="js/config.js"></script>
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
-    <script src="player.js"></script>
+    
+    <!-- Blok Logika Pemutar Musik Terisolasi -->
+    <script>
+        // Memastikan Proteksi Halaman Berjalan Sempurna Lewat Validasi Auth.js
+        if (typeof Auth !== 'undefined') {
+            Auth.protectPage();
+        } else {
+            // Pelindung Cadangan jika Auth.js gagal termuat di browser
+            if (!localStorage.getItem(CONFIG.SESSION_KEY)) {
+                window.location.href = CONFIG.LOGIN_PAGE;
+            }
+        }
+
+        const STREAM_URL = CONFIG.STREAM_URL;
+        let audio = null;
+        let isPlaying = false;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        const playIcon = document.getElementById("playIcon");
+        const statusIndicator = document.getElementById("statusIndicator");
+        const radioCover = document.getElementById("radioCover");
+        const streamTime = document.getElementById("streamTime");
+
+        function toggleRadio() {
+            if (!isPlaying) { startStreaming(); } else { stopStreaming(); }
+        }
+
+        function startStreaming() {
+            statusIndicator.innerText = "Menghubungkan...";
+            statusIndicator.className = "status-text text-connecting";
+            playIcon.className = "fas fa-spinner fa-spin"; 
+
+            // Memutus cache browser dengan penanda waktu unik (?cb=) agar siaran aktual tanpa delay
+            audio = new Audio(STREAM_URL + "?cb=" + Date.now());
+            
+            audio.play().then(() => {
+                isPlaying = true;
+                statusIndicator.innerText = "🔴 LIVE STREAMING";
+                statusIndicator.className = "status-text text-live";
+                playIcon.className = "fas fa-pause"; 
+                radioCover.style.animationPlayState = "running"; 
+                startTimer();
+            }).catch(err => {
+                console.error("Gagal terhubung ke server:", err);
+                statusIndicator.innerText = "Siaran Offline / Gagal Terhubung";
+                statusIndicator.className = "status-text text-muted";
+                playIcon.className = "fas fa-play";
+            });
+        }
+
+        function stopStreaming() {
+            if (audio) {
+                audio.pause();
+                audio.src = "";
+                audio.load(); 
+                audio = null;
+            }
+            isPlaying = false;
+            statusIndicator.innerText = "Siaran Dihentikan";
+            statusIndicator.className = "status-text text-muted";
+            playIcon.className = "fas fa-play"; 
+            radioCover.style.animationPlayState = "paused"; 
+            stopTimer();
+        }
+
+        function startTimer() {
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                let mins = Math.floor(secondsElapsed / 60);
+                let secs = secondsElapsed % 60;
+                streamTime.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            streamTime.innerText = "0:00";
+        }
+
+        function prosesLogoutKeamanan() {
+            stopStreaming();
+            if (typeof Auth !== 'undefined') {
+                Auth.logout();
+            } else {
+                localStorage.removeItem(CONFIG.SESSION_KEY);
+                window.location.href = CONFIG.LOGIN_PAGE;
+            }
+        }
+    </script>
 </body>
 </html>
-
