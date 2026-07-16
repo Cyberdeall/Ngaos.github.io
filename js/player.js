@@ -23,20 +23,20 @@ function toggleRadio() {
 function startStreaming() {
     statusIndicator.innerText = "Menghubungkan...";
     statusIndicator.className = "status-text text-connecting";
-    playIcon.className = "fas fa-spinner fa-spin"; // Mengubah icon menjadi loading berputar
+    playIcon.className = "fas fa-spinner fa-spin"; // Efek loading berputar saat menyambungkan
 
-    // Memutus cache dengan parameter unik agar siaran selalu aktual (anti-delay)
+    // Memutus cache browser dengan penanda waktu unik (?cb=) agar siaran tidak tertinggal / delay
     audio = new Audio(STREAM_URL + "?cb=" + Date.now());
     
     audio.play().then(() => {
         isPlaying = true;
         statusIndicator.innerText = "🔴 LIVE STREAMING";
         statusIndicator.className = "status-text text-live";
-        playIcon.className = "fas fa-pause"; // Mengubah icon menjadi pause
-        radioCover.style.animationPlayState = "running"; // Putar lingkaran gambar
+        playIcon.className = "fas fa-pause"; // Mengubah ikon tombol menjadi Pause
+        radioCover.style.animationPlayState = "running"; // Gambar sampul mulai berputar
         startTimer();
     }).catch(err => {
-        console.error("Gagal memutar:", err);
+        console.error("Gagal memutar siaran radio:", err);
         statusIndicator.innerText = "Gagal terhubung ke server.";
         statusIndicator.className = "status-text text-muted";
         playIcon.className = "fas fa-play";
@@ -47,18 +47,18 @@ function stopStreaming() {
     if (audio) {
         audio.pause();
         audio.src = "";
-        audio.load(); // Putus total koneksi internet agar hemat kuota pengguna
+        audio.load(); // Memutuskan koneksi server seutuhnya agar hemat kuota internet pengguna
         audio = null;
     }
     isPlaying = false;
     statusIndicator.innerText = "Siaran Dihentikan";
     statusIndicator.className = "status-text text-muted";
-    playIcon.className = "fas fa-play";
-    radioCover.style.animationPlayState = "paused"; // Hentikan lingkaran gambar
+    playIcon.className = "fas fa-play"; // Mengubah kembali ikon tombol menjadi Play
+    radioCover.style.animationPlayState = "paused"; // Menghentikan putaran gambar
     stopTimer();
 }
 
-// Menghitung Durasi Mendengar Virtual
+// Menghitung Lama Durasi Pendengar Mendengarkan Radio
 function startTimer() {
     secondsElapsed = 0;
     timerInterval = setInterval(() => {
@@ -74,8 +74,8 @@ function stopTimer() {
     streamTime.innerText = "0:00";
 }
 
-// Fungsi kembali ke halaman login
+// Fungsi tombol untuk keluar dari sistem player radio
 function logout() {
-    // Sesuaikan nama file login Anda, misal index.html atau login.html
-    window.location.href = "index.html"; 
+    // Otomatis kembali ke halaman login utama (index.html)
+    window.location.href = "login.html"; 
 }
