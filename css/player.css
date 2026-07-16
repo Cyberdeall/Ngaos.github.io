@@ -1,248 +1,224 @@
-/* ==========================================
-   PLAYER.CSS
-   Final Version 1.0
-========================================== */
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body{
-
-    font-family:Arial,Helvetica,sans-serif;
-
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-
-    color:#ffffff;
-
-    min-height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    padding:20px;
-
+body {
+    background: #1e222b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-.player-container{
-
-    width:100%;
-
-    max-width:420px;
-
+/* Container Utama bergaya Neumorphism Gelap */
+.player-container {
+    background: #232732;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 40px;
+    padding: 30px;
+    box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848;
+    text-align: center;
+    position: relative;
 }
 
-.card{
-
-    background:#1f2937;
-
-    border-radius:20px;
-
-    padding:25px;
-
-    text-align:center;
-
-    box-shadow:0 10px 40px rgba(0,0,0,.45);
-
+/* Header */
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
 }
 
-.logo{
-
-    font-size:60px;
-
-    margin-bottom:15px;
-
+.live-badge {
+    color: #ff5722;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 14px;
 }
 
-#appName{
-
-    font-size:24px;
-
-    margin-bottom:8px;
-
+/* Tombol Kecil Atas */
+.btn-mini {
+    background: #232732;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #ff5722;
+    box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#appDesc{
-
-    color:#cbd5e1;
-
-    font-size:14px;
-
-    margin-bottom:20px;
-
+/* Animasi Putar Cover Orbit Bulat */
+.circle-outer {
+    width: 220px;
+    height: 220px;
+    margin: 0 auto 25px auto;
+    border-radius: 50%;
+    background: #232732;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
+    position: relative;
 }
 
-.status{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin-bottom:20px;
-
+.circle-inner {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848;
+    border: 3px solid #1e222b;
 }
 
-#liveDot{
-
-    width:12px;
-
-    height:12px;
-
-    border-radius:50%;
-
-    background:#808080;
-
+.circle-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-#liveText{
-
-    font-weight:bold;
-
-    letter-spacing:1px;
-
+/* Efek Putar Piringan Musik */
+.rotating {
+    animation: spin 15s linear infinite;
+    animation-play-state: paused; /* Berhenti secara default */
 }
 
-.cover{
-
-    margin-bottom:20px;
-
+@keyframes spin {
+    100% { transform: rotate(360deg); }
 }
 
-.cover img{
-
-    width:220px;
-
-    height:220px;
-
-    object-fit:cover;
-
-    border-radius:20px;
-
-    border:4px solid white;
-
+/* Teks Informasi */
+.radio-info h2 {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
 }
 
-.controls{
-
-    display:flex;
-
-    gap:10px;
-
-    margin-bottom:20px;
-
+.radio-info p {
+    color: #8a92a6;
+    font-size: 13px;
+    margin-bottom: 15px;
 }
 
-.controls button{
-
-    flex:1;
-
+.status-text {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
-button{
+.text-muted { color: #ffe0b2; }
+.text-connecting { color: #ffca28; }
+.text-live { color: #4caf50; font-weight: bold; }
 
-    background:#2563eb;
-
-    color:#fff;
-
-    border:none;
-
-    border-radius:12px;
-
-    padding:14px;
-
-    font-size:15px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+/* Progress Bar Timeline Virtual */
+.progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 25px 0;
 }
 
-button:hover{
-
-    background:#1d4ed8;
-
+.time-text {
+    color: #8a92a6;
+    font-size: 12px;
 }
 
-.volume{
-
-    margin-bottom:20px;
-
+.live-text {
+    color: #ff5722;
+    font-weight: bold;
 }
 
-.volume label{
-
-    display:block;
-
-    margin-bottom:10px;
-
+.slider-bar {
+    flex: 1;
+    height: 6px;
+    background: #14161c;
+    border-radius: 3px;
+    margin: 0 15px;
+    position: relative;
 }
 
-.volume input{
-
-    width:100%;
-
+.slider-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff5722, #ff7043);
+    border-radius: 3px;
 }
 
-.loading{
-
-    display:none;
-
-    margin-bottom:15px;
-
-    color:#facc15;
-
-    font-weight:bold;
-
+.slider-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffca28;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px #ff5722;
 }
 
-.user{
-
-    margin-top:15px;
-
-    margin-bottom:20px;
-
-    color:#d1d5db;
-
+/* Tombol Kontrol Utama */
+.player-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 25px;
 }
 
-#logoutButton{
-
-    width:100%;
-
-    background:#dc2626;
-
+.btn-control {
+    background: #232732;
+    border: none;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    color: #ff5722;
+    box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848;
+    cursor: pointer;
+    font-size: 16px;
 }
 
-#logoutButton:hover{
-
-    background:#b91c1c;
-
+/* Tombol Oranye Bulat Besar di Tengah */
+.btn-main {
+    background: #ff5722;
+    border: none;
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848, inset 2px 2px 4px rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
 }
 
-@media(max-width:480px){
-
-    .cover img{
-
-        width:180px;
-
-        height:180px;
-
-    }
-
-    #appName{
-
-        font-size:20px;
-
-    }
-
+.btn-main:active {
+    transform: scale(0.95);
+    box-shadow: inset 4px 4px 8px #b33c15;
 }
+
+/* Tombol Keluar Keluar */
+.btn-logout {
+    background: #c62828;
+    border: none;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 4px 4px 8px #14161c;
+    margin-top: 10px;
+}
+
