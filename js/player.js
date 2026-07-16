@@ -1,4 +1,22 @@
-// Membaca STREAM_URL secara dinamis dari CONFIG di file js/config.js Anda
+// =========================================================================
+// 🔒 SISTEM PENGAMAN MANDIRI (ANTI-BYPASS & PROTEKSI SESI)
+// =========================================================================
+function validasiKeamananHalaman() {
+    // Membaca kunci token sesi dinamis dari CONFIG bawaan Anda (radio_session)
+    const tokenSesi = localStorage.getItem(CONFIG.SESSION_KEY);
+    
+    // Jika token kosong (user belum login / mencoba ketik url langsung), tendang ke index.html
+    if (!tokenSesi) {
+        window.location.href = CONFIG.LOGIN_PAGE;
+    }
+}
+// Langsung eksekusi proteksi di detik pertama halaman dimuat sebelum memuat audio
+validasiKeamananHalaman();
+
+
+// =========================================================================
+// 📻 LOGIKA UTAMA AUDIO STREAMING (ARENASTREAMING)
+// =========================================================================
 const STREAM_URL = CONFIG.STREAM_URL;
 
 let audio = null;
@@ -25,7 +43,7 @@ function startStreaming() {
     statusIndicator.className = "status-text text-connecting";
     playIcon.className = "fas fa-spinner fa-spin"; 
 
-    // Memutus cache browser dengan penanda waktu unik (?cb=) agar siaran tidak tertinggal / delay
+    // Memutus cache browser dengan parameter acak unik (?cb=) agar audio tidak delay
     audio = new Audio(STREAM_URL + "?cb=" + Date.now());
     
     audio.play().then(() => {
@@ -36,7 +54,7 @@ function startStreaming() {
         radioCover.style.animationPlayState = "running"; 
         startTimer();
     }).catch(err => {
-        console.error("Gagal memutar siaran radio:", err);
+        console.error("Gagal menjangkau server ArenaStreaming:", err);
         statusIndicator.innerText = "Gagal terhubung ke server.";
         statusIndicator.className = "status-text text-muted";
         playIcon.className = "fas fa-play";
@@ -47,7 +65,7 @@ function stopStreaming() {
     if (audio) {
         audio.pause();
         audio.src = "";
-        audio.load(); 
+        audio.load(); // Memutus total sedotan data internet
         audio = null;
     }
     isPlaying = false;
@@ -73,7 +91,20 @@ function stopTimer() {
     streamTime.innerText = "0:00";
 }
 
+
+// =========================================================================
+// 🚪 PERBAIKAN TOTAL FUNGSI LOGOUT (PASTI BERFUNGSI)
+// =========================================================================
 function logout() {
-    // Menyesuaikan arah logout sesuai dengan CONFIG Anda (index.html)
+    // 1. Matikan aliran suara radio terlebih dahulu
+    stopStreaming(); 
+    
+    // 2. Hapus token login (radio_session) secara paksa dari penyimpanan lokal browser
+    localStorage.removeItem(CONFIG.SESSION_KEY);
+    
+    // 3. Bersihkan juga sisa cookie / session storage cadangan jika ada
+    sessionStorage.clear();
+    
+    // 4. Lemparkan kembali ke halaman masuk utama (index.html)
     window.location.href = CONFIG.LOGIN_PAGE; 
 }
