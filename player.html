@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ngaos Al Falah Ploso - Player</title>
-    <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -14,9 +13,12 @@
         }
         .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
+        
+        /* Gaya Tombol Menggunakan Fitur Flex untuk Menjaga Posisi Ikon SVG Tepat di Tengah */
         .btn-mini {
-            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%; color: #ff5722;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
         }
         .circle-outer {
             width: 200px; height: 200px; margin: 0 auto 25px auto; border-radius: 50%; background: #232732;
@@ -41,26 +43,45 @@
         .slider-bar { flex: 1; height: 6px; background: #14161c; border-radius: 3px; margin: 0 15px; }
         .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 100%; }
         .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 25px; }
+        
         .btn-control {
-            background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%; color: #ff5722;
-            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%;
+            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
         }
         .btn-main {
-            background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; color: #ffffff; font-size: 24px;
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; 
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease;
         }
+        .btn-main:active { transform: scale(0.95); }
         .btn-logout {
             background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px;
             font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px;
         }
+        
+        /* Pewarnaan Kode SVG secara Global */
+        .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
+        .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
+        
+        /* Animasi Khusus Ikon Loading Berputar */
+        .spin-loading { animation: svg-spin 1s linear infinite; }
+        @keyframes svg-spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
+
 <body>
     <div class="player-container">
         <div class="player-header">
-            <button class="btn-mini"><i class="fas fa-volume-up"></i></button>
+            <!-- Ikon Volume Kiri Atas (SVG) -->
+            <button class="btn-mini">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
             <span class="live-badge">LIVE AUDIO</span>
-            <button class="btn-mini"><i class="fas fa-bars"></i></button>
+            <!-- Ikon Menu Kanan Atas (SVG) -->
+            <button class="btn-mini">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
         </div>
 
         <div class="circle-outer">
@@ -82,19 +103,28 @@
         </div>
 
         <div class="player-controls">
-            <button class="btn-control"><i class="fas fa-backward"></i></button>
-            <button class="btn-main" id="playBtn" onclick="toggleRadio()"><i class="fas fa-play" id="playIcon"></i></button>
-            <button class="btn-control"><i class="fas fa-forward"></i></button>
+            <!-- Tombol Backward Kiri (SVG) -->
+            <button class="btn-control">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <!-- Tombol Play Utama Tengah (SVG) -->
+            <button class="btn-main" id="playBtn" onclick="toggleRadio()">
+                <g id="playIconContainer">
+                    <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </g>
+            </button>
+            <!-- Tombol Forward Kanan (SVG) -->
+            <button class="btn-control">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+            </button>
         </div>
         <button class="btn-logout" onclick="prosesLogoutKeamanan()">LOGOUT</button>
     </div>
 
-    <!-- Integrasi sistem folder js internal Anda -->
     <script src="js/config.js"></script>
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
-
     <script>
         if (typeof Auth !== 'undefined') { Auth.protectPage(); } else {
             if (!localStorage.getItem(CONFIG.SESSION_KEY)) { window.location.href = CONFIG.LOGIN_PAGE; }
@@ -103,37 +133,45 @@
         const STREAM_URL = CONFIG.STREAM_URL;
         let audio = null, isPlaying = false, timerInterval = null, secondsElapsed = 0;
 
-        const playIcon = document.getElementById("playIcon");
         const statusIndicator = document.getElementById("statusIndicator");
         const radioCover = document.getElementById("radioCover");
         const streamTime = document.getElementById("streamTime");
+        const playIconContainer = document.getElementById("playIconContainer");
+
+        // Definisi Gambar Komponen Kode SVG secara Internal
+        const SVG_PLAY = `<svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+        const SVG_PAUSE = `<svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+        const SVG_LOADING = `<svg class="svg-icon-main spin-loading" viewBox="0 0 24 24"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 14c4.41 0 8-3.59 8-8h2c0 5.52-4.48 10-10 10v-2z"/></svg>`;
 
         function toggleRadio() { if (!isPlaying) { startStreaming(); } else { stopStreaming(); } }
 
         function startStreaming() {
             statusIndicator.innerText = "Menghubungkan...";
             statusIndicator.className = "status-text text-connecting";
-            playIcon.className = "fas fa-spinner fa-spin"; 
+            playIconContainer.innerHTML = SVG_LOADING; // Mengubah ikon menjadi roda loading berputar
+
             audio = new Audio(STREAM_URL + "?cb=" + Date.now());
             audio.play().then(() => {
                 isPlaying = true;
                 statusIndicator.innerText = "🔴 LIVE STREAMING";
                 statusIndicator.className = "status-text text-live";
-                playIcon.className = "fas fa-pause"; 
+                playIconContainer.innerHTML = SVG_PAUSE; // Mengubah ikon menjadi jeda (Pause)
                 radioCover.style.animationPlayState = "running"; 
                 startTimer();
             }).catch(err => {
                 statusIndicator.innerText = "Siaran Offline / Gagal Terhubung";
                 statusIndicator.className = "status-text text-muted";
-                playIcon.className = "fas fa-play";
+                playIconContainer.innerHTML = SVG_PLAY;
             });
         }
 
         function stopStreaming() {
             if (audio) { audio.pause(); audio.src = ""; audio.load(); audio = null; }
-            isPlaying = false; statusIndicator.innerText = "Siaran Dihentikan";
+            isPlaying = false; 
+            statusIndicator.innerText = "Siaran Dihentikan";
             statusIndicator.className = "status-text text-muted";
-            playIcon.className = "fas fa-play"; radioCover.style.animationPlayState = "paused";
+            playIconContainer.innerHTML = SVG_PLAY; // Mengubah ikon kembali menjadi Play
+            radioCover.style.animationPlayState = "paused";
             stopTimer();
         }
 
