@@ -1,171 +1,61 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>NGAOS AL FALAH PLOSO</title>
-
-<link rel="stylesheet" href="css/player.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngaos Al Falah Ploso - Player</title>
+    <link rel="stylesheet" href="player.css">
+    <!-- Font Awesome untuk ikon tombol -->
+    <link rel="stylesheet" href="https://cloudflare.com">
 </head>
-
 <body>
 
-<div class="player-container">
-
-    <div class="card">
-
-        <!-- Logo -->
-
-        <div class="logo">
-
-            📻
-
+    <div class="player-container">
+        <!-- Header Atas -->
+        <div class="player-header">
+            <button class="btn-mini"><i class="fas fa-volume-up"></i></button>
+            <span class="live-badge">LIVE</span>
+            <button class="btn-mini"><i class="fas fa-bars"></i></button>
         </div>
 
-        <!-- Nama -->
-
-        <h1 id="appName">
-
-            NGAOS AL FALAH PLOSO
-
-        </h1>
-
-        <p id="appDesc">
-
-            TAFSIR JALALAIN DAN SHAHIH BUKHARI
-
-        </p>
-
-        <!-- Status -->
-
-        <div class="status">
-
-            <span id="liveDot"></span>
-
-            <span id="liveText">
-
-                OFFLINE
-
-            </span>
-
+        <!-- Animasi Piringan Cover -->
+        <div class="circle-outer">
+            <div class="circle-inner">
+                <!-- Ganti logo-alfalah.png dengan logo instansi Anda di github -->
+                <img src="logo-alfalah.png" alt="Cover Radio" id="radioCover" class="rotating">
+            </div>
         </div>
 
-        <!-- Cover -->
-
-        <div class="cover">
-
-            <img
-                id="coverImage"
-                src="assets/cover.jpg"
-                alt="Cover">
-
+        <!-- Informasi Judul Siaran -->
+        <div class="radio-info">
+            <h2 id="radioTitle">NGAOS AL FALAH PLOSO</h2>
+            <p id="radioSubtitle">TAFSIR JALALAIN & SHAHIH BUKHARI</p>
+            <span id="statusIndicator" class="status-text text-muted">Klik Play untuk Mendengar</span>
         </div>
 
-        <!-- Audio -->
+        <!-- Slider Progress Virtual (Gaya Live) -->
+        <div class="progress-container">
+            <span class="time-text" id="streamTime">0:00</span>
+            <div class="slider-bar">
+                <div class="slider-fill" style="width: 75%;"></div>
+                <div class="slider-thumb" style="left: 75%;"></div>
+            </div>
+            <span class="time-text live-text">Live</span>
+        </div>
 
-        <audio
-            id="radioPlayer"
-            preload="none">
-        </audio>
-
-        <!-- Tombol -->
-
-        <div class="controls">
-
-            <button
-                id="playButton">
-
-                ▶ PLAY
-
+        <!-- Tombol Kontrol Utama (Neumorphism Style) -->
+        <div class="player-controls">
+            <button class="btn-control"><i class="fas fa-backward"></i></button>
+            <button class="btn-main" id="playBtn" onclick="toggleRadio()">
+                <i class="fas fa-play" id="playIcon"></i>
             </button>
-
-            <button
-                id="stopButton">
-
-                ■ STOP
-
-            </button>
-
+            <button class="btn-control"><i class="fas fa-forward"></i></button>
         </div>
-
-        <!-- Volume -->
-
-        <div class="volume">
-
-            <label>
-
-                Volume
-
-            </label>
-
-            <input
-                type="range"
-                id="volumeSlider"
-                min="0"
-                max="100"
-                value="100">
-
-        </div>
-
-        <!-- Loading -->
-
-        <div
-            id="loading"
-            class="loading">
-
-            Menghubungkan...
-
-        </div>
-
-        <!-- User -->
-
-        <div class="user">
-
-            Login sebagai
-
-            <strong id="currentUser">
-
-                -
-
-            </strong>
-
-        </div>
-
-        <!-- Logout -->
-
-        <button
-            id="logoutButton">
-
-            Logout
-
-        </button>
-
+        
+        <!-- Tombol Keluar Kembali ke Login -->
+        <button class="btn-logout" onclick="logout()">LOGOUT</button>
     </div>
 
-</div>
-
-<script src="js/config.js"></script>
-<script src="js/users.js"></script>
-<script src="js/auth.js"></script>
-
-<script>
-
-if(!checkLogin()){
-
-    window.location.replace(CONFIG.LOGIN_PAGE);
-
-}
-
-</script>
-
-<script src="js/player.js"></script>
-
+    <script src="player.js"></script>
 </body>
-
 </html>
