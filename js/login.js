@@ -1,5 +1,5 @@
 // =========================================================================
-// LOGIN.JS - Pengendali Form Input, Validasi Enkripsi, & Fitur Remember Me
+// LOGIN.JS - Pengendali Validasi Multi-User & Fitur Remember Me
 // =========================================================================
 document.addEventListener("DOMContentLoaded", function() {
     const loginForm = document.getElementById("loginForm");
@@ -38,14 +38,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Jalankan pencocokan enkripsi SHA-256 secara asinkronus
         CryptoEngine.sha256(passwordVal).then(inputPasswordHash => {
-            if (usernameVal === USER_DATA.USERNAME && inputPasswordHash === USER_DATA.PASSWORD_HASH) {
-                
-                // 1. Buat token sesi aktif
-                Auth.createSession(usernameVal);
+            
+            // MENCARI AKUN DI DALAM DAFTAR ARRAY USER_DATA
+            const akunDitemukan = USER_DATA.DAFTAR_USER.find(user => 
+                user.USERNAME.toLowerCase() === usernameVal.toLowerCase() && 
+                user.PASSWORD_HASH === inputPasswordHash
+            );
+
+            if (akunDitemukan) {
+                // 1. Buat token sesi aktif menggunakan nama user yang berhasil login
+                Auth.createSession(akunDitemukan.USERNAME);
 
                 // 2. Eksekusi penyimpanan Remember Me
                 if (rememberCheckbox.checked) {
-                    localStorage.setItem(CONFIG.REMEMBER_KEY, usernameVal);
+                    localStorage.setItem(CONFIG.REMEMBER_KEY, akunDitemukan.USERNAME);
                 } else {
                     localStorage.removeItem(CONFIG.REMEMBER_KEY);
                 }
