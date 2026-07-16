@@ -1,5 +1,5 @@
-// Link Streaming HTTPS Resmi dari ArenaStreaming Anda
-const STREAM_URL = "https://arenastreaming.com";
+// Membaca STREAM_URL secara dinamis dari CONFIG di file js/config.js Anda
+const STREAM_URL = CONFIG.STREAM_URL;
 
 let audio = null;
 let isPlaying = false;
@@ -23,7 +23,7 @@ function toggleRadio() {
 function startStreaming() {
     statusIndicator.innerText = "Menghubungkan...";
     statusIndicator.className = "status-text text-connecting";
-    playIcon.className = "fas fa-spinner fa-spin"; // Efek loading berputar saat menyambungkan
+    playIcon.className = "fas fa-spinner fa-spin"; 
 
     // Memutus cache browser dengan penanda waktu unik (?cb=) agar siaran tidak tertinggal / delay
     audio = new Audio(STREAM_URL + "?cb=" + Date.now());
@@ -32,8 +32,8 @@ function startStreaming() {
         isPlaying = true;
         statusIndicator.innerText = "🔴 LIVE STREAMING";
         statusIndicator.className = "status-text text-live";
-        playIcon.className = "fas fa-pause"; // Mengubah ikon tombol menjadi Pause
-        radioCover.style.animationPlayState = "running"; // Gambar sampul mulai berputar
+        playIcon.className = "fas fa-pause"; 
+        radioCover.style.animationPlayState = "running"; 
         startTimer();
     }).catch(err => {
         console.error("Gagal memutar siaran radio:", err);
@@ -47,18 +47,17 @@ function stopStreaming() {
     if (audio) {
         audio.pause();
         audio.src = "";
-        audio.load(); // Memutuskan koneksi server seutuhnya agar hemat kuota internet pengguna
+        audio.load(); 
         audio = null;
     }
     isPlaying = false;
     statusIndicator.innerText = "Siaran Dihentikan";
     statusIndicator.className = "status-text text-muted";
-    playIcon.className = "fas fa-play"; // Mengubah kembali ikon tombol menjadi Play
-    radioCover.style.animationPlayState = "paused"; // Menghentikan putaran gambar
+    playIcon.className = "fas fa-play"; 
+    radioCover.style.animationPlayState = "paused"; 
     stopTimer();
 }
 
-// Menghitung Lama Durasi Pendengar Mendengarkan Radio
 function startTimer() {
     secondsElapsed = 0;
     timerInterval = setInterval(() => {
@@ -74,8 +73,7 @@ function stopTimer() {
     streamTime.innerText = "0:00";
 }
 
-// Fungsi tombol untuk keluar dari sistem player radio
 function logout() {
-    // Otomatis kembali ke halaman login utama (index.html)
-    window.location.href = "login.html"; 
+    // Menyesuaikan arah logout sesuai dengan CONFIG Anda (index.html)
+    window.location.href = CONFIG.LOGIN_PAGE; 
 }
