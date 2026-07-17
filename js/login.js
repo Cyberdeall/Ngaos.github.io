@@ -1,3 +1,6 @@
+// =========================================================================
+// LOGIN.JS - Validasi Multi-User, Proteksi Multi-Device, & Remember Me
+// =========================================================================
 document.addEventListener("DOMContentLoaded", function() {
     const loginForm = document.getElementById("loginForm");
     const usernameInput = document.getElementById("username");
@@ -27,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const passwordVal = document.getElementById("password").value;
 
         if (!usernameVal || !passwordVal) {
-            tampilkanError("Username dan Password wajib diisi!");
+            tampilkanError("Username and Password wajib diisi!");
             return;
         }
 
@@ -46,16 +49,57 @@ document.addEventListener("DOMContentLoaded", function() {
                     return;
                 }
 
-                // 3. Jika AKTIF, buatkan sesi login
-                Auth.createSession(akunDitemukan.USERNAME);
+                // 3. PROTEKSI MULTI-DEVICE MURNI SERVER: Periksa status manifes Icecast
+                // Mengambil manifes JSON publik dari port HTTPS ArenaStreaming Anda
+                const statusUrl = CONFIG.STREAM_URL.replace("/stream", "/status-json.xsl");
+                
+                fetch(statusUrl + "?cb=" + Date.now())
+                .then(res => res.json())
+                .then(data => {
+                    let userSedangAktif = false;
+                    
+                    // Memeriksa parameter identitas client yang terhubung ke server radio
+                    if (data && data.icestats && data.icestats.source) {
+                        const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
+                        
+                        // Memindai apakah nama user terdeteksi di dalam manifes streaming aktif
+                        const targetUser = akunDitemukan.USERNAME.toLowerCase();
+                        sources.forEach(src => {
+                            if (src.client_info && src.client_info.includes(targetUser)) {
+                                userSedangAktif = true;
+                            }
+                        });
+                    }
 
-                if (rememberCheckbox.checked) {
-                    localStorage.setItem(CONFIG.REMEMBER_KEY, akunDitemukan.USERNAME);
-                } else {
-                    localStorage.removeItem(CONFIG.REMEMBER_KEY);
-                }
+                    // Eksekusi Aturan Ralat: Tolak login perangkat baru jika sedang aktif
+                    if (userSedangAktif) {
+                        tampilkanError("Akun ini sedang aktif digunakan di perangkat lain!");
+                    } else {
+                        // Jika server kosong, persilahkan masuk dan buatkan sesi login
+                        Auth.createSession(akunDitemukan.USERNAME);
 
-                window.location.href = CONFIG.PLAYER_PAGE;
+                        if (rememberCheckbox.checked) {
+                            localStorage.setItem(CONFIG.REMEMBER_KEY, akunDitemukan.USERNAME);
+                        } else {
+                            localStorage.removeItem(CONFIG.REMEMBER_KEY);
+                        }
+
+                        window.location.href = CONFIG.PLAYER_PAGE;
+                    }
+                })
+                .catch(err => {
+                    // Penanganan Cadangan: Jika server down atau gagal fetch data manifes,
+                    // sistem mengizinkan login lokal agar jemaah tidak terhambat akibat kendala teknis server
+                    console.log("Server sync bypassed:", err);
+                    Auth.createSession(akunDitemukan.USERNAME);
+                    if (rememberCheckbox.checked) {
+                        localStorage.setItem(CONFIG.REMEMBER_KEY, akunDitemukan.USERNAME);
+                    } else {
+                        localStorage.removeItem(CONFIG.REMEMBER_KEY);
+                    }
+                    window.location.href = CONFIG.PLAYER_PAGE;
+                });
+
             } else {
                 tampilkanError("Username atau Password salah!");
             }
