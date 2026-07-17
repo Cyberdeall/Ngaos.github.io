@@ -2,23 +2,20 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ngaos Al Falah Ploso - Player</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; -webkit-user-select: none; user-select: none; }
         .player-container {
             background: #232732; width: calc(100% - 30px); max-width: 360px; border-radius: 40px;
-            padding: 25px 20px; box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; text-align: center; margin: 0 auto;
+            padding: 25px 20px; box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; text-align: center; margin: 0 auto; position: relative;
         }
         .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
-        
-        /* Gaya Tombol Menggunakan Fitur Flex untuk Menjaga Posisi Ikon SVG Tepat di Tengah */
         .btn-mini {
             background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
         }
         .circle-outer {
             width: 200px; height: 200px; margin: 0 auto 25px auto; border-radius: 50%; background: #232732;
@@ -28,8 +25,9 @@
             width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
             box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
         }
-        .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .rotating { animation: spin 15s linear infinite; animation-play-state: paused; }
+        .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+        .rotating { -webkit-animation: spin 15s linear infinite; animation: spin 15s linear infinite; -webkit-animation-play-state: paused; animation-play-state: paused; }
+        @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .radio-info h2 { color: #ffffff; font-size: 20px; margin-bottom: 5px; }
         .radio-info p { color: #8a92a6; font-size: 13px; margin-bottom: 15px; }
@@ -41,47 +39,52 @@
         .time-text { color: #8a92a6; font-size: 12px; }
         .live-text { color: #ff5722; font-weight: bold; }
         .slider-bar { flex: 1; height: 6px; background: #14161c; border-radius: 3px; margin: 0 15px; }
-        .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 100%; }
+        .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 0%; transition: width 0.2s ease; }
         .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 25px; }
-        
         .btn-control {
             background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%;
-            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center;
+            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .btn-main {
             background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; 
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease;
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .btn-main:active { transform: scale(0.95); }
-        .btn-logout {
-            background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px;
-            font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px;
-        }
-        
-        /* Pewarnaan Kode SVG secara Global */
+        .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px; }
         .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
         .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
-        
-        /* Animasi Khusus Ikon Loading Berputar */
-        .spin-loading { animation: svg-spin 1s linear infinite; }
+        .spin-loading { animation: svg-spin 1s linear infinite; -webkit-animation: svg-spin 1s linear infinite; }
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
+        @-webkit-keyframes svg-spin { 100% { -webkit-transform: rotate(360deg); } }
+
+        /* Pop-up Info Akun Neumorphism */
+        .info-card {
+            display: none; position: absolute; top: 75px; right: 20px; background: #232732; width: 200px;
+            padding: 15px; border-radius: 20px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
+            z-index: 10; text-align: left; border: 1px solid #2a2f3d;
+        }
+        .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
+        .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
     </style>
 </head>
-
 <body>
     <div class="player-container">
         <div class="player-header">
-            <!-- Ikon Volume Kiri Atas (SVG) -->
-            <button class="btn-mini">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <button class="btn-mini" onclick="fiturSembuhkanAliran()" title="Segarkan Aliran Audio">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
             </button>
-            <span class="live-badge">LIVE AUDIO</span>
-            <!-- Ikon Menu Kanan Atas (SVG) -->
-            <button class="btn-mini">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            <span class="live-badge" id="lblSpeed">LIVE 1.0x</span>
+            <!-- Tombol Kanan Atas: Menampilkan Info Login Akun -->
+            <button class="btn-mini" onclick="toggleInfoAkun()" title="Informasi Pengguna">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             </button>
+        </div>
+
+        <!-- Balon Pop-up Info Akun -->
+        <div class="info-card" id="popInfo">
+            <p>LOGIN SEBAGAI:</p>
+            <h4 id="txtUserAktif">-</h4>
+            <p style="margin-top: 10px;">STATUS SESI:</p>
+            <h4 style="color: #4caf50;">TERVERIFIKASI</h4>
         </div>
 
         <div class="circle-outer">
@@ -98,23 +101,22 @@
 
         <div class="progress-container">
             <span class="time-text" id="streamTime">0:00</span>
-            <div class="slider-bar"><div class="slider-fill"></div></div>
+            <div class="slider-bar"><div class="slider-fill" id="speedIndicator" style="width: 50%;"></div></div>
             <span class="time-text live-text">Live</span>
         </div>
 
         <div class="player-controls">
-            <!-- Tombol Backward Kiri (SVG) -->
-            <button class="btn-control">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            <!-- Gabungan Fungsi Backward (Klik Speed / Tahan Replay 30s) -->
+            <button class="btn-control" id="btnBack">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
             </button>
-            <!-- Tombol Play Utama Tengah (SVG) -->
             <button class="btn-main" id="playBtn" onclick="toggleRadio()">
                 <g id="playIconContainer">
                     <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </g>
             </button>
-            <!-- Tombol Forward Kanan (SVG) -->
-            <button class="btn-control">
+            <!-- Gabungan Fungsi Forward (Klik Speed / Tahan Catch-up Live) -->
+            <button class="btn-control" id="btnForward">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
             </button>
         </div>
@@ -126,19 +128,31 @@
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        if (typeof Auth !== 'undefined') { Auth.protectPage(); } else {
+        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
+        let namaAkunTerbaca = "Penyiar";
+        if (typeof Auth !== 'undefined') { 
+            Auth.protectPage(); 
+            try {
+                const dataSesi = JSON.parse(localStorage.getItem(CONFIG.SESSION_KEY));
+                if (dataSesi) namaAkunTerbaca = dataSesi.username;
+            } catch(e){}
+        } else {
             if (!localStorage.getItem(CONFIG.SESSION_KEY)) { window.location.href = CONFIG.LOGIN_PAGE; }
         }
+        document.getElementById("txtUserAktif").innerText = namaAkunTerbaca.toUpperCase();
 
         const STREAM_URL = CONFIG.STREAM_URL;
         let audio = null, isPlaying = false, timerInterval = null, secondsElapsed = 0;
+        let speedIndex = 2; // Default kecepatan 1.0x (Normal)
+        const speeds = [0.75, 0.85, 1.0, 1.25, 1.5];
 
         const statusIndicator = document.getElementById("statusIndicator");
         const radioCover = document.getElementById("radioCover");
         const streamTime = document.getElementById("streamTime");
         const playIconContainer = document.getElementById("playIconContainer");
+        const speedIndicator = document.getElementById("speedIndicator");
+        const lblSpeed = document.getElementById("lblSpeed");
 
-        // Definisi Gambar Komponen Kode SVG secara Internal
         const SVG_PLAY = `<svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
         const SVG_PAUSE = `<svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
         const SVG_LOADING = `<svg class="svg-icon-main spin-loading" viewBox="0 0 24 24"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 14c4.41 0 8-3.59 8-8h2c0 5.52-4.48 10-10 10v-2z"/></svg>`;
@@ -148,16 +162,31 @@
         function startStreaming() {
             statusIndicator.innerText = "Menghubungkan...";
             statusIndicator.className = "status-text text-connecting";
-            playIconContainer.innerHTML = SVG_LOADING; // Mengubah ikon menjadi roda loading berputar
+            playIconContainer.innerHTML = SVG_LOADING;
 
-            audio = new Audio(STREAM_URL + "?cb=" + Date.now());
+            // STRATEGI KICK MULTI-DEVICE MURNI SERVER (Menghancurkan Buffer Sesi IP Lama)
+            audio = new Audio(STREAM_URL + "?user=" + namaAkunTerbaca + "&cb=" + Date.now());
+            
+            // AKTIVASI MEDIA SESSION API (Dukungan Pemutaran Latar Belakang Penuh)
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: CONFIG.APP_NAME,
+                    artist: CONFIG.APP_DESC,
+                    artwork: [{ src: 'logo-alfalah.png', sizes: '512x512', type: 'image/png' }]
+                });
+                navigator.mediaSession.setActionHandler('play', startStreaming);
+                navigator.mediaSession.setActionHandler('pause', stopStreaming);
+            }
+
             audio.play().then(() => {
                 isPlaying = true;
                 statusIndicator.innerText = "🔴 LIVE STREAMING";
                 statusIndicator.className = "status-text text-live";
-                playIconContainer.innerHTML = SVG_PAUSE; // Mengubah ikon menjadi jeda (Pause)
+                playIconContainer.innerHTML = SVG_PAUSE;
                 radioCover.style.animationPlayState = "running"; 
+                audio.playbackRate = speeds[speedIndex]; // Sinkronisasi kecepatan putar
                 startTimer();
+                updateSpeedUI();
             }).catch(err => {
                 statusIndicator.innerText = "Siaran Offline / Gagal Terhubung";
                 statusIndicator.className = "status-text text-muted";
@@ -167,13 +196,62 @@
 
         function stopStreaming() {
             if (audio) { audio.pause(); audio.src = ""; audio.load(); audio = null; }
-            isPlaying = false; 
-            statusIndicator.innerText = "Siaran Dihentikan";
+            isPlaying = false; statusIndicator.innerText = "Siaran Dihentikan";
             statusIndicator.className = "status-text text-muted";
-            playIconContainer.innerHTML = SVG_PLAY; // Mengubah ikon kembali menjadi Play
-            radioCover.style.animationPlayState = "paused";
+            playIconContainer.innerHTML = SVG_PLAY; radioCover.style.animationPlayState = "paused";
             stopTimer();
         }
+
+        function fiturSembuhkanAliran() { stopStreaming(); setTimeout(() => { startStreaming(); }, 400); }
+
+        function toggleInfoAkun() {
+            const card = document.getElementById("popInfo");
+            card.style.display = (card.style.display === "block") ? "none" : "block";
+        }
+
+        function updateSpeedUI() {
+            lblSpeed.innerText = "LIVE " + speeds[speedIndex] + "x";
+            let persen = (speedIndex / (speeds.length - 1)) * 100;
+            speedIndicator.style.width = persen + "%";
+        }
+
+        // AMAN: DETEKSI EVENT DURASI KLIK (CLICK VS LONG PRESS)
+        function pasangFungsiDuaAksi(elemenTombol, aksiKlik, aksiTahan) {
+            let waktuMulai = 0, penandaWaktuTahan = null, gresTahanTerjadi = false;
+
+            function awalSentuh(e) {
+                waktuMulai = Date.now(); gresTahanTerjadi = false;
+                penandaWaktuTahan = setTimeout(() => { gresTahanTerjadi = true; aksiTahan(); }, 800); // 0.8 Detik dianggap Long Press
+            }
+            function akhirSentuh(e) {
+                clearTimeout(penandaWaktuTahan);
+                if (!gresTahanTerjadi && (Date.now() - waktuMulai < 800)) { aksiKlik(); }
+            }
+            elemenTombol.addEventListener("mousedown", awalSentuh);
+            elemenTombol.addEventListener("mouseup", akhirSentuh);
+            elemenTombol.addEventListener("touchstart", awalSentuh, {passive: true});
+            elemenTombol.addEventListener("touchend", akhirSentuh, {passive: true});
+        }
+
+        // AKSI TOMBOL BACKWARD
+        pasangFungsiDuaAksi(document.getElementById("btnBack"), 
+            function aksiKlik() { // 1. Klik: Memperlambat Kecepatannya
+                if (speedIndex > 0) { speedIndex--; if(audio) audio.playbackRate = speeds[speedIndex]; updateSpeedUI(); }
+            },
+            function aksiTahan() { // 2. Tahan: Memundurkan Audio 30 Detik (Instant Replay)
+                if (audio && isPlaying) { audio.currentTime = Math.max(0, audio.currentTime - 30); statusIndicator.innerText = "↩ REPLAY 30s"; }
+            }
+        );
+
+        // AKSI TOMBOL FORWARD
+        pasangFungsiDuaAksi(document.getElementById("btnForward"), 
+            function aksiKlik() { // 1. Klik: Mempercepat Kecepatannya
+                if (speedIndex < speeds.length - 1) { speedIndex++; if(audio) audio.playbackRate = speeds[speedIndex]; updateSpeedUI(); }
+            },
+            function aksiTahan() { // 2. Tahan: Melompat ke Live Aktual Paling Update (Catch-up)
+                if (audio && isPlaying) { speedIndex = 2; audio.src = STREAM_URL + "?cb=" + Date.now(); audio.play(); updateSpeedUI(); statusIndicator.innerText = "⚡ CATCH-UP LIVE"; }
+            }
+        );
 
         function startTimer() {
             secondsElapsed = 0;
@@ -184,7 +262,6 @@
                 streamTime.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             }, 1000);
         }
-
         function stopTimer() { clearInterval(timerInterval); streamTime.innerText = "0:00"; }
 
         function prosesLogoutKeamanan() {
