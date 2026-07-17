@@ -49,6 +49,7 @@
             background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; 
             box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
+        .btn-main:active, .btn-control:active { transform: scale(0.93); }
         .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px; }
         .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
         .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
@@ -56,7 +57,6 @@
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
         @-webkit-keyframes svg-spin { 100% { -webkit-transform: rotate(360deg); } }
 
-        /* Pop-up Info Akun Neumorphism */
         .info-card {
             display: none; position: absolute; top: 75px; right: 20px; background: #232732; width: 200px;
             padding: 15px; border-radius: 20px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
@@ -73,13 +73,11 @@
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
             </button>
             <span class="live-badge" id="lblSpeed">LIVE 1.0x</span>
-            <!-- Tombol Kanan Atas: Menampilkan Info Login Akun -->
             <button class="btn-mini" onclick="toggleInfoAkun()" title="Informasi Pengguna">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             </button>
         </div>
 
-        <!-- Balon Pop-up Info Akun -->
         <div class="info-card" id="popInfo">
             <p>LOGIN SEBAGAI:</p>
             <h4 id="txtUserAktif">-</h4>
@@ -92,7 +90,6 @@
                 <img src="logo-alfalah.png" alt="Logo" id="radioCover" class="rotating">
             </div>
         </div>
-
         <div class="radio-info">
             <h2>NGAOS AL FALAH PLOSO</h2>
             <p>TAFSIR JALALAIN & SHAHIH BUKHARI</p>
@@ -106,7 +103,6 @@
         </div>
 
         <div class="player-controls">
-            <!-- Gabungan Fungsi Backward (Klik Speed / Tahan Replay 30s) -->
             <button class="btn-control" id="btnBack">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
             </button>
@@ -115,7 +111,6 @@
                     <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </g>
             </button>
-            <!-- Gabungan Fungsi Forward (Klik Speed / Tahan Catch-up Live) -->
             <button class="btn-control" id="btnForward">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
             </button>
@@ -127,8 +122,8 @@
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
+    
     <script>
-        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
         let namaAkunTerbaca = "Penyiar";
         if (typeof Auth !== 'undefined') { 
             Auth.protectPage(); 
@@ -143,7 +138,7 @@
 
         const STREAM_URL = CONFIG.STREAM_URL;
         let audio = null, isPlaying = false, timerInterval = null, secondsElapsed = 0;
-        let speedIndex = 2; // Default kecepatan 1.0x (Normal)
+        let speedIndex = 2; 
         const speeds = [0.75, 0.85, 1.0, 1.25, 1.5];
 
         const statusIndicator = document.getElementById("statusIndicator");
@@ -164,10 +159,8 @@
             statusIndicator.className = "status-text text-connecting";
             playIconContainer.innerHTML = SVG_LOADING;
 
-            // STRATEGI KICK MULTI-DEVICE MURNI SERVER (Menghancurkan Buffer Sesi IP Lama)
             audio = new Audio(STREAM_URL + "?user=" + namaAkunTerbaca + "&cb=" + Date.now());
             
-            // AKTIVASI MEDIA SESSION API (Dukungan Pemutaran Latar Belakang Penuh)
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: CONFIG.APP_NAME,
@@ -184,7 +177,7 @@
                 statusIndicator.className = "status-text text-live";
                 playIconContainer.innerHTML = SVG_PAUSE;
                 radioCover.style.animationPlayState = "running"; 
-                audio.playbackRate = speeds[speedIndex]; // Sinkronisasi kecepatan putar
+                audio.playbackRate = speeds[speedIndex]; 
                 startTimer();
                 updateSpeedUI();
             }).catch(err => {
@@ -215,13 +208,11 @@
             speedIndicator.style.width = persen + "%";
         }
 
-        // AMAN: DETEKSI EVENT DURASI KLIK (CLICK VS LONG PRESS)
         function pasangFungsiDuaAksi(elemenTombol, aksiKlik, aksiTahan) {
             let waktuMulai = 0, penandaWaktuTahan = null, gresTahanTerjadi = false;
-
             function awalSentuh(e) {
                 waktuMulai = Date.now(); gresTahanTerjadi = false;
-                penandaWaktuTahan = setTimeout(() => { gresTahanTerjadi = true; aksiTahan(); }, 800); // 0.8 Detik dianggap Long Press
+                penandaWaktuTahan = setTimeout(() => { gresTahanTerjadi = true; aksiTahan(); }, 800);
             }
             function akhirSentuh(e) {
                 clearTimeout(penandaWaktuTahan);
@@ -233,22 +224,20 @@
             elemenTombol.addEventListener("touchend", akhirSentuh, {passive: true});
         }
 
-        // AKSI TOMBOL BACKWARD
         pasangFungsiDuaAksi(document.getElementById("btnBack"), 
-            function aksiKlik() { // 1. Klik: Memperlambat Kecepatannya
+            function aksiKlik() {
                 if (speedIndex > 0) { speedIndex--; if(audio) audio.playbackRate = speeds[speedIndex]; updateSpeedUI(); }
             },
-            function aksiTahan() { // 2. Tahan: Memundurkan Audio 30 Detik (Instant Replay)
+            function aksiTahan() {
                 if (audio && isPlaying) { audio.currentTime = Math.max(0, audio.currentTime - 30); statusIndicator.innerText = "↩ REPLAY 30s"; }
             }
         );
 
-        // AKSI TOMBOL FORWARD
         pasangFungsiDuaAksi(document.getElementById("btnForward"), 
-            function aksiKlik() { // 1. Klik: Mempercepat Kecepatannya
+            function aksiKlik() {
                 if (speedIndex < speeds.length - 1) { speedIndex++; if(audio) audio.playbackRate = speeds[speedIndex]; updateSpeedUI(); }
             },
-            function aksiTahan() { // 2. Tahan: Melompat ke Live Aktual Paling Update (Catch-up)
+            function aksiTahan() {
                 if (audio && isPlaying) { speedIndex = 2; audio.src = STREAM_URL + "?cb=" + Date.now(); audio.play(); updateSpeedUI(); statusIndicator.innerText = "⚡ CATCH-UP LIVE"; }
             }
         );
@@ -273,3 +262,4 @@
     </script>
 </body>
 </html>
+
