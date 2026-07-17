@@ -1,5 +1,5 @@
 // =========================================================================
-// LOGIN.JS - Validasi Multi-User, Proteksi Multi-Device, & Remember Me
+// LOGIN.JS - Perbaikan Akurat Proteksi Multi-Device Murni Server Icecast
 // =========================================================================
 document.addEventListener("DOMContentLoaded", function() {
     const loginForm = document.getElementById("loginForm");
@@ -30,52 +30,48 @@ document.addEventListener("DOMContentLoaded", function() {
         const passwordVal = document.getElementById("password").value;
 
         if (!usernameVal || !passwordVal) {
-            tampilkanError("Username and Password wajib diisi!");
+            tampilkanError("Username dan Password wajib diisi!");
             return;
         }
 
         CryptoEngine.sha256(passwordVal).then(inputPasswordHash => {
             
-            // 1. Cari dulu apakah ada Username dan Password yang cocok
+            // 1. Validasi Akun Lokal via users.js
             const akunDitemukan = USER_DATA.DAFTAR_USER.find(user => 
                 user.USERNAME.toLowerCase() === usernameVal.toLowerCase() && 
                 user.PASSWORD_HASH === inputPasswordHash
             );
 
             if (akunDitemukan) {
-                // 2. CEK STATUS AKUN: Jika statusnya tidak AKTIF, tolak akses masuk
                 if (akunDitemukan.STATUS !== "AKTIF") {
                     tampilkanError("Akun Anda telah dinonaktifkan oleh Admin!");
                     return;
                 }
 
-                // 3. PROTEKSI MULTI-DEVICE MURNI SERVER: Periksa status manifes Icecast
-                // Mengambil manifes JSON publik dari port HTTPS ArenaStreaming Anda
+                // 2. PROTEKSI MULTI-DEVICE AKURAT: Membaca Jumlah Pendengar Aktif di Server
                 const statusUrl = CONFIG.STREAM_URL.replace("/stream", "/status-json.xsl");
                 
                 fetch(statusUrl + "?cb=" + Date.now())
                 .then(res => res.json())
                 .then(data => {
-                    let userSedangAktif = false;
+                    let jumlahPendengarAktif = 0;
                     
-                    // Memeriksa parameter identitas client yang terhubung ke server radio
                     if (data && data.icestats && data.icestats.source) {
                         const sources = Array.isArray(data.icestats.source) ? data.icestats.source : [data.icestats.source];
                         
-                        // Memindai apakah nama user terdeteksi di dalam manifes streaming aktif
-                        const targetUser = akunDitemukan.USERNAME.toLowerCase();
+                        // Membaca properti 'listeners' resmi dari server Icecast
                         sources.forEach(src => {
-                            if (src.client_info && src.client_info.includes(targetUser)) {
-                                userSedangAktif = true;
+                            if (src.listeners !== undefined) {
+                                jumlahPendengarAktif = parseInt(src.listeners, 10);
                             }
                         });
                     }
 
-                    // Eksekusi Aturan Ralat: Tolak login perangkat baru jika sedang aktif
-                    if (userSedangAktif) {
+                    // ATURAN TEGAS: Jika di server sudah ada 1 pendengar aktif, kunci gerbang masuk
+                    if (jumlahPendengarAktif >= 1) {
                         tampilkanError("Akun ini sedang aktif digunakan di perangkat lain!");
                     } else {
-                        // Jika server kosong, persilahkan masuk dan buatkan sesi login
+                        // Jika server kosong (0 pendengar), izinkan login perangkat baru
                         Auth.createSession(akunDitemukan.USERNAME);
 
                         if (rememberCheckbox.checked) {
@@ -88,9 +84,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 })
                 .catch(err => {
-                    // Penanganan Cadangan: Jika server down atau gagal fetch data manifes,
-                    // sistem mengizinkan login lokal agar jemaah tidak terhambat akibat kendala teknis server
-                    console.log("Server sync bypassed:", err);
+                    // Mode Darurat otomatis jika jaringan server putus / offline
+                    console.log("Server check bypassed:", err);
                     Auth.createSession(akunDitemukan.USERNAME);
                     if (rememberCheckbox.checked) {
                         localStorage.setItem(CONFIG.REMEMBER_KEY, akunDitemukan.USERNAME);
@@ -114,3 +109,4 @@ document.addEventListener("DOMContentLoaded", function() {
         messageOutput.style.display = "block";
     }
 });
+
