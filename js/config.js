@@ -20,7 +20,7 @@ const CONFIG = Object.freeze({
     // ============================
 
     STREAM_URL:
-        "https://arenastreaming.com",
+        "https://alhastream.com",
 
     // ============================
     // Session
