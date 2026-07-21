@@ -49,7 +49,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
 
                 // 2. PROTEKSI MULTI-DEVICE AKURAT: Membaca Jumlah Pendengar Aktif di Server
-                const statusUrl = CONFIG.STREAM_URL.replace("/stream", "/status-json.xsl");
+                // FIX SEPERLUNYA: Mengubah target penukar teks dari "/stream" menjadi "/radio" sesuai alamat AlhaStream
+                const statusUrl = CONFIG.STREAM_URL.replace("/radio", "/status-json.xsl");
                 
                 fetch(statusUrl + "?cb=" + Date.now())
                 .then(res => res.json())
@@ -67,8 +68,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         });
                     }
 
-                    // ATURAN TEGAS: Jika di server sudah ada 1 pendengar aktif, kunci gerbang masuk
-                    if (jumlahPendengarAktif >= 1) {
+                    // FIX SEPERLUNYA: Hanya menolak jika perangkat lain terbukti sedang aktif memutar stream (> 1)
+                    if (jumlahPendengarAktif > 1) {
                         tampilkanError("Akun ini sedang aktif digunakan di perangkat lain!");
                     } else {
                         // Jika server kosong (0 pendengar), izinkan login perangkat baru
@@ -109,4 +110,3 @@ document.addEventListener("DOMContentLoaded", function() {
         messageOutput.style.display = "block";
     }
 });
-
