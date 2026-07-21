@@ -6,147 +6,229 @@
     <title>Ngaos Al Falah Ploso - Player</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; -webkit-user-select: none; user-select: none; overflow: hidden; }
         
-        /* CONTAINER UTAMA: Ukuran vertikal diatur penuh oleh perhitungan mesin JavaScript */
+        body { 
+            background: #1e222b; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            min-height: 100dvh;
+            padding: 20px; 
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
+
+        /* Base Container (Android / Mobile Portrait View) */
         .player-container {
-            background: #232732; width: calc(100% - 16px); max-width: 345px; border-radius: 35px; 
-            display: flex; flex-direction: column; justify-content: space-between; padding: 20px 15px; 
-            box-shadow: 6px 6px 16px #14161c, -6px -6px 16px #323848; text-align: center; position: relative; margin: auto; 
+            background: #232732; 
+            width: 100%; 
+            max-width: 360px; 
+            border-radius: 35px;
+            padding: 25px 20px; 
+            box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; 
+            text-align: center; 
+            margin: auto; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .player-header { display: flex; justify-content: space-between; align-items: center; }
-        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 13px; }
+
+        .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
         .btn-mini {
-            background: #232732; border: none; width: 38px; height: 38px; border-radius: 50%;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
         }
+        
         .circle-outer {
-            width: 170px; height: 170px; margin: 0 auto; border-radius: 50%; background: #232732;
-            display: flex; align-items: center; justify-content: center; box-shadow: inset 6px 6px 12px #14161c, inset -6px -6px 12px #323848;
+            width: 190px; height: 190px; margin: 0 auto 20px auto; border-radius: 50%; background: #232732;
+            display: flex; align-items: center; justify-content: center; box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
+            flex-shrink: 0;
         }
         .circle-inner {
-            width: 115px; height: 115px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
+            width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
+            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
         }
         .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
-        .rotating { -webkit-animation: spin 15s linear infinite; animation: spin 15s linear infinite; -webkit-animation-play-state: paused; animation-play-state: paused; }
+        
+        /* Class Animasi Putar Piringan */
+        .rotating { 
+            -webkit-animation: spin 15s linear infinite; 
+            animation: spin 15s linear infinite; 
+        }
         @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .radio-info h2 { color: #ffffff; font-size: 18px; margin-bottom: 2px; }
-        .radio-info p { color: #8a92a6; font-size: 12px; margin-bottom: 4px; }
+
+        .radio-info h2 { color: #ffffff; font-size: 18px; margin-bottom: 4px; }
+        .radio-info p { color: #8a92a6; font-size: 12px; margin-bottom: 12px; }
         .status-text { display: block; font-size: 13px; font-weight: 500; }
         .text-muted { color: #ffe0b2; }
         .text-connecting { color: #ffca28; }
         .text-live { color: #4caf50; font-weight: bold; }
-        .progress-container { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; }
-        .time-text { color: #8a92a6; font-size: 11px; }
+
+        .progress-container { display: flex; align-items: center; justify-content: space-between; margin: 20px 0; }
+        .time-text { color: #8a92a6; font-size: 12px; }
         .live-text { color: #ff5722; font-weight: bold; }
-        .slider-bar { flex: 1; height: 5px; background: #14161c; border-radius: 3px; margin: 0 12px; }
+        .slider-bar { flex: 1; height: 6px; background: #14161c; border-radius: 3px; margin: 0 12px; }
         .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 0%; transition: width 0.2s ease; }
-        .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
+
+        .player-controls { display: flex; justify-content: space-evenly; align-items: center; margin-bottom: 20px; }
         .btn-control {
             background: #232732; border: none; width: 50px; height: 50px; border-radius: 50%;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-        .btn-main {
-            background: #ff5722; border: none; width: 66px; height: 66px; border-radius: 50%; 
             box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin: 0 auto; width: fit-content; }
-        .svg-icon { width: 16px; height: 16px; fill: #ff5722; }
-        .svg-icon-main { width: 22px; height: 22px; fill: #ffffff; }
+        .btn-main {
+            background: #ff5722; border: none; width: 70px; height: 70px; border-radius: 50%; 
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-main:active, .btn-control:active { transform: scale(0.93); }
+        
+        .logout-wrapper { text-align: center; }
+        .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; width: 100%; max-width: 180px; }
+        
+        .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
+        .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
         .spin-loading { animation: svg-spin 1s linear infinite; -webkit-animation: svg-spin 1s linear infinite; }
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
         @-webkit-keyframes svg-spin { 100% { -webkit-transform: rotate(360deg); } }
-        .info-card { display: none; position: absolute; top: 70px; right: 20px; background: #232732; width: 180px; padding: 12px; border-radius: 15px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848; z-index: 10; text-align: left; border: 1px solid #2a2f3d; }
-        .info-card p { color: #8a92a6; font-size: 10px; margin-bottom: 2px; }
-        .info-card h4 { color: #ffffff; font-size: 13px; font-weight: bold; word-break: break-all; }
 
-        @media screen and (min-width: 768px) {
-            .player-container { width: 350px !important; height: 560px !important; }
+        .info-card {
+            display: none; position: absolute; top: 70px; right: 20px; background: #232732; width: 200px;
+            padding: 15px; border-radius: 20px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
+            z-index: 10; text-align: left; border: 1px solid #2a2f3d;
+        }
+        .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
+        .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
+
+        /* =========================================================
+           DESKTOP MODE (Spotify Style Landscape Layout)
+           ========================================================= */
+        @media (min-width: 768px) {
+            .player-container {
+                max-width: 680px;
+                display: grid;
+                grid-template-columns: 240px 1fr;
+                gap: 25px;
+                padding: 30px;
+                text-align: left;
+                align-items: center;
+            }
+
+            .player-left {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .circle-outer {
+                width: 220px;
+                height: 220px;
+                margin: 0;
+            }
+
+            .circle-inner {
+                width: 150px;
+                height: 150px;
+            }
+
+            .player-right {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 100%;
+            }
+
+            .radio-info {
+                text-align: left;
+            }
+
+            .info-card {
+                top: 65px;
+                right: 30px;
+            }
+
+            .btn-logout {
+                width: auto;
+            }
+
+            .logout-wrapper {
+                text-align: right;
+            }
         }
     </style>
 </head>
-
 <body>
     <div class="player-container">
-        <div class="player-header">
-            <!-- Tombol Segarkan Aliran Audio -->
-            <button class="btn-mini" onclick="fiturSembuhkanAliran()" title="Segarkan Aliran Audio">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-            </button>
-            <span class="live-badge" id="lblSpeed">LIVE 1.0x</span>
-            <!-- Tombol Kanan Atas: Informasi Pengguna -->
-            <button class="btn-mini" onclick="toggleInfoAkun()" title="Informasi Pengguna">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            </button>
-        </div>
-
-        <!-- Balon Pop-up Info Akun -->
-        <div class="info-card" id="popInfo">
-            <p>LOGIN SEBAGAI:</p>
-            <h4 id="txtUserAktif">-</h4>
-            <p style="margin-top: 10px;">STATUS SESI:</p>
-            <h4 style="color: #4caf50;">TERVERIFIKASI</h4>
-        </div>
-
-        <div class="circle-outer">
-            <div class="circle-inner">
-                <img src="logo-alfalah.png" alt="Logo" id="radioCover" class="rotating">
+        <!-- Kolom Kiri (Desktop Mode) / Atas (Mobile Mode) -->
+        <div class="player-left">
+            <div class="circle-outer">
+                <div class="circle-inner">
+                    <!-- Class 'rotating' dihilangkan secara bawaan -->
+                    <img src="logo-alfalah.png" alt="Logo" id="radioCover">
+                </div>
             </div>
         </div>
 
-        <div class="radio-info">
-            <h2>NGAOS AL FALAH PLOSO</h2>
-            <p>TAFSIR JALALAIN & SHAHIH BUKHARI</p>
-            <span id="statusIndicator" class="status-text text-muted">Klik Play untuk Mendengar</span>
-        </div>
+        <!-- Kolom Kanan (Desktop Mode) / Bawah (Mobile Mode) -->
+        <div class="player-right">
+            <div class="player-header">
+                <button class="btn-mini" onclick="fiturSembuhkanAliran()" title="Segarkan Aliran Audio">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+                <span class="live-badge" id="lblSpeed">LIVE 1.0x</span>
+                <button class="btn-mini" onclick="toggleInfoAkun()" title="Informasi Pengguna">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </button>
+            </div>
 
-        <div class="progress-container">
-            <span class="time-text" id="streamTime">0:00</span>
-            <div class="slider-bar"><div class="slider-fill" id="speedIndicator" style="width: 50%;"></div></div>
-            <span class="time-text live-text">Live</span>
-        </div>
+            <div class="info-card" id="popInfo">
+                <p>LOGIN SEBAGAI:</p>
+                <h4 id="txtUserAktif">-</h4>
+                <p style="margin-top: 10px;">STATUS SESI:</p>
+                <h4 style="color: #4caf50;">TERVERIFIKASI</h4>
+            </div>
 
-        <div class="player-controls">
-            <!-- Backward (Klik Speed Down / Tahan Replay 30s) -->
-            <button class="btn-control" id="btnBack">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-            </button>
-            <!-- Play Utama -->
-            <button class="btn-main" id="playBtn" onclick="toggleRadio()">
-                <g id="playIconContainer">
-                    <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </g>
-            </button>
-            <!-- Forward (Klik Speed Up / Tahan Catch-up Live) -->
-            <button class="btn-control" id="btnForward">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
-            </button>
+            <div class="radio-info">
+                <h2>NGAOS AL FALAH PLOSO</h2>
+                <p>TAFSIR JALALAIN & SHAHIH BUKHARI</p>
+                <span id="statusIndicator" class="status-text text-muted">Klik Play untuk Mendengar</span>
+            </div>
+
+            <div class="progress-container">
+                <span class="time-text" id="streamTime">0:00</span>
+                <div class="slider-bar"><div class="slider-fill" id="speedIndicator" style="width: 50%;"></div></div>
+                <span class="time-text live-text">Live</span>
+            </div>
+
+            <div class="player-controls">
+                <button class="btn-control" id="btnBack">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                </button>
+                <button class="btn-main" id="playBtn" onclick="toggleRadio()">
+                    <g id="playIconContainer">
+                        <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </g>
+                </button>
+                <button class="btn-control" id="btnForward">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                </button>
+            </div>
+
+            <div class="logout-wrapper">
+                <button class="btn-logout" onclick="prosesLogoutKeamanan()">LOGOUT</button>
+            </div>
         </div>
-        <button class="btn-logout" onclick="prosesLogoutKeamanan()">LOGOUT</button>
     </div>
 
-    <!-- Pemanggilan Berkas Sistem Sesi Modular -->
     <script src="js/config.js"></script>
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
-    <script>
-        // 🛠️ MESIN KALKULASI TINGGI BERSIH LAYAR REAL-TIME UNTUK ANDROID
-        function sesuaikanTinggiLayarBersih() {
-            const container = document.querySelector('.player-container');
-            if (window.innerWidth <= 480) {
-                // Mengunci tinggi wadah 20px di bawah tinggi asli LCD HP bersih
-                const tinggiBersihHP = window.innerHeight;
-                container.style.height = (tinggiBersihHP - 20) + "px";
-            }
-        }
-        window.addEventListener('DOMContentLoaded', sesuaikanTinggiLayarBersih);
-        window.addEventListener('resize', sesuaikanTinggiLayarBersih);
-        sesuaikanTinggiLayarBersih();
 
-        // VALIDASI PROTEKSI SESI LOGIN BERKALA
+    <script>
+        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
         let namaAkunTerbaca = "Penyiar";
         if (typeof Auth !== 'undefined') { 
             Auth.protectPage(); 
@@ -192,6 +274,9 @@
             statusIndicator.innerText = "Menghubungkan...";
             statusIndicator.className = "status-text text-connecting";
             playIconContainer.innerHTML = SVG_LOADING;
+            
+            // Pastikan animasi tidak aktif saat proses memuat
+            radioCover.classList.remove("rotating");
 
             audio = new Audio(STREAM_URL + "?user=" + namaAkunTerbaca + "&cb=" + Date.now());
             
@@ -210,7 +295,10 @@
                 statusIndicator.innerText = "🔴 LIVE STREAMING";
                 statusIndicator.className = "status-text text-live";
                 playIconContainer.innerHTML = SVG_PAUSE;
-                radioCover.style.animationPlayState = "running"; 
+                
+                // AKTIFKAN ANIMASI PUTAR HANYA SAAT AUDIO SUDAH BERBUNYI/ONLINE
+                radioCover.classList.add("rotating"); 
+                
                 audio.playbackRate = speeds[speedIndex]; 
                 startTimer();
                 updateSpeedUI();
@@ -221,6 +309,9 @@
                 statusIndicator.innerText = "Siaran Offline / Standby Menunggu...";
                 statusIndicator.className = "status-text text-muted";
                 playIconContainer.innerHTML = SVG_LOADING;
+                
+                // Hentikan animasi jika audio gagal berbunyi / offline
+                radioCover.classList.remove("rotating");
                 
                 if (tombolPlayPernahDiklik && !intervalCekServerStandby) {
                     mulaiMesinStimulanOtomatis();
@@ -236,7 +327,10 @@
             statusIndicator.innerText = "Siaran Dihentikan";
             statusIndicator.className = "status-text text-muted";
             playIconContainer.innerHTML = SVG_PLAY; 
-            radioCover.style.animationPlayState = "paused";
+            
+            // MATIKAN ANIMASI PUTAR SAAT SIARAN DIHENTIKAN
+            radioCover.classList.remove("rotating");
+            
             stopTimer();
         }
 
@@ -332,3 +426,5 @@
     </script>
 </body>
 </html>
+
+
