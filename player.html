@@ -4,168 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ngaos Al Falah Ploso - Player</title>
-        <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Segoe UI', sans-serif; 
-        }
-
-        /* 1. KONDISI BADAN LAYAR UTAMA (BERLAKU GLOBAL & DESKTOP LANDSCAPE) */
-        body { 
-            background: #1e222b; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            -webkit-user-select: none; 
-            user-select: none; 
-            overflow: hidden; 
-            padding: 20px;
-        }
-
-        /* 2. BASE BINGKAI CONTAINER (PRESET PROPORESIONAL UNTUK DESKTOP LANDSCAPE) */
-        .player-container {
-            background: #232732; 
-            width: 350px; 
-            height: 560px; /* Dikunci tinggi ideal agar tegak lurus seimbang di monitor komputer */
-            border-radius: 40px; 
-            
-            /* PENGATURAN RUANG VERTIKAL DESKTOP */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-            
-            padding: 30px 25px; 
-            box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; 
-            text-align: center; 
-            position: relative; 
-            margin: auto; 
-        }
-
-        .player-header { display: flex; justify-content: space-between; align-items: center; }
-        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; -webkit-user-select: none; user-select: none; overflow: hidden; }
         
-        .btn-mini {
-            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
+        /* CONTAINER UTAMA: Ukuran vertikal diatur penuh oleh perhitungan mesin JavaScript */
+        .player-container {
+            background: #232732; width: calc(100% - 16px); max-width: 345px; border-radius: 35px; 
+            display: flex; flex-direction: column; justify-content: space-between; padding: 20px 15px; 
+            box-shadow: 6px 6px 16px #14161c, -6px -6px 16px #323848; text-align: center; position: relative; margin: auto; 
         }
-
-        /* STRUKTUR BULATAN TENGAH UNTUK COMPUTER DESKTOP */
+        .player-header { display: flex; justify-content: space-between; align-items: center; }
+        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 13px; }
+        .btn-mini {
+            background: #232732; border: none; width: 38px; height: 38px; border-radius: 50%;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+        }
         .circle-outer {
-            width: 190px; height: 190px; margin: 0 auto; border-radius: 50%; background: #232732;
-            display: flex; align-items: center; justify-content: center; box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
+            width: 170px; height: 170px; margin: 0 auto; border-radius: 50%; background: #232732;
+            display: flex; align-items: center; justify-content: center; box-shadow: inset 6px 6px 12px #14161c, inset -6px -6px 12px #323848;
         }
         .circle-inner {
-            width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
-            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
+            width: 115px; height: 115px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
         }
         .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
-
         .rotating { -webkit-animation: spin 15s linear infinite; animation: spin 15s linear infinite; -webkit-animation-play-state: paused; animation-play-state: paused; }
         @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .radio-info h2 { color: #ffffff; font-size: 20px; margin-bottom: 5px; }
-        .radio-info p { color: #8a92a6; font-size: 13px; margin-bottom: 5px; }
-        .status-text { display: block; font-size: 14px; font-weight: 500; }
+        .radio-info h2 { color: #ffffff; font-size: 18px; margin-bottom: 2px; }
+        .radio-info p { color: #8a92a6; font-size: 12px; margin-bottom: 4px; }
+        .status-text { display: block; font-size: 13px; font-weight: 500; }
         .text-muted { color: #ffe0b2; }
         .text-connecting { color: #ffca28; }
         .text-live { color: #4caf50; font-weight: bold; }
-
-        .progress-container { display: flex; align-items: center; justify-content: space-between; }
-        .time-text { color: #8a92a6; font-size: 12px; }
+        .progress-container { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; }
+        .time-text { color: #8a92a6; font-size: 11px; }
         .live-text { color: #ff5722; font-weight: bold; }
-        .slider-bar { flex: 1; height: 5px; background: #14161c; border-radius: 3px; margin: 0 15px; }
+        .slider-bar { flex: 1; height: 5px; background: #14161c; border-radius: 3px; margin: 0 12px; }
         .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 0%; transition: width 0.2s ease; }
-
         .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
-        
         .btn-control {
-            background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%;
+            background: #232732; border: none; width: 50px; height: 50px; border-radius: 50%;
             box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .btn-main {
-            background: #ff5722; border: none; width: 72px; height: 72px; border-radius: 50%; 
+            background: #ff5722; border: none; width: 66px; height: 66px; border-radius: 50%; 
             box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-
-        .btn-logout {
-            background: #c62828; border: none; color: white; padding: 11px 28px; border-radius: 20px;
-            font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin: 0 auto; width: fit-content;
-        }
-
-        .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
-        .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
+        .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin: 0 auto; width: fit-content; }
+        .svg-icon { width: 16px; height: 16px; fill: #ff5722; }
+        .svg-icon-main { width: 22px; height: 22px; fill: #ffffff; }
         .spin-loading { animation: svg-spin 1s linear infinite; -webkit-animation: svg-spin 1s linear infinite; }
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
         @-webkit-keyframes svg-spin { 100% { -webkit-transform: rotate(360deg); } }
+        .info-card { display: none; position: absolute; top: 70px; right: 20px; background: #232732; width: 180px; padding: 12px; border-radius: 15px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848; z-index: 10; text-align: left; border: 1px solid #2a2f3d; }
+        .info-card p { color: #8a92a6; font-size: 10px; margin-bottom: 2px; }
+        .info-card h4 { color: #ffffff; font-size: 13px; font-weight: bold; word-break: break-all; }
 
-        .info-card {
-            display: none; position: absolute; top: 75px; right: 25px; background: #232732; width: 190px;
-            padding: 15px; border-radius: 18px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
-            z-index: 10; text-align: left; border: 1px solid #2a2f3d;
-        }
-        .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
-        .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
-
-
-        /* =========================================================================
-           📱 3. ARSITEKTUR KHUSUS: 100% PAS UNTUK ANDROID MOBILE PORTRAIT 
-           ========================================================================= */
-        @media screen and (max-width: 480px) and (orientation: portrait) {
-            body { 
-                padding: 8px; /* Mengunci ruang pas terluar atas-bawah agar tidak menabrak status bar HP */
-            } 
-            
-            .player-container {
-                width: calc(100% - 16px); /* Pas kanan-kiri dengan sisa pendaran shadow luar */
-                max-width: 345px;
-                
-                /* SOLUSI MUTLAK: Mengunci tinggi wadah agar menyesuaikan sisa tinggi bersih layar HP 
-                   dan menggunakan space-around agar jarak atas-bawah otomatis padat merapat di tengah */
-                height: calc(100vh - 16px); 
-                max-height: 540px; /* Batas tinggi maksimal Android agar tombol LOGOUT aman naik ke atas navigasi sistem */
-                justify-content: space-around; 
-                
-                padding: 18px 15px; 
-                border-radius: 35px;
-            }
-
-            /* Mengompres skala bulatan tengah agar menghemat jatah ruang vertikal HP */
-            .circle-outer { width: 165px; height: 165px; }
-            .circle-inner { width: 110px; height: 115px; }
-
-            /* Penataan kepadatan teks informasi */
-            .radio-info h2 { font-size: 18px; }
-            .radio-info p { font-size: 12px; margin-bottom: 2px; }
-            .status-text { font-size: 13px; }
-
-            /* Mengunci pengecilan diameter tombol agar pas di layar genggaman */
-            .btn-mini { width: 36px; height: 36px; }
-            .btn-control { width: 48px; height: 48px; }
-            .btn-main { width: 64px; height: 64px; }
-            .btn-logout { padding: 9px 24px; font-size: 11px; }
-            
-            .info-card { top: 62px; right: 15px; width: 175px; padding: 12px; }
+        @media screen and (min-width: 768px) {
+            .player-container { width: 350px !important; height: 560px !important; }
         }
     </style>
-
 </head>
+
 <body>
     <div class="player-container">
         <div class="player-header">
+            <!-- Tombol Segarkan Aliran Audio -->
             <button class="btn-mini" onclick="fiturSembuhkanAliran()" title="Segarkan Aliran Audio">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
             </button>
             <span class="live-badge" id="lblSpeed">LIVE 1.0x</span>
+            <!-- Tombol Kanan Atas: Informasi Pengguna -->
             <button class="btn-mini" onclick="toggleInfoAkun()" title="Informasi Pengguna">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             </button>
         </div>
 
+        <!-- Balon Pop-up Info Akun -->
         <div class="info-card" id="popInfo">
             <p>LOGIN SEBAGAI:</p>
             <h4 id="txtUserAktif">-</h4>
@@ -178,6 +95,7 @@
                 <img src="logo-alfalah.png" alt="Logo" id="radioCover" class="rotating">
             </div>
         </div>
+
         <div class="radio-info">
             <h2>NGAOS AL FALAH PLOSO</h2>
             <p>TAFSIR JALALAIN & SHAHIH BUKHARI</p>
@@ -191,14 +109,17 @@
         </div>
 
         <div class="player-controls">
+            <!-- Backward (Klik Speed Down / Tahan Replay 30s) -->
             <button class="btn-control" id="btnBack">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
             </button>
+            <!-- Play Utama -->
             <button class="btn-main" id="playBtn" onclick="toggleRadio()">
                 <g id="playIconContainer">
                     <svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </g>
             </button>
+            <!-- Forward (Klik Speed Up / Tahan Catch-up Live) -->
             <button class="btn-control" id="btnForward">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
             </button>
@@ -206,13 +127,26 @@
         <button class="btn-logout" onclick="prosesLogoutKeamanan()">LOGOUT</button>
     </div>
 
+    <!-- Pemanggilan Berkas Sistem Sesi Modular -->
     <script src="js/config.js"></script>
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
+    <script>
+        // 🛠️ MESIN KALKULASI TINGGI BERSIH LAYAR REAL-TIME UNTUK ANDROID
+        function sesuaikanTinggiLayarBersih() {
+            const container = document.querySelector('.player-container');
+            if (window.innerWidth <= 480) {
+                // Mengunci tinggi wadah 20px di bawah tinggi asli LCD HP bersih
+                const tinggiBersihHP = window.innerHeight;
+                container.style.height = (tinggiBersihHP - 20) + "px";
+            }
+        }
+        window.addEventListener('DOMContentLoaded', sesuaikanTinggiLayarBersih);
+        window.addEventListener('resize', sesuaikanTinggiLayarBersih);
+        sesuaikanTinggiLayarBersih();
 
-        <script>
-        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
+        // VALIDASI PROTEKSI SESI LOGIN BERKALA
         let namaAkunTerbaca = "Penyiar";
         if (typeof Auth !== 'undefined') { 
             Auth.protectPage(); 
@@ -230,7 +164,6 @@
         let speedIndex = 2; 
         const speeds = [0.75, 0.85, 1.0, 1.25, 1.5];
         
-        // VARIABEL BARU: Pengendali Stimulan Otomatis untuk Tunggu Durasi Lama (30 Menit+)
         let intervalCekServerStandby = null;
         let tombolPlayPernahDiklik = false;
 
@@ -282,14 +215,12 @@
                 startTimer();
                 updateSpeedUI();
                 
-                // Jika sukses berbunyi, matikan mesin pelacak standby di latar belakang
                 clearInterval(intervalCekServerStandby);
                 intervalCekServerStandby = null;
             }).catch(err => {
-                // MASUK MODE STANDBY (Memicu Pemicu Paksa Latar Belakang jika Encoder Mati)
                 statusIndicator.innerText = "Siaran Offline / Standby Menunggu...";
                 statusIndicator.className = "status-text text-muted";
-                playIconContainer.innerHTML = SVG_LOADING; // Tetap biarkan berputar tanda standby aktif
+                playIconContainer.innerHTML = SVG_LOADING;
                 
                 if (tombolPlayPernahDiklik && !intervalCekServerStandby) {
                     mulaiMesinStimulanOtomatis();
@@ -309,7 +240,6 @@
             stopTimer();
         }
 
-        // MESIN STIMULAN OTOMATIS: Memantau keaktifan encoder secara realtime tanpa batas waktu
         function mulaiMesinStimulanOtomatis() {
             const statusUrl = CONFIG.STREAM_URL.replace("/radio", "/status-json.xsl");
             
@@ -321,19 +251,18 @@
                 .then(data => {
                     let encoderSudahAktif = false;
                     if (data && data.icestats && data.icestats.source) {
-                        encoderSudahAktif = true; // Sinyal Rocket Broadcaster terdeteksi masuk ke server
+                        encoderSudahAktif = true;
                     }
                     
-                    // JIKA ENCODER MENYALA, PUTUS PAKSA KONEKSI LAMA & PEMICU SUARA BARU
                     if (encoderSudahAktif) {
                         clearInterval(intervalCekServerStandby);
                         intervalCekServerStandby = null;
                         if (audio) { audio.pause(); audio.src = ""; audio.load(); }
-                        setTimeout(() => { startStreaming(); }, 500); // Trigger berbunyi otomatis otomatis
+                        setTimeout(() => { startStreaming(); }, 500);
                     }
                 })
                 .catch(e => console.log("Menunggu server online..."));
-            }, 15000); // Memeriksa gerbang server setiap 15 detik sekali (Sangat hemat kuota)
+            }, 15000);
         }
 
         function fiturSembuhkanAliran() { stopStreaming(); setTimeout(() => { startStreaming(); }, 400); }
@@ -401,7 +330,5 @@
             }
         }
     </script>
-
 </body>
 </html>
-
