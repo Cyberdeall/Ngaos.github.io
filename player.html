@@ -5,66 +5,262 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ngaos Al Falah Ploso - Player</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #1e222b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; -webkit-user-select: none; user-select: none; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+
+        /* 1. MENGUNCI LAYAR UTAMA SMARTPHONE AGAR SIMETRIS & ANTI-SCROLL */
+        body { 
+            background: #1e222b; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 10px; /* Mengunci jarak tipis 10px di batas terluar atas-bawah layar HP */
+            -webkit-user-select: none; 
+            user-select: none; 
+            overflow: hidden; /* Menghilangkan scrollbar agar layar tidak bisa digeser naik-turun */
+        }
+
+        /* 2. MELEBARKAN BINGKAI CONTAINER PAS ATAS-BAWAH KANAN-KIRI LAYAR HP */
         .player-container {
-            background: #232732; width: calc(100% - 30px); max-width: 360px; border-radius: 40px;
-            padding: 25px 20px; box-shadow: 12px 12px 24px #14161c, -12px -12px 24px #323848; text-align: center; margin: 0 auto; position: relative;
+            background: #232732; 
+            
+            /* KANAN-KIRI PAS LAYAR: Menyisakan jarak 8px di kanan-kiri untuk pancaran shadow */
+            width: calc(100% - 16px); 
+            max-width: 355px; 
+            
+            /* ATAS-BAWAH PAS LAYAR: Tinggi otomatis mengisi ruang vertikal secara maksimal */
+            height: calc(100vh - 20px); 
+            max-height: 640px; 
+            
+            border-radius: 35px; /* Sudut lengkungan disesuaikan agar pas dengan bezel smartphone */
+            
+            /* SISTEM LAYOUT FLEX: Memaksa semua tombol dan teks di dalam otomatis renggang 
+               dan membagi jarak vertikal secara adil agar memenuhi ruang atas-bawah yang luas */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            
+            padding: 25px 15px; 
+            
+            /* BIAS SHADOW PERSIPI: Dibuat halus agar pendaran gradasi ruang timbulnya tidak terpotong tepi LCD */
+            box-shadow: 6px 6px 16px #14161c, -6px -6px 16px #323848; 
+            text-align: center; 
+            position: relative; 
+            margin: 0 auto; 
         }
-        .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .live-badge { color: #ff5722; font-weight: bold; letter-spacing: 2px; font-size: 14px; }
+
+        .player-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; /* Jarak disesuaikan untuk flex layout */
+        }
+
+        .live-badge { 
+            color: #ff5722; 
+            font-weight: bold; 
+            letter-spacing: 2px; 
+            font-size: 14px; 
+        }
+
         .btn-mini {
-            background: #232732; border: none; width: 40px; height: 40px; border-radius: 50%;
-            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
+            background: #232732; 
+            border: none; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%;
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
         }
+
+        /* 3. OPTIMALISASI UKURAN BULATAN PIRINGAN HITAM TENGAH */
         .circle-outer {
-            width: 200px; height: 200px; margin: 0 auto 25px auto; border-radius: 50%; background: #232732;
-            display: flex; align-items: center; justify-content: center; box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
+            width: 195px; 
+            height: 195px; 
+            margin: 0 auto; 
+            border-radius: 50%; 
+            background: #232732;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
         }
+
         .circle-inner {
-            width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 4px solid #1a1d24;
-            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; background: #232732; display: flex; align-items: center; justify-content: center;
+            width: 135px; 
+            height: 135px; 
+            border-radius: 50%; 
+            overflow: hidden; 
+            border: 4px solid #1a1d24;
+            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; 
+            background: #232732; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
-        .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
-        .rotating { -webkit-animation: spin 15s linear infinite; animation: spin 15s linear infinite; -webkit-animation-play-state: paused; animation-play-state: paused; }
+
+        .circle-inner img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block; 
+            border-radius: 50%; 
+        }
+
+        .rotating { 
+            -webkit-animation: spin 15s linear infinite; 
+            animation: spin 15s linear infinite; 
+            -webkit-animation-play-state: paused; 
+            animation-play-state: paused; 
+        }
+
         @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .radio-info h2 { color: #ffffff; font-size: 20px; margin-bottom: 5px; }
-        .radio-info p { color: #8a92a6; font-size: 13px; margin-bottom: 15px; }
-        .status-text { display: block; font-size: 14px; font-weight: 500; }
+
+        /* 4. PENATAAN AREA INFORMASI TEKS & TIMELINE PROGRESS */
+        .radio-info { 
+            margin: 10px 0; 
+        }
+
+        .radio-info h2 { 
+            color: #ffffff; 
+            font-size: 20px; 
+            margin-bottom: 5px; 
+        }
+
+        .radio-info p { 
+            color: #8a92a6; 
+            font-size: 13px; 
+            margin-bottom: 10px; 
+        }
+
+        .status-text { 
+            display: block; 
+            font-size: 14px; 
+            font-weight: 500; 
+        }
+
         .text-muted { color: #ffe0b2; }
         .text-connecting { color: #ffca28; }
         .text-live { color: #4caf50; font-weight: bold; }
-        .progress-container { display: flex; align-items: center; justify-content: space-between; margin: 25px 0; }
-        .time-text { color: #8a92a6; font-size: 12px; }
-        .live-text { color: #ff5722; font-weight: bold; }
-        .slider-bar { flex: 1; height: 6px; background: #14161c; border-radius: 3px; margin: 0 15px; }
-        .slider-fill { height: 100%; background: linear-gradient(90deg, #ff5722, #ff7043); border-radius: 3px; width: 0%; transition: width 0.2s ease; }
-        .player-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 25px; }
+
+        .progress-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin: 15px 0; 
+        }
+
+        .time-text { 
+            color: #8a92a6; 
+            font-size: 12px; 
+        }
+
+        .live-text { 
+            color: #ff5722; 
+            font-weight: bold; 
+        }
+
+        .slider-bar { 
+            flex: 1; 
+            height: 6px; 
+            background: #14161c; 
+            border-radius: 3px; 
+            margin: 0 15px; 
+        }
+
+        .slider-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #ff5722, #ff7043); 
+            border-radius: 3px; 
+            width: 0%; 
+            transition: width 0.2s ease; 
+        }
+
+        /* 5. PENATAAN PANEL TOMBOL UTAMA */
+        .player-controls { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0 15px; 
+            margin-bottom: 10px; 
+        }
+
         .btn-control {
-            background: #232732; border: none; width: 55px; height: 55px; border-radius: 50%;
-            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #232732; 
+            border: none; 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%;
+            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
+
         .btn-main {
-            background: #ff5722; border: none; width: 75px; height: 75px; border-radius: 50%; 
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #ff5722; 
+            border: none; 
+            width: 75px; 
+            height: 75px; 
+            border-radius: 50%; 
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
-        .btn-main:active, .btn-control:active { transform: scale(0.93); }
-        .btn-logout { background: #c62828; border: none; color: white; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 4px 4px 8px #14161c; margin-top: 10px; }
+
+        .btn-logout {
+            background: #c62828; 
+            border: none; 
+            color: white; 
+            padding: 12px 30px; 
+            border-radius: 20px;
+            font-weight: bold; 
+            font-size: 12px; 
+            cursor: pointer; 
+            box-shadow: 4px 4px 8px #14161c; 
+            margin: 0 auto; 
+            width: fit-content;
+        }
+
         .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
         .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
         .spin-loading { animation: svg-spin 1s linear infinite; -webkit-animation: svg-spin 1s linear infinite; }
+        
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
         @-webkit-keyframes svg-spin { 100% { -webkit-transform: rotate(360deg); } }
 
         .info-card {
-            display: none; position: absolute; top: 75px; right: 20px; background: #232732; width: 200px;
-            padding: 15px; border-radius: 20px; box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
-            z-index: 10; text-align: left; border: 1px solid #2a2f3d;
+            display: none; 
+            position: absolute; 
+            top: 75px; 
+            right: 20px; 
+            background: #232732; 
+            width: 200px;
+            padding: 15px; 
+            border-radius: 20px; 
+            box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
+            z-index: 10; 
+            text-align: left; 
+            border: 1px solid #2a2f3d;
         }
+
         .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
         .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
     </style>
+    
 </head>
 <body>
     <div class="player-container">
