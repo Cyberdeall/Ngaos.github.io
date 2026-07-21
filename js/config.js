@@ -11,7 +11,7 @@ const CONFIG = Object.freeze({
     APP_VERSION: "4.0.0",
 
     // Audio Stream
-    STREAM_URL: "https://alhastream.com",
+    STREAM_URL: "https://b.alhastream.com:5125/radio",
 
     // Clerk Authentication
     // PASTE PUBLISHABLE KEY CLERK ANDA DI SINI
