@@ -122,8 +122,9 @@
     <script src="js/crypto.js"></script>
     <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
-    
-    <script>
+
+        <script>
+        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
         let namaAkunTerbaca = "Penyiar";
         if (typeof Auth !== 'undefined') { 
             Auth.protectPage(); 
@@ -140,6 +141,10 @@
         let audio = null, isPlaying = false, timerInterval = null, secondsElapsed = 0;
         let speedIndex = 2; 
         const speeds = [0.75, 0.85, 1.0, 1.25, 1.5];
+        
+        // VARIABEL BARU: Pengendali Stimulan Otomatis untuk Tunggu Durasi Lama (30 Menit+)
+        let intervalCekServerStandby = null;
+        let tombolPlayPernahDiklik = false;
 
         const statusIndicator = document.getElementById("statusIndicator");
         const radioCover = document.getElementById("radioCover");
@@ -152,7 +157,15 @@
         const SVG_PAUSE = `<svg class="svg-icon-main" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
         const SVG_LOADING = `<svg class="svg-icon-main spin-loading" viewBox="0 0 24 24"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 14c4.41 0 8-3.59 8-8h2c0 5.52-4.48 10-10 10v-2z"/></svg>`;
 
-        function toggleRadio() { if (!isPlaying) { startStreaming(); } else { stopStreaming(); } }
+        function toggleRadio() { 
+            if (!isPlaying) { 
+                tombolPlayPernahDiklik = true;
+                startStreaming(); 
+            } else { 
+                tombolPlayPernahDiklik = false;
+                stopStreaming(); 
+            } 
+        }
 
         function startStreaming() {
             statusIndicator.innerText = "Menghubungkan...";
@@ -180,19 +193,59 @@
                 audio.playbackRate = speeds[speedIndex]; 
                 startTimer();
                 updateSpeedUI();
+                
+                // Jika sukses berbunyi, matikan mesin pelacak standby di latar belakang
+                clearInterval(intervalCekServerStandby);
+                intervalCekServerStandby = null;
             }).catch(err => {
-                statusIndicator.innerText = "Siaran Offline / Gagal Terhubung";
+                // MASUK MODE STANDBY (Memicu Pemicu Paksa Latar Belakang jika Encoder Mati)
+                statusIndicator.innerText = "Siaran Offline / Standby Menunggu...";
                 statusIndicator.className = "status-text text-muted";
-                playIconContainer.innerHTML = SVG_PLAY;
+                playIconContainer.innerHTML = SVG_LOADING; // Tetap biarkan berputar tanda standby aktif
+                
+                if (tombolPlayPernahDiklik && !intervalCekServerStandby) {
+                    mulaiMesinStimulanOtomatis();
+                }
             });
         }
 
         function stopStreaming() {
+            clearInterval(intervalCekServerStandby);
+            intervalCekServerStandby = null;
             if (audio) { audio.pause(); audio.src = ""; audio.load(); audio = null; }
-            isPlaying = false; statusIndicator.innerText = "Siaran Dihentikan";
+            isPlaying = false; 
+            statusIndicator.innerText = "Siaran Dihentikan";
             statusIndicator.className = "status-text text-muted";
-            playIconContainer.innerHTML = SVG_PLAY; radioCover.style.animationPlayState = "paused";
+            playIconContainer.innerHTML = SVG_PLAY; 
+            radioCover.style.animationPlayState = "paused";
             stopTimer();
+        }
+
+        // MESIN STIMULAN OTOMATIS: Memantau keaktifan encoder secara realtime tanpa batas waktu
+        function mulaiMesinStimulanOtomatis() {
+            const statusUrl = CONFIG.STREAM_URL.replace("/radio", "/status-json.xsl");
+            
+            intervalCekServerStandby = setInterval(() => {
+                if (!tombolPlayPernahDiklik) { clearInterval(intervalCekServerStandby); return; }
+                
+                fetch(statusUrl + "?cb=" + Date.now())
+                .then(res => res.json())
+                .then(data => {
+                    let encoderSudahAktif = false;
+                    if (data && data.icestats && data.icestats.source) {
+                        encoderSudahAktif = true; // Sinyal Rocket Broadcaster terdeteksi masuk ke server
+                    }
+                    
+                    // JIKA ENCODER MENYALA, PUTUS PAKSA KONEKSI LAMA & PEMICU SUARA BARU
+                    if (encoderSudahAktif) {
+                        clearInterval(intervalCekServerStandby);
+                        intervalCekServerStandby = null;
+                        if (audio) { audio.pause(); audio.src = ""; audio.load(); }
+                        setTimeout(() => { startStreaming(); }, 500); // Trigger berbunyi otomatis otomatis
+                    }
+                })
+                .catch(e => console.log("Menunggu server online..."));
+            }, 15000); // Memeriksa gerbang server setiap 15 detik sekali (Sangat hemat kuota)
         }
 
         function fiturSembuhkanAliran() { stopStreaming(); setTimeout(() => { startStreaming(); }, 400); }
@@ -260,6 +313,7 @@
             }
         }
     </script>
+
 </body>
 </html>
 
