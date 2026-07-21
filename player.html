@@ -12,42 +12,34 @@
             font-family: 'Segoe UI', sans-serif; 
         }
 
-        /* 1. MENGUNCI LAYAR UTAMA SMARTPHONE AGAR SIMETRIS & ANTI-SCROLL */
+        /* 1. MENGUNCI LAYAR HP AGAR RESPONSIF TANPA SCROLLBAR */
         body { 
             background: #1e222b; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
-            padding: 10px; /* Mengunci jarak tipis 10px di batas terluar atas-bawah layar HP */
+            padding: 12px; /* Jarak aman sekeliling layar HP */
             -webkit-user-select: none; 
             user-select: none; 
-            overflow: hidden; /* Menghilangkan scrollbar agar layar tidak bisa digeser naik-turun */
+            overflow: hidden; 
         }
 
-        /* 2. MELEBARKAN BINGKAI CONTAINER PAS ATAS-BAWAH KANAN-KIRI LAYAR HP */
+        /* 2. PERBAIKAN BINGKAI: MENGGUNAKAN GRID AGAR PADAT DAN PAS DI LAYAR */
         .player-container {
             background: #232732; 
+            width: calc(100% - 16px); /* Pas kanan-kiri dengan sisa ruang shadow */
+            max-width: 350px; 
+            height: calc(100vh - 24px); /* Pas atas-bawah mengikuti tinggi layar HP */
+            border-radius: 35px; 
             
-            /* KANAN-KIRI PAS LAYAR: Menyisakan jarak 8px di kanan-kiri untuk pancaran shadow */
-            width: calc(100% - 16px); 
-            max-width: 355px; 
+            /* SUNTIKAN GRID: Mengunci elemen agar padat, tidak melar ke atas, dan tidak terpotong ke bawah */
+            display: grid;
+            grid-template-rows: auto auto auto auto auto auto;
+            align-content: center; /* Memaksa semua komponen berkumpul pas di tengah vertikal */
+            gap: 15px; /* Jarak konsisten antar elemen agar tidak berdesakan */
             
-            /* ATAS-BAWAH PAS LAYAR: Tinggi otomatis mengisi ruang vertikal secara maksimal */
-            height: calc(100vh - 20px); 
-            max-height: 640px; 
-            
-            border-radius: 35px; /* Sudut lengkungan disesuaikan agar pas dengan bezel smartphone */
-            
-            /* SISTEM LAYOUT FLEX: Memaksa semua tombol dan teks di dalam otomatis renggang 
-               dan membagi jarak vertikal secara adil agar memenuhi ruang atas-bawah yang luas */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-            
-            padding: 25px 15px; 
-            
-            /* BIAS SHADOW PERSIPI: Dibuat halus agar pendaran gradasi ruang timbulnya tidak terpotong tepi LCD */
+            padding: 20px 15px; 
             box-shadow: 6px 6px 16px #14161c, -6px -6px 16px #323848; 
             text-align: center; 
             position: relative; 
@@ -58,50 +50,49 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 10px; /* Jarak disesuaikan untuk flex layout */
+            margin-bottom: 5px;
         }
 
         .live-badge { 
             color: #ff5722; 
             font-weight: bold; 
             letter-spacing: 2px; 
-            font-size: 14px; 
+            font-size: 13px; 
         }
 
         .btn-mini {
             background: #232732; 
             border: none; 
-            width: 40px; 
-            height: 40px; 
+            width: 38px; 
+            height: 38px; 
             border-radius: 50%;
             box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            position: relative;
         }
 
-        /* 3. OPTIMALISASI UKURAN BULATAN PIRINGAN HITAM TENGAH */
+        /* 3. MENGUNCI UKURAN BULATAN TENGAH AGAR TIDAK MEMAKAN RUANG KELUAR SCREEN */
         .circle-outer {
-            width: 195px; 
-            height: 195px; 
+            width: 180px; 
+            height: 180px; 
             margin: 0 auto; 
             border-radius: 50%; 
             background: #232732;
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            box-shadow: inset 8px 8px 16px #14161c, inset -8px -8px 16px #323848;
+            box-shadow: inset 6px 6px 12px #14161c, inset -6px -6px 12px #323848;
         }
 
         .circle-inner {
-            width: 135px; 
-            height: 135px; 
+            width: 125px; 
+            height: 125px; 
             border-radius: 50%; 
             overflow: hidden; 
             border: 4px solid #1a1d24;
-            box-shadow: 8px 8px 16px #14161c, -8px -8px 16px #323848; 
+            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; 
             background: #232732; 
             display: flex; 
             align-items: center; 
@@ -126,26 +117,22 @@
         @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 4. PENATAAN AREA INFORMASI TEKS & TIMELINE PROGRESS */
-        .radio-info { 
-            margin: 10px 0; 
-        }
-
+        /* 4. PENATAAN TEKS INFORMASI YANG PRECOISE */
         .radio-info h2 { 
             color: #ffffff; 
-            font-size: 20px; 
-            margin-bottom: 5px; 
+            font-size: 18px; 
+            margin-bottom: 4px; 
         }
 
         .radio-info p { 
             color: #8a92a6; 
-            font-size: 13px; 
-            margin-bottom: 10px; 
+            font-size: 12px; 
+            margin-bottom: 6px; 
         }
 
         .status-text { 
             display: block; 
-            font-size: 14px; 
+            font-size: 13px; 
             font-weight: 500; 
         }
 
@@ -153,16 +140,17 @@
         .text-connecting { color: #ffca28; }
         .text-live { color: #4caf50; font-weight: bold; }
 
+        /* 5. TIMELINE AREA YANG RINGKAS */
         .progress-container { 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            margin: 15px 0; 
+            margin: 5px 0; 
         }
 
         .time-text { 
             color: #8a92a6; 
-            font-size: 12px; 
+            font-size: 11px; 
         }
 
         .live-text { 
@@ -172,10 +160,10 @@
 
         .slider-bar { 
             flex: 1; 
-            height: 6px; 
+            height: 5px; 
             background: #14161c; 
             border-radius: 3px; 
-            margin: 0 15px; 
+            margin: 0 12px; 
         }
 
         .slider-fill { 
@@ -186,22 +174,21 @@
             transition: width 0.2s ease; 
         }
 
-        /* 5. PENATAAN PANEL TOMBOL UTAMA */
+        /* 6. PANEL TOMBOL UTAMA */
         .player-controls { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            padding: 0 15px; 
-            margin-bottom: 10px; 
+            padding: 0 10px; 
         }
 
         .btn-control {
             background: #232732; 
             border: none; 
-            width: 55px; 
-            height: 55px; 
+            width: 50px; 
+            height: 50px; 
             border-radius: 50%;
-            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; 
+            box-shadow: 4px 4px 8px #14161c, -4px -4px 8px #323848; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
@@ -211,10 +198,10 @@
         .btn-main {
             background: #ff5722; 
             border: none; 
-            width: 75px; 
-            height: 75px; 
+            width: 70px; 
+            height: 70px; 
             border-radius: 50%; 
-            box-shadow: 6px 6px 12px #14161c, -6px -6px 12px #323848; 
+            box-shadow: 5px 5px 10px #14161c, -5px -5px 10px #323848; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
@@ -225,18 +212,18 @@
             background: #c62828; 
             border: none; 
             color: white; 
-            padding: 12px 30px; 
+            padding: 10px 25px; 
             border-radius: 20px;
             font-weight: bold; 
-            font-size: 12px; 
+            font-size: 11px; 
             cursor: pointer; 
             box-shadow: 4px 4px 8px #14161c; 
-            margin: 0 auto; 
+            margin: 5px auto 0 auto; 
             width: fit-content;
         }
 
-        .svg-icon { width: 18px; height: 18px; fill: #ff5722; }
-        .svg-icon-main { width: 24px; height: 24px; fill: #ffffff; }
+        .svg-icon { width: 16px; height: 18px; fill: #ff5722; }
+        .svg-icon-main { width: 22px; height: 22px; fill: #ffffff; }
         .spin-loading { animation: svg-spin 1s linear infinite; -webkit-animation: svg-spin 1s linear infinite; }
         
         @keyframes svg-spin { 100% { transform: rotate(360deg); } }
@@ -245,22 +232,22 @@
         .info-card {
             display: none; 
             position: absolute; 
-            top: 75px; 
+            top: 70px; 
             right: 20px; 
             background: #232732; 
-            width: 200px;
-            padding: 15px; 
-            border-radius: 20px; 
+            width: 180px;
+            padding: 12px; 
+            border-radius: 15px; 
             box-shadow: 6px 6px 15px #14161c, -6px -6px 15px #323848;
             z-index: 10; 
             text-align: left; 
             border: 1px solid #2a2f3d;
         }
 
-        .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
-        .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
+        .info-card p { color: #8a92a6; font-size: 10px; margin-bottom: 2px; }
+        .info-card h4 { color: #ffffff; font-size: 13px; font-weight: bold; word-break: break-all; }
     </style>
-    
+  
 </head>
 <body>
     <div class="player-container">
