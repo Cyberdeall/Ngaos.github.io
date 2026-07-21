@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="NamaAplikasi">
+    <meta name="apple-mobile-web-app-title" content="Ngaos Al Falah">
  
     <meta charset="UTF-8">
     <meta name="color-scheme" content="light">
@@ -17,11 +17,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
-    <!-- Clerk JS SDK -->
+    <!-- Load Configuration First -->
+    <script src="js/config.js"></script>
+
+    <!-- Clerk JS SDK (Publishable Key Dipasang Direct) -->
     <script
       async
       crossorigin="anonymous"
-      id="clerk-sdk"
+      data-clerk-publishable-key="pk_test_ZnVuLXBpZ2Vvbi02Mi5jbGVyay5hY2NvdW50cy5kZXYk"
       src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js">
     </script>
 
@@ -102,15 +105,7 @@
         </div>
     </div>
 
-    <!-- Script Konfigurasi & Aplikasi -->
-    <script src="js/config.js"></script>
-    <script>
-      // Menghubungkan Publishable Key dari config.js ke tag Clerk SDK secara otomatis
-      if (typeof CONFIG !== 'undefined' && CONFIG.CLERK_PUBLISHABLE_KEY) {
-        document.getElementById('clerk-sdk').setAttribute('data-clerk-publishable-key', CONFIG.CLERK_PUBLISHABLE_KEY);
-      }
-    </script>
-    <script src="js/crypto.js"></script>
+    <!-- Script Aplikasi (Crypto.js Dihapus) -->
     <script src="js/auth.js"></script>
     <script src="js/login.js"></script>
     <script>
@@ -125,3 +120,4 @@
 
 </body>
 </html>
+
