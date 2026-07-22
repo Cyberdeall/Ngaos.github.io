@@ -6,6 +6,7 @@ const PWA_BASE_URL = 'https://cyberdeall.github.io/Ngaos/';
 const PLAYER_PAGE = 'https://cyberdeall.github.io/Ngaos/player.html';
 
 let clerk;
+let currentSignUpObject = null; // Menyimpan objek SignUp untuk verifikasi OTP
 
 // 1. INISIALISASI CLERK SDK
 window.addEventListener('load', async () => {
@@ -88,15 +89,11 @@ async function handleSignIn(email, password, formEl) {
             await clerk.setActive({ session: signIn.createdSessionId });
             window.location.href = PLAYER_PAGE;
         } else if (signIn.status === 'needs_client_trust' || signIn.status === 'needs_first_factor') {
-            // Jika butuh aktivasi / verifikasi kepercayaan perangkat
-            showNotice('Akun memerlukan verifikasi tambahan. Mengalihkan ke verifikasi...', false, formEl);
-            
-            // Mengaktifkan sesi jika ID tersedia
             if (signIn.createdSessionId) {
                 await clerk.setActive({ session: signIn.createdSessionId });
                 window.location.href = PLAYER_PAGE;
             } else {
-                showNotice('Silakan periksa email Anda untuk mengonfirmasi perangkat baru ini.', true, formEl);
+                showNotice('Silakan periksa email Anda untuk mengonfirmasi perangkat ini.', true, formEl);
                 setBtnLoading(formEl, false, originalText);
             }
         } else {
@@ -120,7 +117,7 @@ async function handleSignIn(email, password, formEl) {
     }
 }
 
-// 4. FUNGSI DAFTAR (SIGN UP)
+// 4. FUNGSI DAFTAR (SIGN UP) + TAMPILKAN INPUT OTP
 async function handleSignUp(email, password, formEl) {
     const btn = formEl.querySelector('button[type="submit"]');
     const originalText = btn ? btn.textContent : 'DAFTAR';
@@ -134,22 +131,19 @@ async function handleSignUp(email, password, formEl) {
             password: password,
         });
 
-        // MENGGUNAKAN STRATEGI 'email_code' (KODE OTP EMAIL) ATAU VERIFIKASI STANDAR
+        currentSignUpObject = signUp;
+
+        // Meminta kode OTP
         try {
-            await signUp.prepareEmailAddressVerification({
-                strategy: 'email_code'
-            });
-            showNotice('Kode verifikasi telah dikirim ke email Anda! Silakan cek kotak masuk/spam.', false, formEl);
+            await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
         } catch (stratErr) {
-            // Fallback jika Clerk disetting 'email_link' di dashboard
-            await signUp.prepareEmailAddressVerification({
-                strategy: 'email_link',
-                redirectUrl: PWA_BASE_URL
-            });
-            showNotice('Link verifikasi telah dikirim ke email Anda!', false, formEl);
+            await signUp.prepareEmailAddressVerification({ strategy: 'email_link', redirectUrl: PWA_BASE_URL });
         }
 
-        startPolling(signUp, formEl);
+        showNotice('Kode OTP dikirim! Masukkan kode 6 digit dari email Anda di bawah:', false, formEl);
+        
+        // Ubah tampilan form pendaftaran menjadi Input OTP
+        renderOtpInputUI(formEl);
 
     } catch (signUpErr) {
         setBtnLoading(formEl, false, originalText);
@@ -167,24 +161,75 @@ async function handleSignUp(email, password, formEl) {
     }
 }
 
-// 5. POLLING STATUS VERIFIKASI EMAIL
-function startPolling(signUpObject, formEl) {
-    const interval = setInterval(async () => {
-        try {
-            await signUpObject.reload();
-            if (signUpObject.status === 'complete') {
-                clearInterval(interval);
-                showNotice('Verifikasi berhasil! Mengalihkan...', false, formEl);
-                await clerk.setActive({ session: signUpObject.createdSessionId });
-                window.location.href = PLAYER_PAGE;
-            }
-        } catch (err) {
-            console.error('Polling error:', err);
-        }
-    }, 2500);
+// 5. RENDERING UI INPUT OTP DINAMIS
+function renderOtpInputUI(formEl) {
+    // Sembunyikan elemen input biasa
+    const allInputs = formEl.querySelectorAll('input');
+    allInputs.forEach(inp => {
+        if (inp.type !== 'hidden') inp.style.display = 'none';
+    });
+
+    // Buat input OTP jika belum ada
+    let otpInput = formEl.querySelector('#otp-code-input');
+    if (!otpInput) {
+        otpInput = document.createElement('input');
+        otpInput.id = 'otp-code-input';
+        otpInput.type = 'text';
+        otpInput.placeholder = 'Masukkan 6 Digit Kode OTP';
+        otpInput.maxLength = 6;
+        otpInput.required = true;
+        otpInput.style.cssText = 'width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; letter-spacing: 4px; font-weight: bold; background: #23272a; color: #fff;';
+        
+        // Sisipkan sebelum tombol submit
+        const submitBtn = formEl.querySelector('button[type="submit"]');
+        formEl.insertBefore(otpInput, submitBtn);
+    } else {
+        otpInput.style.display = 'block';
+    }
+
+    // Ubah tombol Submit menjadi "VERIFIKASI OTP"
+    const submitBtn = formEl.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'VERIFIKASI OTP';
+        formEl.dataset.step = 'otp_verification'; // Tandai form dalam mode OTP
+    }
 }
 
-// 6. INITIALIZER (SLIDER TOGGLE & FORM SUBMIT)
+// 6. FUNGSI VERIFIKASI KODE OTP
+async function handleVerifyOtp(otpCode, formEl) {
+    setBtnLoading(formEl, true, 'VERIFIKASI OTP');
+    showNotice('Memeriksa kode OTP...', false, formEl);
+
+    try {
+        if (!currentSignUpObject) {
+            showNotice('Sesi habis. Silakan ulangi pendaftaran.', true, formEl);
+            setBtnLoading(formEl, false, 'VERIFIKASI OTP');
+            return;
+        }
+
+        const completeSignUp = await currentSignUpObject.attemptEmailAddressVerification({
+            code: otpCode
+        });
+
+        if (completeSignUp.status === 'complete') {
+            showNotice('Verifikasi Berhasil! Mengalihkan...', false, formEl);
+            await clerk.setActive({ session: completeSignUp.createdSessionId });
+            window.location.href = PLAYER_PAGE;
+        } else {
+            showNotice('Status verifikasi: ' + completeSignUp.status, true, formEl);
+            setBtnLoading(formEl, false, 'VERIFIKASI OTP');
+        }
+
+    } catch (err) {
+        setBtnLoading(formEl, false, 'VERIFIKASI OTP');
+        const firstErr = (err.errors && err.errors.length > 0) ? err.errors[0] : null;
+        const msg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
+        showNotice('Kode OTP Salah/Kadaluarsa: ' + msg, true, formEl);
+    }
+}
+
+// 7. INITIALIZER (SLIDER TOGGLE & FORM SUBMIT)
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.container') || document.body;
     const registerBtn = document.querySelector('.register-btn');
@@ -210,6 +255,19 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Jika form sedang dalam mode verifikasi OTP
+            if (form.dataset.step === 'otp_verification') {
+                const otpInput = form.querySelector('#otp-code-input');
+                const otpCode = otpInput ? otpInput.value.trim() : '';
+                if (!otpCode) {
+                    showNotice('Masukkan 6 digit kode OTP!', true, form);
+                    return;
+                }
+                await handleVerifyOtp(otpCode, form);
+                return;
+            }
+
+            // Pembacaan input Email & Password standar
             const inputs = form.querySelectorAll('input');
             let emailVal = '';
             let passwordVal = '';
@@ -245,4 +303,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
