@@ -26,20 +26,17 @@ window.addEventListener('load', async () => {
     }
 });
 
-// 2. HELPER NOTIFIKASI UNIVERSAL (Mendukung Form Aktif & Slide)
+// 2. HELPER NOTIFIKASI UNIVERSAL
 function showNotice(msg, isError = false, formEl = null) {
     let statusEl = null;
 
-    // Jika form spesifik dikirim, cari penampung status di dalam form tersebut
     if (formEl) {
         statusEl = formEl.querySelector('#status-message, .status-message');
     }
 
-    // Jika tidak ketemu di form, cari global atau di form yang sedang aktif/tidak tersembunyi
     if (!statusEl) {
         const allStatusEls = document.querySelectorAll('#status-message, .status-message');
         for (let el of allStatusEls) {
-            // Pastikan elemen status berada di area yang terlihat (tidak dalam panel yang dislide tertutup)
             const parentPanel = el.closest('.toggle-panel, form, div');
             if (!parentPanel || window.getComputedStyle(parentPanel).display !== 'none') {
                 statusEl = el;
@@ -48,7 +45,6 @@ function showNotice(msg, isError = false, formEl = null) {
         }
     }
 
-    // Jika masih tidak ada, buat otomatis di dalam form aktif agar pesan pasti tampil
     if (!statusEl && formEl) {
         statusEl = document.createElement('div');
         statusEl.id = 'status-message';
@@ -91,6 +87,18 @@ async function handleSignIn(email, password, formEl) {
             showNotice('Login Berhasil! Mengalihkan...', false, formEl);
             await clerk.setActive({ session: signIn.createdSessionId });
             window.location.href = PLAYER_PAGE;
+        } else if (signIn.status === 'needs_client_trust' || signIn.status === 'needs_first_factor') {
+            // Jika butuh aktivasi / verifikasi kepercayaan perangkat
+            showNotice('Akun memerlukan verifikasi tambahan. Mengalihkan ke verifikasi...', false, formEl);
+            
+            // Mengaktifkan sesi jika ID tersedia
+            if (signIn.createdSessionId) {
+                await clerk.setActive({ session: signIn.createdSessionId });
+                window.location.href = PLAYER_PAGE;
+            } else {
+                showNotice('Silakan periksa email Anda untuk mengonfirmasi perangkat baru ini.', true, formEl);
+                setBtnLoading(formEl, false, originalText);
+            }
         } else {
             showNotice('Status login: ' + signIn.status, true, formEl);
             setBtnLoading(formEl, false, originalText);
@@ -126,12 +134,21 @@ async function handleSignUp(email, password, formEl) {
             password: password,
         });
 
-        await signUp.prepareEmailAddressVerification({
-            strategy: 'email_link',
-            redirectUrl: PWA_BASE_URL
-        });
+        // MENGGUNAKAN STRATEGI 'email_code' (KODE OTP EMAIL) ATAU VERIFIKASI STANDAR
+        try {
+            await signUp.prepareEmailAddressVerification({
+                strategy: 'email_code'
+            });
+            showNotice('Kode verifikasi telah dikirim ke email Anda! Silakan cek kotak masuk/spam.', false, formEl);
+        } catch (stratErr) {
+            // Fallback jika Clerk disetting 'email_link' di dashboard
+            await signUp.prepareEmailAddressVerification({
+                strategy: 'email_link',
+                redirectUrl: PWA_BASE_URL
+            });
+            showNotice('Link verifikasi telah dikirim ke email Anda!', false, formEl);
+        }
 
-        showNotice('Pendaftaran berhasil! Link verifikasi telah dikirim ke email Anda.', false, formEl);
         startPolling(signUp, formEl);
 
     } catch (signUpErr) {
@@ -173,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerBtn = document.querySelector('.register-btn');
     const loginBtn = document.querySelector('.login-btn');
 
-    // A. PEMICU ANIMASI SLIDE CSS
     if (registerBtn) {
         registerBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -188,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // B. PENANGANAN SUBMIT SEMUA FORM
     const forms = document.querySelectorAll('form');
 
     forms.forEach((form) => {
@@ -217,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Deteksi jenis form berdasarkan posisi slider atau ID/Class
             const isSignUp = container.classList.contains('active') || 
                              form.id.includes('register') || 
                              form.id.includes('signup') ||
