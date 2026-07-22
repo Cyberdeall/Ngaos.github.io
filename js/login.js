@@ -26,15 +26,40 @@ window.addEventListener('load', async () => {
     }
 });
 
-// 2. HELPER NOTIFIKASI & LOADING
-function showNotice(msg, isError = false) {
-    const statusEls = document.querySelectorAll('#status-message, .status-message');
-    if (statusEls.length > 0) {
-        statusEls.forEach(el => {
-            el.textContent = msg;
-            el.style.color = isError ? '#ff4d4d' : '#00e676';
-            el.style.display = 'block';
-        });
+// 2. HELPER NOTIFIKASI UNIVERSAL (Mendukung Form Aktif & Slide)
+function showNotice(msg, isError = false, formEl = null) {
+    let statusEl = null;
+
+    // Jika form spesifik dikirim, cari penampung status di dalam form tersebut
+    if (formEl) {
+        statusEl = formEl.querySelector('#status-message, .status-message');
+    }
+
+    // Jika tidak ketemu di form, cari global atau di form yang sedang aktif/tidak tersembunyi
+    if (!statusEl) {
+        const allStatusEls = document.querySelectorAll('#status-message, .status-message');
+        for (let el of allStatusEls) {
+            // Pastikan elemen status berada di area yang terlihat (tidak dalam panel yang dislide tertutup)
+            const parentPanel = el.closest('.toggle-panel, form, div');
+            if (!parentPanel || window.getComputedStyle(parentPanel).display !== 'none') {
+                statusEl = el;
+                break;
+            }
+        }
+    }
+
+    // Jika masih tidak ada, buat otomatis di dalam form aktif agar pesan pasti tampil
+    if (!statusEl && formEl) {
+        statusEl = document.createElement('div');
+        statusEl.id = 'status-message';
+        statusEl.style.cssText = 'margin-top: 15px; font-size: 13px; font-weight: 600; text-align: center;';
+        formEl.appendChild(statusEl);
+    }
+
+    if (statusEl) {
+        statusEl.textContent = msg;
+        statusEl.style.color = isError ? '#ff4d4d' : '#00e676';
+        statusEl.style.display = 'block';
     } else {
         alert((isError ? '❌ ERROR: ' : '✅ INFO: ') + msg);
     }
@@ -54,7 +79,7 @@ async function handleSignIn(email, password, formEl) {
     const originalText = btn ? btn.textContent : 'MASUK';
     
     setBtnLoading(formEl, true);
-    showNotice('Memeriksa akun...');
+    showNotice('Memeriksa akun...', false, formEl);
 
     try {
         const signIn = await clerk.client.signIn.create({
@@ -63,11 +88,11 @@ async function handleSignIn(email, password, formEl) {
         });
 
         if (signIn.status === 'complete') {
-            showNotice('Login Berhasil! Mengalihkan...');
+            showNotice('Login Berhasil! Mengalihkan...', false, formEl);
             await clerk.setActive({ session: signIn.createdSessionId });
             window.location.href = PLAYER_PAGE;
         } else {
-            showNotice('Status login: ' + signIn.status, true);
+            showNotice('Status login: ' + signIn.status, true, formEl);
             setBtnLoading(formEl, false, originalText);
         }
 
@@ -77,12 +102,12 @@ async function handleSignIn(email, password, formEl) {
         const code = firstErr ? firstErr.code : '';
 
         if (code === 'form_password_incorrect') {
-            showNotice('Kata sandi yang Anda masukkan salah.', true);
+            showNotice('Kata sandi yang Anda masukkan salah.', true, formEl);
         } else if (code === 'form_identifier_not_found') {
-            showNotice('Email belum terdaftar. Silakan klik "Daftar Akun" untuk membuat akun baru.', true);
+            showNotice('Email belum terdaftar. Silakan klik "Daftar Akun".', true, formEl);
         } else {
             const msg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
-            showNotice(msg || 'Gagal masuk.', true);
+            showNotice(msg || 'Gagal masuk.', true, formEl);
         }
     }
 }
@@ -93,7 +118,7 @@ async function handleSignUp(email, password, formEl) {
     const originalText = btn ? btn.textContent : 'DAFTAR';
 
     setBtnLoading(formEl, true);
-    showNotice('Membuat akun baru...');
+    showNotice('Membuat akun baru...', false, formEl);
 
     try {
         const signUp = await clerk.client.signUp.create({
@@ -106,8 +131,8 @@ async function handleSignUp(email, password, formEl) {
             redirectUrl: PWA_BASE_URL
         });
 
-        showNotice('Link verifikasi telah dikirim ke email Anda. Silakan periksa inbox/spam.');
-        startPolling(signUp);
+        showNotice('Pendaftaran berhasil! Link verifikasi telah dikirim ke email Anda.', false, formEl);
+        startPolling(signUp, formEl);
 
     } catch (signUpErr) {
         setBtnLoading(formEl, false, originalText);
@@ -115,24 +140,24 @@ async function handleSignUp(email, password, formEl) {
         const code = firstErr ? firstErr.code : '';
 
         if (code === 'form_password_length_too_short') {
-            showNotice('Pendaftaran gagal: Kata sandi minimal 8 karakter.', true);
+            showNotice('Kata sandi minimal 8 karakter.', true, formEl);
         } else if (code === 'form_identifier_exists') {
-            showNotice('Email ini sudah terdaftar. Silakan klik "Masuk".', true);
+            showNotice('Email ini sudah terdaftar. Silakan masuk.', true, formEl);
         } else {
             const errorDetail = firstErr ? firstErr.longMessage : signUpErr.message;
-            showNotice('Gagal mendaftar: ' + errorDetail, true);
+            showNotice('Gagal mendaftar: ' + errorDetail, true, formEl);
         }
     }
 }
 
 // 5. POLLING STATUS VERIFIKASI EMAIL
-function startPolling(signUpObject) {
+function startPolling(signUpObject, formEl) {
     const interval = setInterval(async () => {
         try {
             await signUpObject.reload();
             if (signUpObject.status === 'complete') {
                 clearInterval(interval);
-                showNotice('Verifikasi berhasil! Mengalihkan...');
+                showNotice('Verifikasi berhasil! Mengalihkan...', false, formEl);
                 await clerk.setActive({ session: signUpObject.createdSessionId });
                 window.location.href = PLAYER_PAGE;
             }
@@ -188,14 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!emailVal || !passwordVal) {
-                showNotice('Mohon isi email dan kata sandi terlebih dahulu.', true);
+                showNotice('Mohon isi email dan kata sandi terlebih dahulu.', true, form);
                 return;
             }
 
-            // Deteksi jenis form berdasarkan posisi slider atau ID
+            // Deteksi jenis form berdasarkan posisi slider atau ID/Class
             const isSignUp = container.classList.contains('active') || 
                              form.id.includes('register') || 
-                             form.id.includes('signup');
+                             form.id.includes('signup') ||
+                             form.closest('.sign-up') !== null;
 
             if (isSignUp) {
                 await handleSignUp(emailVal, passwordVal, form);
