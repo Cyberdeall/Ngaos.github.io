@@ -1,7 +1,7 @@
 // ==========================================
 // KONFIGURASI PWA NGAOS AL FALAH PLOSO
 // ==========================================
-const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Ganti dengan Key Anda
+const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Masukkan Publishable Key Clerk Anda
 const PWA_BASE_URL = 'https://cyberdeall.github.io/Ngaos/';
 const PLAYER_PAGE = 'https://cyberdeall.github.io/Ngaos/player.html';
 
@@ -26,9 +26,8 @@ window.addEventListener('load', async () => {
     }
 });
 
-// 2. HELPER NOTIFIKASI
+// 2. HELPER NOTIFIKASI & LOADING
 function showNotice(msg, isError = false) {
-    // Cari status-message yang ada di form aktif atau fallback ke global
     const statusEls = document.querySelectorAll('#status-message, .status-message');
     if (statusEls.length > 0) {
         statusEls.forEach(el => {
@@ -49,7 +48,7 @@ function setBtnLoading(formElement, isLoading, defaultText = 'KIRIM') {
     }
 }
 
-// 3. FUNGSI LOG IN (SIGN IN)
+// 3. FUNGSI LOGIN (SIGN IN)
 async function handleSignIn(email, password, formEl) {
     const btn = formEl.querySelector('button[type="submit"]');
     const originalText = btn ? btn.textContent : 'MASUK';
@@ -80,7 +79,7 @@ async function handleSignIn(email, password, formEl) {
         if (code === 'form_password_incorrect') {
             showNotice('Kata sandi yang Anda masukkan salah.', true);
         } else if (code === 'form_identifier_not_found') {
-            showNotice('Email belum terdaftar. Silakan geser/klik tombol Daftar untuk buat akun baru.', true);
+            showNotice('Email belum terdaftar. Silakan klik "Daftar Akun" untuk membuat akun baru.', true);
         } else {
             const msg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
             showNotice(msg || 'Gagal masuk.', true);
@@ -107,7 +106,7 @@ async function handleSignUp(email, password, formEl) {
             redirectUrl: PWA_BASE_URL
         });
 
-        showNotice('Link verifikasi dikirim ke email Anda! Silakan cek kotak masuk/spam.');
+        showNotice('Link verifikasi telah dikirim ke email Anda. Silakan periksa inbox/spam.');
         startPolling(signUp);
 
     } catch (signUpErr) {
@@ -118,7 +117,7 @@ async function handleSignUp(email, password, formEl) {
         if (code === 'form_password_length_too_short') {
             showNotice('Pendaftaran gagal: Kata sandi minimal 8 karakter.', true);
         } else if (code === 'form_identifier_exists') {
-            showNotice('Email ini sudah terdaftar. Silakan geser ke form Masuk.', true);
+            showNotice('Email ini sudah terdaftar. Silakan klik "Masuk".', true);
         } else {
             const errorDetail = firstErr ? firstErr.longMessage : signUpErr.message;
             showNotice('Gagal mendaftar: ' + errorDetail, true);
@@ -126,7 +125,7 @@ async function handleSignUp(email, password, formEl) {
     }
 }
 
-// 5. POLLING STATUS VERIFIKASI
+// 5. POLLING STATUS VERIFIKASI EMAIL
 function startPolling(signUpObject) {
     const interval = setInterval(async () => {
         try {
@@ -143,16 +142,34 @@ function startPolling(signUpObject) {
     }, 2500);
 }
 
-// 6. DETEKSI DUA FORM OTOMATIS (SLIDE UI)
+// 6. INITIALIZER (SLIDER TOGGLE & FORM SUBMIT)
 document.addEventListener('DOMContentLoaded', () => {
-    // Ambil semua form yang ada di HTML (baik form Sign In maupun Form Sign Up)
+    const container = document.querySelector('.container') || document.body;
+    const registerBtn = document.querySelector('.register-btn');
+    const loginBtn = document.querySelector('.login-btn');
+
+    // A. PEMICU ANIMASI SLIDE CSS
+    if (registerBtn) {
+        registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            container.classList.add('active');
+        });
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            container.classList.remove('active');
+        });
+    }
+
+    // B. PENANGANAN SUBMIT SEMUA FORM
     const forms = document.querySelectorAll('form');
 
     forms.forEach((form) => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Pindai input di dalam form yang DITEKAN tombol submit-nya
             const inputs = form.querySelectorAll('input');
             let emailVal = '';
             let passwordVal = '';
@@ -175,17 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Tentukan jenis form berdasarkan ID/Class/Teks Tombol
-            const formText = form.textContent.toLowerCase();
-            const formId = (form.id || '').toLowerCase();
-            
-            const isSignUpForm = formId.includes('signup') || formId.includes('daftar') || formText.includes('daftar');
+            // Deteksi jenis form berdasarkan posisi slider atau ID
+            const isSignUp = container.classList.contains('active') || 
+                             form.id.includes('register') || 
+                             form.id.includes('signup');
 
-            if (isSignUpForm) {
-                // Jalankan Pendaftaran jika form yang di-submit adalah form Daftar
+            if (isSignUp) {
                 await handleSignUp(emailVal, passwordVal, form);
             } else {
-                // Jalankan Login jika form yang di-submit adalah form Masuk
                 await handleSignIn(emailVal, passwordVal, form);
             }
         });
