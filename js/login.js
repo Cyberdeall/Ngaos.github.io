@@ -1,155 +1,164 @@
 // ==========================================
-// CONFIGURATION & INITIALIZATION
+// KONFIGURASI PWA NGAOS AL FALAH PLOSO
 // ==========================================
 const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Ganti dengan Publishable Key Anda jika belum
-const PWA_URL = 'https://cyberdeall.github.io/Ngaos/';
-const REDIRECT_AFTER_LOGIN = 'https://cyberdeall.github.io/Ngaos/player.html';
+const PWA_BASE_URL = 'https://cyberdeall.github.io/Ngaos/';
+const PLAYER_PAGE = 'https://cyberdeall.github.io/Ngaos/player.html';
 
 let clerk;
 
-// Inisialisasi Clerk SDK
+// 1. INISIALISASI CLERK SDK
 window.addEventListener('load', async () => {
     try {
         if (!window.Clerk) {
-            console.error('Clerk SDK belum dimuat di HTML.');
+            showNotice('SDK Clerk gagal dimuat! Periksa koneksi atau script HTML.', true);
             return;
         }
         
         clerk = window.Clerk;
         await clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
 
-        // Jika pengguna sudah login, langsung lempar ke halaman player
+        // Jika user sudah terautentikasi, langsung arahkan ke Player
         if (clerk.user) {
-            window.location.href = REDIRECT_AFTER_LOGIN;
+            window.location.href = PLAYER_PAGE;
         }
     } catch (err) {
-        console.error('Gagal menginisialisasi Clerk:', err);
+        showNotice('Gagal inisialisasi Clerk: ' + err.message, true);
     }
 });
 
-// ==========================================
-// HELPER FUNCTIONS (UI & NOTIFICATION)
-// ==========================================
-function showMessage(msg, isError = false) {
+// 2. HELPER NOTIFIKASI (ANTI-BISU)
+function showNotice(msg, isError = false) {
     const statusEl = document.getElementById('status-message');
+    
     if (statusEl) {
         statusEl.textContent = msg;
         statusEl.style.color = isError ? '#ff4d4d' : '#00e676';
         statusEl.style.display = 'block';
     } else {
-        alert(msg);
+        // Fallback jika tag HTML penampung pesan belum terpasang
+        alert((isError ? '❌ ERROR: ' : '✅ INFO: ') + msg);
     }
 }
 
-function setLoading(isLoading) {
-    const btnSubmit = document.getElementById('btn-submit');
-    if (btnSubmit) {
-        btnSubmit.disabled = isLoading;
-        btnSubmit.textContent = isLoading ? 'Memproses...' : 'Lanjutkan';
+function setBtnLoading(isLoading) {
+    const btn = document.getElementById('btn-submit') || document.querySelector('button[type="submit"]');
+    if (btn) {
+        btn.disabled = isLoading;
+        btn.textContent = isLoading ? 'Memproses...' : 'Masuk / Daftar';
     }
 }
 
-// ==========================================
-// MAIN AUTHENTICATION FLOW
-// ==========================================
+// 3. FUNGSI UTAMA AUTHENTICATION (INTELLIGENT FLOW)
+async function processAuth(email, password) {
+    setBtnLoading(true);
+    showNotice('Memeriksa kredensial...');
 
-// 1. FUNGSI PENDAFTARAN (SIGN UP)
-async function handleSignUp(email, password) {
-    setLoading(true);
     try {
-        // Buat sesi pendaftaran di Clerk
-        const signUp = await clerk.client.signUp.create({
-            emailAddress: email,
-            password: password,
-        });
-
-        // Kirim link verifikasi ke email
-        const verification = await signUp.prepareEmailAddressVerification({
-            strategy: 'email_link',
-            redirectUrl: PWA_URL
-        });
-
-        showMessage('Link verifikasi telah dikirim! Silakan periksa inbox email Anda.');
-
-        // Jalankan Polling untuk mendeteksi ketika pengguna mengklik link di email
-        startVerificationPolling(signUp);
-
-    } catch (err) {
-        setLoading(false);
-        const errorMsg = err.errors ? err.errors[0].longMessage : err.message;
-        showMessage(`Gagal Mendaftar: ${errorMsg}`, true);
-    }
-}
-
-// 2. FUNGSI MASUK (SIGN IN)
-async function handleSignIn(email, password) {
-    setLoading(true);
-    try {
+        // LANGKAH 1: Coba Sign In terlebih dahulu (Untuk akun yang sudah ada di dasbor)
         const signIn = await clerk.client.signIn.create({
             identifier: email,
             password: password,
         });
 
         if (signIn.status === 'complete') {
+            showNotice('Login Berhasil! Mengalihkan...');
             await clerk.setActive({ session: signIn.createdSessionId });
-            window.location.href = REDIRECT_AFTER_LOGIN;
+            window.location.href = PLAYER_PAGE;
+            return;
         } else {
-            // Jika butuh verifikasi tambahan
-            showMessage('Diperlukan verifikasi tambahan.', true);
-            setLoading(false);
+            showNotice('Status login: ' + signIn.status + '. Memerlukan verifikasi lanjutan.', true);
         }
-    } catch (err) {
-        setLoading(false);
-        const errorMsg = err.errors ? err.errors[0].longMessage : err.message;
-        showMessage(`Gagal Login: ${errorMsg}`, true);
+
+    } catch (signInErr) {
+        // Ambil kode error dari Clerk
+        const errorCode = signInErr.errors ? signInErr.errors[0].code : '';
+
+        // Jika error karena pengguna belum terdaftar, otomatis alihkan ke Sign Up
+        if (errorCode === 'form_identifier_not_found') {
+            showNotice('Akun belum ada, mencoba membuat akun baru...');
+            await handleSignUp(email, password);
+        } else {
+            // Jika error karena password salah atau hal lain, tampilkan error aslinya
+            setBtnLoading(false);
+            const errorDetail = signInErr.errors ? signInErr.errors[0].longMessage : signInErr.message;
+            showNotice(errorDetail, true);
+        }
     }
 }
 
-// 3. POLLING DETECTOR (Mencegah Infinite Loading)
-function startVerificationPolling(signUpObject) {
-    const interval = setInterval(async () => {
-        try {
-            // Reload status pendaftaran dari server
-            await signUpObject.reload();
+// 4. FUNGSI SIGN UP (JIKA AKUN BELUM TERDAFTAR)
+async function handleSignUp(email, password) {
+    try {
+        const signUp = await clerk.client.signUp.create({
+            emailAddress: email,
+            password: password,
+        });
 
-            if (signUpObject.status === 'complete') {
-                clearInterval(interval);
-                showMessage('Verifikasi berhasil! Mengalihkan...');
-                
-                // Aktifkan sesi login dan pindahkan halaman
-                await clerk.setActive({ session: signUpObject.createdSessionId });
-                window.location.href = REDIRECT_AFTER_LOGIN;
-            }
-        } catch (err) {
-            console.error('Error saat mengecek status verifikasi:', err);
-        }
-    }, 2500); // Cek setiap 2.5 detik
+        // Kirim link verifikasi email
+        await signUp.prepareEmailAddressVerification({
+            strategy: 'email_link',
+            redirectUrl: PWA_BASE_URL
+        });
+
+        showNotice('Link verifikasi dikirim! Silakan cek email Anda (atau gunakan kode 424242 jika di Test Mode).');
+        
+        // Polling untuk mendeteksi penyelesaian verifikasi
+        startPolling(signUp);
+
+    } catch (signUpErr) {
+        setBtnLoading(false);
+        const errorDetail = signUpErr.errors ? signUpErr.errors[0].longMessage : signUpErr.message;
+        showNotice('Gagal Pendaftaran: ' + errorDetail, true);
+    }
 }
 
-// ==========================================
-// EVENT LISTENER FORM
-// ==========================================
+// 5. POLLING DETECTOR (Mencegah Stagnan/Infinite Loading)
+function startPolling(signUpObject) {
+    const interval = setInterval(async () => {
+        try {
+            await signUpObject.reload();
+            if (signUpObject.status === 'complete') {
+                clearInterval(interval);
+                showNotice('Verifikasi Selesai! Mengalihkan...');
+                await clerk.setActive({ session: signUpObject.createdSessionId });
+                window.location.href = PLAYER_PAGE;
+            }
+        } catch (err) {
+            console.error('Polling error:', err);
+        }
+    }, 2500);
+}
+
+// 6. EVENT LISTENER FORM
 document.addEventListener('DOMContentLoaded', () => {
-    const authForm = document.getElementById('auth-form');
+    // Cari form berdasarkan ID atau tag <form> pertama di halaman
+    const authForm = document.getElementById('auth-form') || document.querySelector('form');
     
     if (authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email-input').value.trim();
-            const password = document.getElementById('password-input').value.trim();
-            const isSignUp = document.getElementById('mode-toggle')?.checked; // Asumsi toggle checkbox untuk switch Sign In / Sign Up
+            // Cari elemen input email & password secara fleksibel
+            const emailInput = document.getElementById('email-input') || document.querySelector('input[type="email"]');
+            const passwordInput = document.getElementById('password-input') || document.querySelector('input[type="password"]');
 
-            if (!email || !password) {
-                showMessage('Harap isi email dan kata sandi.', true);
+            if (!emailInput || !passwordInput) {
+                alert('ERROR: Input Email atau Password tidak ditemukan di elemen HTML!');
                 return;
             }
 
-            if (isSignUp) {
-                await handleSignUp(email, password);
-            } else {
-                await handleSignIn(email, password);
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showNotice('Mohon isi email dan kata sandi terlebih dahulu.', true);
+                return;
             }
+
+            await processAuth(email, password);
         });
+    } else {
+        console.error('Elemen <form> tidak ditemukan di HTML.');
     }
 });
