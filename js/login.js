@@ -1,45 +1,57 @@
-// ==========================================
-// KONFIGURASI PWA NGAOS AL FALAH PLOSO
-// ==========================================
-const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Masukkan Publishable Key Clerk Anda
-const PWA_BASE_URL = 'https://cyberdeall.github.io/Ngaos/';
-const PLAYER_PAGE = 'https://cyberdeall.github.io/Ngaos/player.html';
+/**
+ * ============================================================================
+ * PWA NGAOS AL FALAH PLOSO - ENTERPRISE AUTHENTICATION ENGINE (v4.0)
+ * ============================================================================
+ */
 
-let clerk;
-let currentSignUpObject = null; // Menyimpan objek SignUp untuk verifikasi OTP
+// 1. KONFIGURASI UTAMA
+const CONFIG = {
+    CLERK_PUBLISHABLE_KEY: 'pk_test_...', // Ganti dengan Publishable Key Anda
+    BASE_URL: window.location.origin + window.location.pathname,
+    REDIRECT_TARGET: './player.html'
+};
 
-// 1. INISIALISASI CLERK SDK
+// 2. STATE MANAGEMENT FORM
+const AuthState = {
+    clerk: null,
+    signUpInstance: null,
+    signInInstance: null,
+    activeMode: 'SIGN_IN', // 'SIGN_IN' | 'SIGN_UP'
+    step: 'CREDENTIALS'     // 'CREDENTIALS' | 'OTP_VERIFICATION'
+};
+
+// 3. INISIALISASI DENGAN GUARD SESSION
 window.addEventListener('load', async () => {
     try {
         if (!window.Clerk) {
-            showNotice('SDK Clerk tidak ditemukan di HTML!', true);
+            showNotice('SDK Autentikasi gagal dimuat dari server.', true);
             return;
         }
-        
-        clerk = window.Clerk;
-        await clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
 
-        if (clerk.user) {
-            window.location.href = PLAYER_PAGE;
+        AuthState.clerk = window.Clerk;
+        await AuthState.clerk.load({ publishableKey: CONFIG.CLERK_PUBLISHABLE_KEY });
+
+        // Jika pengguna sudah terautentikasi, alihkan langsung
+        if (AuthState.clerk.user) {
+            window.location.replace(CONFIG.REDIRECT_TARGET);
         }
     } catch (err) {
-        showNotice('Gagal muat sistem autentikasi: ' + err.message, true);
+        console.error('[Auth Init Error]:', err);
+        showNotice('Gagal menginisialisasi sistem keamanan.', true);
     }
 });
 
-// 2. HELPER NOTIFIKASI UNIVERSAL
+/**
+ * UTILITY: System Notice & UI Helpers
+ */
 function showNotice(msg, isError = false, formEl = null) {
-    let statusEl = null;
-
-    if (formEl) {
-        statusEl = formEl.querySelector('#status-message, .status-message');
-    }
+    let statusEl = formEl ? formEl.querySelector('#status-message, .status-message') : null;
 
     if (!statusEl) {
-        const allStatusEls = document.querySelectorAll('#status-message, .status-message');
-        for (let el of allStatusEls) {
-            const parentPanel = el.closest('.toggle-panel, form, div');
-            if (!parentPanel || window.getComputedStyle(parentPanel).display !== 'none') {
+        const allNoticeEls = document.querySelectorAll('#status-message, .status-message');
+        for (let el of allNoticeEls) {
+            const parent = el.closest('.toggle-panel, form, div');
+            if (!parent || window.getComputedStyle(parent).display !== 'none') {
                 statusEl = el;
                 break;
             }
@@ -49,195 +61,219 @@ function showNotice(msg, isError = false, formEl = null) {
     if (!statusEl && formEl) {
         statusEl = document.createElement('div');
         statusEl.id = 'status-message';
-        statusEl.style.cssText = 'margin-top: 15px; font-size: 13px; font-weight: 600; text-align: center;';
+        statusEl.style.cssText = 'margin-top: 15px; font-size: 13px; font-weight: 600; text-align: center; transition: all 0.3s ease;';
         formEl.appendChild(statusEl);
     }
 
     if (statusEl) {
         statusEl.textContent = msg;
-        statusEl.style.color = isError ? '#ff4d4d' : '#00e676';
+        statusEl.style.color = isError ? '#ff5252' : '#00e676';
         statusEl.style.display = 'block';
+    }
+}
+
+function setButtonLoading(formEl, isLoading, textOverride = null) {
+    const submitBtn = formEl.querySelector('button[type="submit"]');
+    if (!submitBtn) return;
+
+    submitBtn.disabled = isLoading;
+    submitBtn.style.opacity = isLoading ? '0.65' : '1';
+    submitBtn.style.cursor = isLoading ? 'wait' : 'pointer';
+
+    if (isLoading) {
+        submitBtn.textContent = 'Memproses...';
+    } else if (textOverride) {
+        submitBtn.textContent = textOverride;
     } else {
-        alert((isError ? '❌ ERROR: ' : '✅ INFO: ') + msg);
+        submitBtn.textContent = AuthState.activeMode === 'SIGN_UP' ? 'DAFTAR SEKARANG' : 'MASUK';
     }
 }
 
-function setBtnLoading(formElement, isLoading, defaultText = 'KIRIM') {
-    const btn = formElement.querySelector('button[type="submit"]');
-    if (btn) {
-        btn.disabled = isLoading;
-        btn.textContent = isLoading ? 'Memproses...' : defaultText;
-    }
-}
-
-// 3. FUNGSI LOGIN (SIGN IN)
-async function handleSignIn(email, password, formEl) {
-    const btn = formEl.querySelector('button[type="submit"]');
-    const originalText = btn ? btn.textContent : 'MASUK';
-    
-    setBtnLoading(formEl, true);
-    showNotice('Memeriksa akun...', false, formEl);
+/**
+ * CORE LOGIC: Sign In Process
+ */
+async function executeSignIn(email, password, formEl) {
+    setButtonLoading(formEl, true);
+    showNotice('Memverifikasi kredensial...', false, formEl);
 
     try {
-        const signIn = await clerk.client.signIn.create({
+        const signIn = await AuthState.clerk.client.signIn.create({
             identifier: email,
-            password: password,
+            password: password
         });
 
+        AuthState.signInInstance = signIn;
+
         if (signIn.status === 'complete') {
-            showNotice('Login Berhasil! Mengalihkan...', false, formEl);
-            await clerk.setActive({ session: signIn.createdSessionId });
-            window.location.href = PLAYER_PAGE;
+            showNotice('Autentikasi berhasil! Mengalihkan...', false, formEl);
+            await AuthState.clerk.setActive({ session: signIn.createdSessionId });
+            window.location.replace(CONFIG.REDIRECT_TARGET);
         } else if (signIn.status === 'needs_client_trust' || signIn.status === 'needs_first_factor') {
-            if (signIn.createdSessionId) {
-                await clerk.setActive({ session: signIn.createdSessionId });
-                window.location.href = PLAYER_PAGE;
-            } else {
-                showNotice('Silakan periksa email Anda untuk mengonfirmasi perangkat ini.', true, formEl);
-                setBtnLoading(formEl, false, originalText);
+            // Penanganan Tantangan Perangkat Baru (Device Trust / 2FA)
+            try {
+                await signIn.prepareFirstFactor({ strategy: 'email_code' });
+                showNotice('Perangkat baru terdeteksi. Masukkan kode 6 digit dari email Anda:', false, formEl);
+                renderOtpUI(formEl, 'SIGN_IN_OTP');
+            } catch (prepErr) {
+                showNotice('Silakan buka email Anda untuk mengonfirmasi akses perangkat ini.', true, formEl);
+                setButtonLoading(formEl, false, 'MASUK');
             }
         } else {
-            showNotice('Status login: ' + signIn.status, true, formEl);
-            setBtnLoading(formEl, false, originalText);
+            showNotice(`Tindakan diperlukan: Status [${signIn.status}]`, true, formEl);
+            setButtonLoading(formEl, false, 'MASUK');
         }
-
     } catch (err) {
-        setBtnLoading(formEl, false, originalText);
-        const firstErr = (err.errors && err.errors.length > 0) ? err.errors[0] : null;
-        const code = firstErr ? firstErr.code : '';
-
-        if (code === 'form_password_incorrect') {
-            showNotice('Kata sandi yang Anda masukkan salah.', true, formEl);
-        } else if (code === 'form_identifier_not_found') {
-            showNotice('Email belum terdaftar. Silakan klik "Daftar Akun".', true, formEl);
-        } else {
-            const msg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
-            showNotice(msg || 'Gagal masuk.', true, formEl);
-        }
+        setButtonLoading(formEl, false, 'MASUK');
+        handleAuthError(err, formEl);
     }
 }
 
-// 4. FUNGSI DAFTAR (SIGN UP) + TAMPILKAN INPUT OTP
-async function handleSignUp(email, password, formEl) {
-    const btn = formEl.querySelector('button[type="submit"]');
-    const originalText = btn ? btn.textContent : 'DAFTAR';
-
-    setBtnLoading(formEl, true);
+/**
+ * CORE LOGIC: Sign Up Process
+ */
+async function executeSignUp(email, password, formEl) {
+    setButtonLoading(formEl, true);
     showNotice('Membuat akun baru...', false, formEl);
 
     try {
-        const signUp = await clerk.client.signUp.create({
+        const signUp = await AuthState.clerk.client.signUp.create({
             emailAddress: email,
-            password: password,
+            password: password
         });
 
-        currentSignUpObject = signUp;
+        AuthState.signUpInstance = signUp;
 
-        // Meminta kode OTP
+        // Strategi Verifikasi Email
         try {
             await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-        } catch (stratErr) {
-            await signUp.prepareEmailAddressVerification({ strategy: 'email_link', redirectUrl: PWA_BASE_URL });
+        } catch (codeErr) {
+            await signUp.prepareEmailAddressVerification({ strategy: 'email_link', redirectUrl: CONFIG.BASE_URL });
         }
 
-        showNotice('Kode OTP dikirim! Masukkan kode 6 digit dari email Anda di bawah:', false, formEl);
-        
-        // Ubah tampilan form pendaftaran menjadi Input OTP
-        renderOtpInputUI(formEl);
+        showNotice('Kode verifikasi telah dikirim ke email Anda. Silakan periksa inbox/spam:', false, formEl);
+        renderOtpUI(formEl, 'SIGN_UP_OTP');
 
-    } catch (signUpErr) {
-        setBtnLoading(formEl, false, originalText);
-        const firstErr = (signUpErr.errors && signUpErr.errors.length > 0) ? signUpErr.errors[0] : null;
-        const code = firstErr ? firstErr.code : '';
-
-        if (code === 'form_password_length_too_short') {
-            showNotice('Kata sandi minimal 8 karakter.', true, formEl);
-        } else if (code === 'form_identifier_exists') {
-            showNotice('Email ini sudah terdaftar. Silakan masuk.', true, formEl);
-        } else {
-            const errorDetail = firstErr ? firstErr.longMessage : signUpErr.message;
-            showNotice('Gagal mendaftar: ' + errorDetail, true, formEl);
-        }
+    } catch (err) {
+        setButtonLoading(formEl, false, 'DAFTAR SEKARANG');
+        handleAuthError(err, formEl);
     }
 }
 
-// 5. RENDERING UI INPUT OTP DINAMIS
-function renderOtpInputUI(formEl) {
-    // Sembunyikan elemen input biasa
-    const allInputs = formEl.querySelectorAll('input');
-    allInputs.forEach(inp => {
-        if (inp.type !== 'hidden') inp.style.display = 'none';
-    });
+/**
+ * DYNAMIC OTP UI RENDERER
+ */
+function renderOtpUI(formEl, mode) {
+    AuthState.step = 'OTP_VERIFICATION';
+    formEl.dataset.step = mode;
 
-    // Buat input OTP jika belum ada
+    // Sembunyikan input biasa
+    const inputs = formEl.querySelectorAll('input:not([type="hidden"])');
+    inputs.forEach(input => input.style.display = 'none');
+
     let otpInput = formEl.querySelector('#otp-code-input');
     if (!otpInput) {
         otpInput = document.createElement('input');
         otpInput.id = 'otp-code-input';
         otpInput.type = 'text';
-        otpInput.placeholder = 'Masukkan 6 Digit Kode OTP';
+        otpInput.placeholder = '• • • • • •';
         otpInput.maxLength = 6;
         otpInput.required = true;
-        otpInput.style.cssText = 'width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; letter-spacing: 4px; font-weight: bold; background: #23272a; color: #fff;';
+        otpInput.autocomplete = 'one-time-code';
+        otpInput.style.cssText = 'width: 100%; padding: 14px; margin: 15px 0; border-radius: 12px; border: 2px solid #00e676; text-align: center; font-size: 22px; letter-spacing: 6px; font-weight: 700; background: #181b1d; color: #ffffff; outline: none; box-sizing: border-box;';
         
-        // Sisipkan sebelum tombol submit
         const submitBtn = formEl.querySelector('button[type="submit"]');
         formEl.insertBefore(otpInput, submitBtn);
     } else {
         otpInput.style.display = 'block';
+        otpInput.value = '';
     }
 
-    // Ubah tombol Submit menjadi "VERIFIKASI OTP"
-    const submitBtn = formEl.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'VERIFIKASI OTP';
-        formEl.dataset.step = 'otp_verification'; // Tandai form dalam mode OTP
-    }
+    otpInput.focus();
+    setButtonLoading(formEl, false, 'VERIFIKASI KODE');
 }
 
-// 6. FUNGSI VERIFIKASI KODE OTP
-async function handleVerifyOtp(otpCode, formEl) {
-    setBtnLoading(formEl, true, 'VERIFIKASI OTP');
-    showNotice('Memeriksa kode OTP...', false, formEl);
+/**
+ * OTP VERIFICATION HANDLER
+ */
+async function executeOtpVerification(code, formEl, mode) {
+    setButtonLoading(formEl, true, 'VERIFIKASI KODE');
+    showNotice('Memvalidasi kode OTP...', false, formEl);
 
     try {
-        if (!currentSignUpObject) {
-            showNotice('Sesi habis. Silakan ulangi pendaftaran.', true, formEl);
-            setBtnLoading(formEl, false, 'VERIFIKASI OTP');
-            return;
+        let sessionId = null;
+
+        if (mode === 'SIGN_UP_OTP') {
+            if (!AuthState.signUpInstance) throw new Error('Sesi pendaftaran tidak ditemukan.');
+            const res = await AuthState.signUpInstance.attemptEmailAddressVerification({ code });
+            if (res.status === 'complete') sessionId = res.createdSessionId;
+        } else if (mode === 'SIGN_IN_OTP') {
+            if (!AuthState.signInInstance) throw new Error('Sesi masuk tidak ditemukan.');
+            const res = await AuthState.signInInstance.attemptFirstFactor({ strategy: 'email_code', code });
+            if (res.status === 'complete') sessionId = res.createdSessionId;
         }
 
-        const completeSignUp = await currentSignUpObject.attemptEmailAddressVerification({
-            code: otpCode
-        });
-
-        if (completeSignUp.status === 'complete') {
-            showNotice('Verifikasi Berhasil! Mengalihkan...', false, formEl);
-            await clerk.setActive({ session: completeSignUp.createdSessionId });
-            window.location.href = PLAYER_PAGE;
+        if (sessionId) {
+            showNotice('Verifikasi berhasil! Menyiapkan dasbor...', false, formEl);
+            await AuthState.clerk.setActive({ session: sessionId });
+            window.location.replace(CONFIG.REDIRECT_TARGET);
         } else {
-            showNotice('Status verifikasi: ' + completeSignUp.status, true, formEl);
-            setBtnLoading(formEl, false, 'VERIFIKASI OTP');
+            showNotice('Status verifikasi belum selesai.', true, formEl);
+            setButtonLoading(formEl, false, 'VERIFIKASI KODE');
         }
 
     } catch (err) {
-        setBtnLoading(formEl, false, 'VERIFIKASI OTP');
-        const firstErr = (err.errors && err.errors.length > 0) ? err.errors[0] : null;
-        const msg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
-        showNotice('Kode OTP Salah/Kadaluarsa: ' + msg, true, formEl);
+        setButtonLoading(formEl, false, 'VERIFIKASI KODE');
+        handleAuthError(err, formEl);
     }
 }
 
-// 7. INITIALIZER (SLIDER TOGGLE & FORM SUBMIT)
+/**
+ * ERROR DICTIONARY & TRANSLATION
+ */
+function handleAuthError(err, formEl) {
+    const firstErr = (err.errors && err.errors.length > 0) ? err.errors[0] : null;
+    const code = firstErr ? firstErr.code : '';
+    const rawMsg = firstErr ? (firstErr.longMessage || firstErr.message) : err.message;
+
+    let userFriendlyMsg = 'Terjadi kesalahan pada sistem autentikasi.';
+
+    switch (code) {
+        case 'form_password_incorrect':
+            userFriendlyMsg = 'Kata sandi yang Anda masukkan tidak sesuai.';
+            break;
+        case 'form_identifier_not_found':
+            userFriendlyMsg = 'Email tidak terdaftar. Silakan gunakan menu pendaftaran.';
+            break;
+        case 'form_password_length_too_short':
+            userFriendlyMsg = 'Kata sandi terlalu pendek (minimal 8 karakter).';
+            break;
+        case 'form_identifier_exists':
+            userFriendlyMsg = 'Email ini sudah terdaftar. Silakan klik tombol Masuk.';
+            break;
+        case 'incorrect_code':
+            userFriendlyMsg = 'Kode OTP yang Anda masukkan salah atau sudah expired.';
+            break;
+        default:
+            userFriendlyMsg = rawMsg || userFriendlyMsg;
+            break;
+    }
+
+    showNotice(userFriendlyMsg, true, formEl);
+}
+
+/**
+ * INITIALIZATION & EVENT BINDINGS
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.container') || document.body;
     const registerBtn = document.querySelector('.register-btn');
     const loginBtn = document.querySelector('.login-btn');
 
+    // Control Slide Panel UI
     if (registerBtn) {
         registerBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            AuthState.activeMode = 'SIGN_UP';
             container.classList.add('active');
         });
     }
@@ -245,29 +281,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginBtn) {
         loginBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            AuthState.activeMode = 'SIGN_IN';
             container.classList.remove('active');
         });
     }
 
+    // Attach Event Handlers to Forms
     const forms = document.querySelectorAll('form');
-
     forms.forEach((form) => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Jika form sedang dalam mode verifikasi OTP
-            if (form.dataset.step === 'otp_verification') {
+            const currentStep = form.dataset.step;
+
+            // Handle Verification Step
+            if (currentStep === 'SIGN_UP_OTP' || currentStep === 'SIGN_IN_OTP') {
                 const otpInput = form.querySelector('#otp-code-input');
-                const otpCode = otpInput ? otpInput.value.trim() : '';
-                if (!otpCode) {
-                    showNotice('Masukkan 6 digit kode OTP!', true, form);
+                const otpVal = otpInput ? otpInput.value.trim() : '';
+
+                if (!otpVal || otpVal.length < 6) {
+                    showNotice('Masukkan 6 digit kode OTP dengan lengkap.', true, form);
                     return;
                 }
-                await handleVerifyOtp(otpCode, form);
+                await executeOtpVerification(otpVal, form, currentStep);
                 return;
             }
 
-            // Pembacaan input Email & Password standar
+            // Agnostic Input Scanner
             const inputs = form.querySelectorAll('input');
             let emailVal = '';
             let passwordVal = '';
@@ -275,31 +315,35 @@ document.addEventListener('DOMContentLoaded', () => {
             inputs.forEach(input => {
                 const type = (input.getAttribute('type') || '').toLowerCase();
                 const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
-                const idName = (input.id + ' ' + input.name).toLowerCase();
+                const keyName = (input.id + ' ' + input.name).toLowerCase();
 
-                if (type === 'email' || placeholder.includes('email') || idName.includes('email')) {
+                if (type === 'email' || placeholder.includes('email') || keyName.includes('email')) {
                     emailVal = input.value.trim();
                 }
-                if (type === 'password' || placeholder.includes('sandi') || placeholder.includes('pass') || idName.includes('pass')) {
+                if (type === 'password' || placeholder.includes('sandi') || placeholder.includes('pass') || keyName.includes('pass')) {
                     passwordVal = input.value.trim();
                 }
             });
 
             if (!emailVal || !passwordVal) {
-                showNotice('Mohon isi email dan kata sandi terlebih dahulu.', true, form);
+                showNotice('Harap isi email dan kata sandi Anda.', true, form);
                 return;
             }
 
-            const isSignUp = container.classList.contains('active') || 
-                             form.id.includes('register') || 
-                             form.id.includes('signup') ||
-                             form.closest('.sign-up') !== null;
+            // Determine Context
+            const isSignUpForm = container.classList.contains('active') || 
+                                 form.id.includes('register') || 
+                                 form.id.includes('signup') ||
+                                 form.closest('.sign-up') !== null;
 
-            if (isSignUp) {
-                await handleSignUp(emailVal, passwordVal, form);
+            if (isSignUpForm) {
+                AuthState.activeMode = 'SIGN_UP';
+                await executeSignUp(emailVal, passwordVal, form);
             } else {
-                await handleSignIn(emailVal, passwordVal, form);
+                AuthState.activeMode = 'SIGN_IN';
+                await executeSignIn(emailVal, passwordVal, form);
             }
         });
     });
 });
+
