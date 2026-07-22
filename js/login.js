@@ -1,7 +1,7 @@
 // ==========================================
 // KONFIGURASI PWA NGAOS AL FALAH PLOSO
 // ==========================================
-const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Ganti dengan Publishable Key Anda jika belum
+const CLERK_PUBLISHABLE_KEY = 'pk_test_...'; // Ganti dengan Publishable Key Anda
 const PWA_BASE_URL = 'https://cyberdeall.github.io/Ngaos/';
 const PLAYER_PAGE = 'https://cyberdeall.github.io/Ngaos/player.html';
 
@@ -11,32 +11,29 @@ let clerk;
 window.addEventListener('load', async () => {
     try {
         if (!window.Clerk) {
-            showNotice('SDK Clerk gagal dimuat! Periksa koneksi atau script HTML.', true);
+            showNotice('SDK Clerk tidak ditemukan di HTML!', true);
             return;
         }
         
         clerk = window.Clerk;
         await clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
 
-        // Jika user sudah terautentikasi, langsung arahkan ke Player
         if (clerk.user) {
             window.location.href = PLAYER_PAGE;
         }
     } catch (err) {
-        showNotice('Gagal inisialisasi Clerk: ' + err.message, true);
+        showNotice('Gagal muat sistem autentikasi: ' + err.message, true);
     }
 });
 
 // 2. HELPER NOTIFIKASI (ANTI-BISU)
 function showNotice(msg, isError = false) {
     const statusEl = document.getElementById('status-message');
-    
     if (statusEl) {
         statusEl.textContent = msg;
         statusEl.style.color = isError ? '#ff4d4d' : '#00e676';
         statusEl.style.display = 'block';
     } else {
-        // Fallback jika tag HTML penampung pesan belum terpasang
         alert((isError ? '❌ ERROR: ' : '✅ INFO: ') + msg);
     }
 }
@@ -45,17 +42,17 @@ function setBtnLoading(isLoading) {
     const btn = document.getElementById('btn-submit') || document.querySelector('button[type="submit"]');
     if (btn) {
         btn.disabled = isLoading;
-        btn.textContent = isLoading ? 'Memproses...' : 'Masuk / Daftar';
+        btn.textContent = isLoading ? 'Memproses...' : 'MASUK';
     }
 }
 
-// 3. FUNGSI UTAMA AUTHENTICATION (INTELLIGENT FLOW)
+// 3. FUNGSI UTAMA AUTHENTICATION & PENANGANAN ERROR SPESIFIK
 async function processAuth(email, password) {
     setBtnLoading(true);
-    showNotice('Memeriksa kredensial...');
+    showNotice('Memeriksa akun...');
 
     try {
-        // LANGKAH 1: Coba Sign In terlebih dahulu (Untuk akun yang sudah ada di dasbor)
+        // Coba Login / Sign In
         const signIn = await clerk.client.signIn.create({
             identifier: email,
             password: password,
@@ -67,60 +64,86 @@ async function processAuth(email, password) {
             window.location.href = PLAYER_PAGE;
             return;
         } else {
-            showNotice('Status login: ' + signIn.status + '. Memerlukan verifikasi lanjutan.', true);
+            showNotice('Status login: ' + signIn.status, true);
+            setBtnLoading(false);
         }
 
-    } catch (signInErr) {
-        // Ambil kode error dari Clerk
-        const errorCode = signInErr.errors ? signInErr.errors[0].code : '';
+    } catch (err) {
+        setBtnLoading(false);
 
-        // Jika error karena pengguna belum terdaftar, otomatis alihkan ke Sign Up
-        if (errorCode === 'form_identifier_not_found') {
-            showNotice('Akun belum ada, mencoba membuat akun baru...');
-            await handleSignUp(email, password);
-        } else {
-            // Jika error karena password salah atau hal lain, tampilkan error aslinya
-            setBtnLoading(false);
-            const errorDetail = signInErr.errors ? signInErr.errors[0].longMessage : signInErr.message;
-            showNotice(errorDetail, true);
+        // Ambil kode error utama dari Clerk
+        const firstError = (err.errors && err.errors.length > 0) ? err.errors[0] : null;
+        const errorCode = firstError ? firstError.code : '';
+
+        // DIPERIKSA BERDASARKAN KASUS ERROR:
+
+        // KASUS A: Kata Sandi Salah
+        if (errorCode === 'form_password_incorrect') {
+            showNotice('Kata sandi yang Anda masukkan salah.', true);
+        } 
+        // KASUS B: Email Belum Terdaftar -> Alihkan ke Pendaftaran
+        else if (errorCode === 'form_identifier_not_found') {
+            showNotice('Email belum terdaftar. Mengalihkan ke proses pendaftaran...');
+            
+            // Eksekusi Pendaftaran Otomatis
+            setTimeout(() => {
+                handleSignUp(email, password);
+            }, 1200);
+        } 
+        // KASUS C: Format Email Salah
+        else if (errorCode === 'form_param_format_invalid') {
+            showNotice('Format alamat email tidak valid.', true);
+        }
+        // KASUS D: Error Lainnya dari Clerk
+        else {
+            const msg = firstError ? (firstError.longMessage || firstError.message) : err.message;
+            showNotice(msg || 'Gagal memproses permintaan.', true);
         }
     }
 }
 
-// 4. FUNGSI SIGN UP (JIKA AKUN BELUM TERDAFTAR)
+// 4. FUNGSI SIGN UP (JIKA EMAIL BELUM TERDAFTAR)
 async function handleSignUp(email, password) {
+    setBtnLoading(true);
+    showNotice('Membuat akun baru...');
+
     try {
         const signUp = await clerk.client.signUp.create({
             emailAddress: email,
             password: password,
         });
 
-        // Kirim link verifikasi email
         await signUp.prepareEmailAddressVerification({
             strategy: 'email_link',
             redirectUrl: PWA_BASE_URL
         });
 
-        showNotice('Link verifikasi dikirim! Silakan cek email Anda (atau gunakan kode 424242 jika di Test Mode).');
+        showNotice('Link verifikasi telah dikirim ke email Anda. Silakan periksa kotak masuk!');
         
-        // Polling untuk mendeteksi penyelesaian verifikasi
+        // Polling status verifikasi
         startPolling(signUp);
 
     } catch (signUpErr) {
         setBtnLoading(false);
-        const errorDetail = signUpErr.errors ? signUpErr.errors[0].longMessage : signUpErr.message;
-        showNotice('Gagal Pendaftaran: ' + errorDetail, true);
+        const firstErr = (signUpErr.errors && signUpErr.errors.length > 0) ? signUpErr.errors[0] : null;
+        
+        if (firstErr && firstErr.code === 'form_password_length_too_short') {
+            showNotice('Pendaftaran gagal: Kata sandi minimal 8 karakter.', true);
+        } else {
+            const errorDetail = firstErr ? firstErr.longMessage : signUpErr.message;
+            showNotice('Gagal mendaftar: ' + errorDetail, true);
+        }
     }
 }
 
-// 5. POLLING DETECTOR (Mencegah Stagnan/Infinite Loading)
+// 5. POLLING STATUS VERIFIKASI
 function startPolling(signUpObject) {
     const interval = setInterval(async () => {
         try {
             await signUpObject.reload();
             if (signUpObject.status === 'complete') {
                 clearInterval(interval);
-                showNotice('Verifikasi Selesai! Mengalihkan...');
+                showNotice('Verifikasi berhasil! Mengalihkan...');
                 await clerk.setActive({ session: signUpObject.createdSessionId });
                 window.location.href = PLAYER_PAGE;
             }
@@ -130,35 +153,43 @@ function startPolling(signUpObject) {
     }, 2500);
 }
 
-// 6. EVENT LISTENER FORM
+// 6. EVENT LISTENER FORM (MEMBACA VALUE INPUT DENGAN PRESISI)
 document.addEventListener('DOMContentLoaded', () => {
-    // Cari form berdasarkan ID atau tag <form> pertama di halaman
     const authForm = document.getElementById('auth-form') || document.querySelector('form');
     
     if (authForm) {
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Cari elemen input email & password secara fleksibel
-            const emailInput = document.getElementById('email-input') || document.querySelector('input[type="email"]');
-            const passwordInput = document.getElementById('password-input') || document.querySelector('input[type="password"]');
+            // Pindai semua tag input di dalam form
+            const inputs = authForm.querySelectorAll('input');
+            let emailVal = '';
+            let passwordVal = '';
 
-            if (!emailInput || !passwordInput) {
-                alert('ERROR: Input Email atau Password tidak ditemukan di elemen HTML!');
-                return;
-            }
+            inputs.forEach(input => {
+                const type = (input.getAttribute('type') || '').toLowerCase();
+                const placeholder = (input.getAttribute('placeholder') || '').toLowerCase();
+                const idName = (input.id + ' ' + input.name).toLowerCase();
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+                // Cari input email
+                if (type === 'email' || placeholder.includes('email') || idName.includes('email')) {
+                    emailVal = input.value.trim();
+                }
+                // Cari input password
+                if (type === 'password' || placeholder.includes('sandi') || placeholder.includes('pass') || idName.includes('pass')) {
+                    passwordVal = input.value.trim();
+                }
+            });
 
-            if (!email || !password) {
+            // Validasi keberadaan isi
+            if (!emailVal || !passwordVal) {
                 showNotice('Mohon isi email dan kata sandi terlebih dahulu.', true);
                 return;
             }
 
-            await processAuth(email, password);
+            // Jalankan alur autentikasi pintar
+            await processAuth(emailVal, passwordVal);
         });
-    } else {
-        console.error('Elemen <form> tidak ditemukan di HTML.');
     }
 });
+
