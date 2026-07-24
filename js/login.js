@@ -1,34 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('container');
-    const toRegisterBtn = document.getElementById('toRegisterBtn');
-    const toLoginBtn = document.getElementById('toLoginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const loginBtn = document.getElementById('loginBtn');
 
-    const signUpForm = document.getElementById('signUpForm');
     const signInForm = document.getElementById('signInForm');
+    const signUpForm = document.getElementById('signUpForm');
 
-    const signUpMsg = document.getElementById('signUpMsg');
     const signInMsg = document.getElementById('signInMsg');
+    const signUpMsg = document.getElementById('signUpMsg');
 
-    // 1. DYNAMIC SLIDE TRIGGER
-    if (toRegisterBtn && toLoginBtn) {
-        toRegisterBtn.addEventListener('click', () => {
+    // 1. ANIMASI SLIDE SLIDER (Bekerja di Desktop & HP)
+    if (registerBtn && loginBtn) {
+        registerBtn.addEventListener('click', () => {
             container.classList.add('active');
             clearMessages();
         });
 
-        toLoginBtn.addEventListener('click', () => {
+        loginBtn.addEventListener('click', () => {
             container.classList.remove('active');
             clearMessages();
         });
     }
 
     function clearMessages() {
-        signUpMsg.textContent = '';
         signInMsg.textContent = '';
+        signUpMsg.textContent = '';
     }
 
-    // 2. PENDAFTARAN (DENGAN STRATEGI PASSWORD LOGIC)
-    signUpForm.addEventListener('submit', async (e) => {
+    // 2. SUBMIT FORM LOGIN
+    signInForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        signInMsg.style.color = '#ffcc00';
+        signInMsg.textContent = 'Memproses login...';
+
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        // Simulasi Login Mandiri (Tanpa SDK luar)
+        setTimeout(() => {
+            if (email && password) {
+                signInMsg.style.color = '#4caf50';
+                signInMsg.textContent = 'Berhasil masuk! Mengalihkan...';
+                // window.location.href = 'index.html';
+            } else {
+                signInMsg.style.color = '#ff4d4d';
+                signInMsg.textContent = 'Gagal masuk: Periksa data Anda';
+            }
+        }, 1000);
+    });
+
+    // 3. SUBMIT FORM PENDAFTARAN
+    signUpForm.addEventListener('submit', (e) => {
         e.preventDefault();
         signUpMsg.style.color = '#ffcc00';
         signUpMsg.textContent = 'Memproses pendaftaran...';
@@ -37,80 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
 
-        try {
-            // Jika Anda menggunakan Supabase
-            if (typeof supabase !== 'undefined') {
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: { data: { username: username } }
-                });
-                if (error) throw error;
+        // Simulasi Register Mandiri
+        setTimeout(() => {
+            if (username && email && password) {
                 signUpMsg.style.color = '#4caf50';
-                signUpMsg.textContent = 'Pendaftaran berhasil! Silakan login.';
-            } 
-            // Jika Anda menggunakan Clerk JS SDK
-            else if (window.Clerk && window.Clerk.client) {
-                const signUp = await window.Clerk.client.signUp.create({
-                    emailAddress: email,
-                    password: password,
-                    username: username
-                });
-                // Memastikan menggunakan password strategy tanpa email_link
-                await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-                signUpMsg.style.color = '#4caf50';
-                signUpMsg.textContent = 'Kode verifikasi telah dikirim ke email Anda.';
-            } 
-            else {
-                // Fallback / Simulasi sukses jika backend belum terhubung penuh
-                setTimeout(() => {
-                    signUpMsg.style.color = '#4caf50';
-                    signUpMsg.textContent = 'Pendaftaran berhasil! Silakan login.';
-                }, 1000);
+                signUpMsg.textContent = 'Pendaftaran berhasil! Silakan masuk.';
+            } else {
+                signUpMsg.style.color = '#ff4d4d';
+                signUpMsg.textContent = 'Gagal mendaftar: Data tidak lengkap';
             }
-        } catch (err) {
-            signUpMsg.style.color = '#ff4d4d';
-            signUpMsg.textContent = 'Gagal mendaftar: ' + (err.message || 'Periksa kembali data Anda');
-        }
-    });
-
-    // 3. LOGIN
-    signInForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        signInMsg.style.color = '#ffcc00';
-        signInMsg.textContent = 'Memproses masuk...';
-
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-
-        try {
-            if (typeof supabase !== 'undefined') {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                if (error) throw error;
-                window.location.href = 'index.html';
-            } 
-            else if (window.Clerk && window.Clerk.client) {
-                const signIn = await window.Clerk.client.signIn.create({
-                    identifier: email,
-                    password: password
-                });
-                if (signIn.status === "complete") {
-                    await window.Clerk.setActive({ session: signIn.createdSessionId });
-                    window.location.href = 'index.html';
-                }
-            } 
-            else {
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            }
-        } catch (err) {
-            signInMsg.style.color = '#ff4d4d';
-            signInMsg.textContent = 'Gagal masuk: ' + (err.message || 'Email atau password salah');
-        }
+        }, 1000);
     });
 });
-
