@@ -1,57 +1,100 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Register - Ngaos Al Falah Ploso</title>
-  
-  <link rel="stylesheet" href="css/login.css">
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-
-  <!-- SDK Clerk -->
-  <script
-    async
-    crossorigin="anonymous"
-    id="clerk-sdk-alt"
-    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js">
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngaos Al Falah Ploso - Akses Masuk</title>
+    <link rel="stylesheet" href="login.css">
+    <!-- FontAwesome Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <div class="background"></div>
-  <div class="login-box" style="max-width: 400px;">
-    
-    <!-- FORM LOGIN -->
-    <div id="box-login">
-      <form id="clerk-login-form">
-        <div class="logo">
-          <img src="logo-alfalah.png" alt="Logo Al-Falah" onerror="this.style.display='none';">
-        </div>
-        <h1>Masuk Ngaos</h1>
-        <p>TAFSIR JALALAIN DAN SHAHIH BUKHARI</p>
+    <div class="container" id="container">
+        
+        <!-- FORM PENDAFTARAN -->
+        <div class="form-container sign-up">
+            <form id="signUpForm">
+                <div class="logo-container">
+                    <div class="logo-circle">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                </div>
+                <h2>PENDAFTARAN</h2>
+                <span class="subtitle">BUAT AKUN NGAOS BARU</span>
 
-        <div class="input-group">
-          <i class='bx bxs-envelope'></i>
-          <input type="email" id="login-email" placeholder="Alamat Email" required>
+                <div class="input-box">
+                    <input type="text" id="regUsername" placeholder="Username" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div class="input-box">
+                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" id="regPassword" placeholder="Kata Sandi" required>
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+
+                <button type="submit" class="btn-main">DAFTAR</button>
+                <div class="status-msg" id="signUpMsg"></div>
+            </form>
         </div>
-        <div class="input-group">
-          <i class='bx bxs-lock-alt'></i>
-          <input type="password" id="login-password" placeholder="Kata Sandi" required>
+
+        <!-- FORM LOGIN -->
+        <div class="form-container sign-in">
+            <form id="signInForm">
+                <div class="logo-container">
+                    <div class="logo-circle">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                </div>
+                <h2>NGAOS AL FALAH PLOSO</h2>
+                <span class="subtitle">TAFSIR JALALAIN DAN SHAHIH BUKHORI</span>
+
+                <div class="input-box">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" id="loginPassword" placeholder="Kata Sandi" required>
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+
+                <div class="remember-me">
+                    <label><input type="checkbox" id="rememberCheck"> Remember Me</label>
+                </div>
+
+                <button type="submit" class="btn-main">MASUK</button>
+                <div class="status-msg" id="signInMsg"></div>
+            </form>
         </div>
-        <button type="submit">MASUK</button>
-        <p id="login-error" class="error-msg" style="color:#f44336; margin-top:10px; display:none;"></p>
-      </form>
+
+        <!-- PANEL SLIDE (OVERLAY) -->
+        <div class="toggle-container">
+            <div class="toggle">
+                <!-- Panel Kiri (Saat di Halaman Pendaftaran) -->
+                <div class="toggle-panel toggle-left">
+                    <h1>Sampun Gadah Akun?</h1>
+                    <p>Silakan masuk jika Anda sudah terdaftar.</p>
+                    <button class="btn-outline" id="toLoginBtn">Masuk</button>
+                </div>
+                
+                <!-- Panel Kanan (Saat di Halaman Login) -->
+                <div class="toggle-panel toggle-right">
+                    <h1>Selamat Datang!</h1>
+                    <p>Belum memiliki akun Ngaos Al Falah Ploso?</p>
+                    <button class="btn-outline" id="toRegisterBtn">Daftar Akun</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-  </div>
-
-  <script src="js/config.js"></script>
-  <script>
-    if (typeof CONFIG !== 'undefined' && CONFIG.CLERK_PUBLISHABLE_KEY) {
-      document.getElementById('clerk-sdk-alt').setAttribute('data-clerk-publishable-key', CONFIG.CLERK_PUBLISHABLE_KEY);
-    }
-  </script>
-  <script src="js/auth.js"></script>
-  <script src="js/login.js"></script>
+    <script src="config.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>
