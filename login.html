@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ngaos Al Falah Ploso - Akses Masuk</title>
+    <title>Ngaos Al Falah Ploso</title>
     <link rel="stylesheet" href="login.css">
     <!-- FontAwesome Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,89 +12,87 @@
 
     <div class="container" id="container">
         
-        <!-- FORM PENDAFTARAN -->
+        <!-- ================= FORM REGISTER ================= -->
         <div class="form-container sign-up">
             <form id="signUpForm">
-                <div class="logo-container">
-                    <div class="logo-circle">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </div>
+                <div class="logo-circle">
+                    <i class="fa-solid fa-layer-group"></i>
                 </div>
                 <h2>PENDAFTARAN</h2>
-                <span class="subtitle">BUAT AKUN NGAOS BARU</span>
+                <p class="subtitle">BUAT AKUN NGAOS BARU</p>
 
                 <div class="input-box">
                     <input type="text" id="regUsername" placeholder="Username" required>
-                    <i class="fa-solid fa-user"></i>
+                    <i class="fa-solid fa-user icon-orange"></i>
                 </div>
 
                 <div class="input-box">
                     <input type="email" id="regEmail" placeholder="Email" required>
-                    <i class="fa-solid fa-envelope"></i>
+                    <i class="fa-solid fa-envelope icon-orange"></i>
                 </div>
 
                 <div class="input-box">
-                    <input type="password" id="regPassword" placeholder="Kata Sandi" required>
-                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="regPassword" placeholder="••••••••" required>
+                    <i class="fa-solid fa-lock icon-orange"></i>
                 </div>
 
-                <button type="submit" class="btn-main">DAFTAR</button>
+                <button type="submit" class="btn-orange">DAFTAR</button>
                 <div class="status-msg" id="signUpMsg"></div>
             </form>
         </div>
 
-        <!-- FORM LOGIN -->
+        <!-- ================= FORM LOGIN ================= -->
         <div class="form-container sign-in">
             <form id="signInForm">
-                <div class="logo-container">
-                    <div class="logo-circle">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </div>
+                <div class="logo-circle">
+                    <i class="fa-solid fa-layer-group"></i>
                 </div>
                 <h2>NGAOS AL FALAH PLOSO</h2>
-                <span class="subtitle">TAFSIR JALALAIN DAN SHAHIH BUKHORI</span>
+                <p class="subtitle">TAFSIR JALALAIN DAN SHAHIH BUKHORI</p>
 
-                <div class="input-box">
-                    <input type="email" id="loginEmail" placeholder="Email" required>
-                    <i class="fa-solid fa-user"></i>
+                <div class="input-box light-input">
+                    <input type="email" id="loginEmail" placeholder="Email" value="fadilputunembahe@gmail.com" required>
+                    <i class="fa-solid fa-user icon-orange"></i>
                 </div>
 
                 <div class="input-box">
-                    <input type="password" id="loginPassword" placeholder="Kata Sandi" required>
-                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    <i class="fa-solid fa-lock icon-orange"></i>
                 </div>
 
-                <div class="remember-me">
-                    <label><input type="checkbox" id="rememberCheck"> Remember Me</label>
+                <div class="remember-box">
+                    <label>
+                        <input type="checkbox" id="rememberMe">
+                        <span>Remember Me</span>
+                    </label>
                 </div>
 
-                <button type="submit" class="btn-main">MASUK</button>
+                <button type="submit" class="btn-orange">MASUK</button>
                 <div class="status-msg" id="signInMsg"></div>
             </form>
         </div>
 
-        <!-- PANEL SLIDE (OVERLAY) -->
+        <!-- ================= OVERLAY SLIDE PANEL ================= -->
         <div class="toggle-container">
             <div class="toggle">
-                <!-- Panel Kiri (Saat di Halaman Pendaftaran) -->
+                <!-- Panel Kiri (Muncul saat di form Pendaftaran) -->
                 <div class="toggle-panel toggle-left">
-                    <h1>Sampun Gadah Akun?</h1>
+                    <h2>Sampun Gadah Akun?</h2>
                     <p>Silakan masuk jika Anda sudah terdaftar.</p>
-                    <button class="btn-outline" id="toLoginBtn">Masuk</button>
+                    <button class="btn-outline" id="loginBtn">Masuk</button>
                 </div>
-                
-                <!-- Panel Kanan (Saat di Halaman Login) -->
+
+                <!-- Panel Kanan (Muncul saat di form Login) -->
                 <div class="toggle-panel toggle-right">
-                    <h1>Selamat Datang!</h1>
+                    <h2>Selamat Datang!</h2>
                     <p>Belum memiliki akun Ngaos Al Falah Ploso?</p>
-                    <button class="btn-outline" id="toRegisterBtn">Daftar Akun</button>
+                    <button class="btn-outline" id="registerBtn">Daftar Akun</button>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <script src="config.js"></script>
     <script src="login.js"></script>
 </body>
 </html>
