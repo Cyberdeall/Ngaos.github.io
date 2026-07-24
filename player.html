@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Ngaos Al Falah Ploso - Player</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -20,7 +20,6 @@
             overflow-x: hidden;
         }
 
-        /* Base Container (Smartphone View - Presisi & Simetris) */
         .player-container {
             background: #232732; 
             width: 100%; 
@@ -55,7 +54,6 @@
         }
         .circle-inner img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
         
-        /* Class Animasi Putar Piringan */
         .rotating { 
             -webkit-animation: spin 15s linear infinite; 
             animation: spin 15s linear infinite; 
@@ -104,9 +102,6 @@
         .info-card p { color: #8a92a6; font-size: 11px; margin-bottom: 4px; }
         .info-card h4 { color: #ffffff; font-size: 14px; font-weight: bold; word-break: break-all; }
 
-        /* =========================================================
-           DESKTOP MODE (Spotify Style Landscape Layout)
-           ========================================================= */
         @media (min-width: 768px) {
             .player-container {
                 max-width: 680px;
@@ -118,53 +113,19 @@
                 text-align: left;
                 align-items: center;
             }
-
-            .player-left {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .circle-outer {
-                width: 220px;
-                height: 220px;
-                margin: 0;
-            }
-
-            .circle-inner {
-                width: 150px;
-                height: 150px;
-            }
-
-            .player-right {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                height: 100%;
-            }
-
-            .radio-info {
-                text-align: left;
-            }
-
-            .info-card {
-                top: 65px;
-                right: 30px;
-            }
-
-            .btn-logout {
-                width: auto;
-            }
-
-            .logout-wrapper {
-                text-align: right;
-            }
+            .player-left { display: flex; justify-content: center; align-items: center; }
+            .circle-outer { width: 220px; height: 220px; margin: 0; }
+            .circle-inner { width: 150px; height: 150px; }
+            .player-right { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+            .radio-info { text-align: left; }
+            .info-card { top: 65px; right: 30px; }
+            .btn-logout { width: auto; }
+            .logout-wrapper { text-align: right; }
         }
     </style>
 </head>
 <body>
     <div class="player-container">
-        <!-- Kolom Kiri (Desktop) / Atas (Mobile) -->
         <div class="player-left">
             <div class="circle-outer">
                 <div class="circle-inner">
@@ -173,7 +134,6 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan (Desktop) / Bawah (Mobile) -->
         <div class="player-right">
             <div class="player-header">
                 <button class="btn-mini" onclick="fiturSembuhkanAliran()" title="Segarkan Aliran Audio">
@@ -224,19 +184,18 @@
         </div>
     </div>
 
+    <!-- SCRIPT DIMUAT SESUAI FOLDER JS DAN DIHAPUS DEPENDENSI GHOIB -->
     <script src="js/config.js"></script>
     <script src="js/crypto.js"></script>
-    <script src="js/users.js"></script>
     <script src="js/auth.js"></script>
 
     <script>
-        // PROTEKSI ANTI-BYPASS SERVER & PARSING NAMA AKUN AKTIF
-        let namaAkunTerbaca = "Penyiar";
+        let namaAkunTerbaca = "Pendengar";
         if (typeof Auth !== 'undefined') { 
             Auth.protectPage(); 
             try {
                 const dataSesi = JSON.parse(localStorage.getItem(CONFIG.SESSION_KEY));
-                if (dataSesi) namaAkunTerbaca = dataSesi.username;
+                if (dataSesi && dataSesi.username) namaAkunTerbaca = dataSesi.username;
             } catch(e){}
         } else {
             if (!localStorage.getItem(CONFIG.SESSION_KEY)) { window.location.href = CONFIG.LOGIN_PAGE; }
@@ -276,11 +235,9 @@
             statusIndicator.innerText = "Menghubungkan...";
             statusIndicator.className = "status-text text-connecting";
             playIconContainer.innerHTML = SVG_LOADING;
-            
-            // Hapus animasi saat proses memuat
             radioCover.classList.remove("rotating");
 
-            audio = new Audio(STREAM_URL + "?user=" + namaAkunTerbaca + "&cb=" + Date.now());
+            audio = new Audio(STREAM_URL + "?user=" + encodeURIComponent(namaAkunTerbaca) + "&cb=" + Date.now());
             
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -297,21 +254,20 @@
                 statusIndicator.innerText = "🔴 LIVE STREAMING";
                 statusIndicator.className = "status-text text-live";
                 playIconContainer.innerHTML = SVG_PAUSE;
-                
-                // HANYA PUTAR LOGO KETIKA AUDIO TELAH BERBUNYI
                 radioCover.classList.add("rotating"); 
                 
                 audio.playbackRate = speeds[speedIndex]; 
                 startTimer();
                 updateSpeedUI();
                 
-                clearInterval(intervalCekServerStandby);
-                intervalCekServerStandby = null;
+                if (intervalCekServerStandby) {
+                    clearInterval(intervalCekServerStandby);
+                    intervalCekServerStandby = null;
+                }
             }).catch(err => {
-                statusIndicator.innerText = "Siaran Offline / Standby Menunggu...";
+                statusIndicator.innerText = "Siaran Offline / Standby...";
                 statusIndicator.className = "status-text text-muted";
                 playIconContainer.innerHTML = SVG_LOADING;
-                
                 radioCover.classList.remove("rotating");
                 
                 if (tombolPlayPernahDiklik && !intervalCekServerStandby) {
@@ -321,22 +277,23 @@
         }
 
         function stopStreaming() {
-            clearInterval(intervalCekServerStandby);
-            intervalCekServerStandby = null;
+            if (intervalCekServerStandby) {
+                clearInterval(intervalCekServerStandby);
+                intervalCekServerStandby = null;
+            }
             if (audio) { audio.pause(); audio.src = ""; audio.load(); audio = null; }
             isPlaying = false; 
             statusIndicator.innerText = "Siaran Dihentikan";
             statusIndicator.className = "status-text text-muted";
             playIconContainer.innerHTML = SVG_PLAY; 
-            
-            // HENTIKAN PUTARAN LOGO
             radioCover.classList.remove("rotating");
-            
             stopTimer();
         }
 
         function mulaiMesinStimulanOtomatis() {
-            const statusUrl = CONFIG.STREAM_URL.replace("/radio", "/status-json.xsl");
+            // Pembenahan URL Status Icecast
+            let baseUrl = CONFIG.STREAM_URL.split('?')[0];
+            const statusUrl = baseUrl.endsWith('/') ? baseUrl + "status-json.xsl" : baseUrl + "/status-json.xsl";
             
             intervalCekServerStandby = setInterval(() => {
                 if (!tombolPlayPernahDiklik) { clearInterval(intervalCekServerStandby); return; }
@@ -344,19 +301,14 @@
                 fetch(statusUrl + "?cb=" + Date.now())
                 .then(res => res.json())
                 .then(data => {
-                    let encoderSudahAktif = false;
                     if (data && data.icestats && data.icestats.source) {
-                        encoderSudahAktif = true;
-                    }
-                    
-                    if (encoderSudahAktif) {
                         clearInterval(intervalCekServerStandby);
                         intervalCekServerStandby = null;
                         if (audio) { audio.pause(); audio.src = ""; audio.load(); }
                         setTimeout(() => { startStreaming(); }, 500);
                     }
                 })
-                .catch(e => console.log("Menunggu server online..."));
+                .catch(e => console.log("Menunggu server streaming online..."));
             }, 15000);
         }
 
@@ -394,7 +346,10 @@
                 if (speedIndex > 0) { speedIndex--; if(audio) audio.playbackRate = speeds[speedIndex]; updateSpeedUI(); }
             },
             function aksiTahan() {
-                if (audio && isPlaying) { audio.currentTime = Math.max(0, audio.currentTime - 30); statusIndicator.innerText = "↩ REPLAY 30s"; }
+                if (audio && isPlaying) { 
+                    fiturSembuhkanAliran();
+                    statusIndicator.innerText = "🔄 RECONNECT LIVE"; 
+                }
             }
         );
 
