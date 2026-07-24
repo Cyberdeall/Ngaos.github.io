@@ -8,252 +8,370 @@
 }
 
 body {
-    background-color: #16181e;
+    background-color: #161821;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     min-height: 100vh;
-    color: #ffffff;
     padding: 15px;
 }
 
 .container {
-    background-color: #1e2029;
-    border-radius: 28px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    background-color: #1e212b;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     position: relative;
     overflow: hidden;
-    width: 420px;
+    width: 768px;
     max-width: 100%;
-    min-height: 680px;
+    min-height: 520px;
 }
 
+/* --- STYLES FORM --- */
 .container form {
-    background-color: #1e2029;
+    background-color: #1e212b;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding: 0 35px;
+    padding: 0 40px;
     height: 100%;
     text-align: center;
 }
 
 .logo-circle {
-    width: 65px;
-    height: 65px;
-    background: #282a36;
+    width: 60px;
+    height: 60px;
+    background: #12141c;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
-    border: 1px solid #383b4a;
+    box-shadow: inset 3px 3px 6px #0b0c11, inset -3px -3px 6px #191c27;
 }
 
 .logo-circle i {
-    font-size: 28px;
-    color: #ff5224;
+    font-size: 26px;
+    color: #ff5722;
 }
 
 h2 {
-    font-size: 20px;
+    color: #ffffff;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #ffffff;
 }
 
 .subtitle {
-    font-size: 11px;
-    color: #8c90a0;
+    color: #7b809a;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 22px;
+    letter-spacing: 0.8px;
+    margin-bottom: 20px;
     text-transform: uppercase;
 }
 
 .input-box {
     position: relative;
     width: 100%;
-    margin: 8px 0;
+    margin-bottom: 12px;
 }
 
 .input-box input {
     width: 100%;
     padding: 14px 45px 14px 20px;
-    background-color: #121318;
-    border: 1px solid #2d303e;
-    outline: none;
+    background-color: #151720;
+    border: 1px solid #262936;
     border-radius: 25px;
-    color: #fff;
+    color: #ffffff;
     font-size: 13px;
+    outline: none;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
     transition: 0.3s ease;
 }
 
-.input-box input:focus {
-    border-color: #ff5224;
+.input-box.light-input input {
+    background-color: #eef3f7;
+    color: #111111;
+    border: none;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
 }
 
-.input-box i {
+.icon-orange {
     position: absolute;
-    right: 20px;
+    right: 18px;
     top: 50%;
     transform: translateY(-50%);
-    color: #ff5224;
+    color: #ff5722;
     font-size: 15px;
 }
 
-.remember-me {
+.remember-box {
     width: 100%;
     text-align: left;
-    margin: 10px 0 18px 10px;
-    font-size: 12px;
+    margin: 2px 0 16px 10px;
+}
+
+.remember-box label {
     color: #8c90a0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
 }
 
-.remember-me input {
-    accent-color: #ff5224;
-    margin-right: 6px;
+.remember-box input[type="checkbox"] {
+    accent-color: #ff5722;
+    width: 15px;
+    height: 15px;
 }
 
-.btn-main {
-    background-color: #ff5224;
-    color: #fff;
-    font-size: 14px;
-    padding: 14px 0;
+.btn-orange {
+    width: 100%;
+    background: linear-gradient(135deg, #ff5722, #f44336);
+    color: #ffffff;
     border: none;
+    padding: 14px;
     border-radius: 25px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1px;
-    text-transform: uppercase;
     cursor: pointer;
-    width: 100%;
-    margin-top: 5px;
-    box-shadow: 0 6px 20px rgba(255, 82, 36, 0.3);
-    transition: 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+    transition: 0.2s ease;
 }
 
-.btn-main:active {
+.btn-orange:active {
     transform: scale(0.98);
 }
 
-.form-container {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    transition: all 0.6s ease-in-out;
-    width: 100%;
+.status-msg {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #ff4d4d;
+    min-height: 16px;
 }
 
-.sign-in {
-    left: 0;
-    z-index: 2;
-}
+/* ================= LAYOUT DESKTOP (SLIDE KIRI - KANAN) ================= */
+@media (min-width: 768px) {
+    .form-container {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        transition: all 0.6s ease-in-out;
+        width: 50%;
+    }
 
-.sign-up {
-    left: 0;
-    opacity: 0;
-    z-index: 1;
-}
+    .sign-in {
+        left: 0;
+        z-index: 2;
+    }
 
-/* Animasi Slide */
-.container.active .sign-in {
-    transform: translateY(100%);
-    opacity: 0;
-}
-
-.container.active .sign-up {
-    animation: move 0.6s;
-    opacity: 1;
-    z-index: 5;
-}
-
-@keyframes move {
-    0%, 49.99% {
+    .sign-up {
+        left: 0;
         opacity: 0;
         z-index: 1;
     }
-    50%, 100% {
+
+    .container.active .sign-in {
+        transform: translateX(100%);
+    }
+
+    .container.active .sign-up {
+        transform: translateX(100%);
         opacity: 1;
         z-index: 5;
+        animation: move 0.6s;
+    }
+
+    @keyframes move {
+        0%, 49.99% { opacity: 0; z-index: 1; }
+        50%, 100% { opacity: 1; z-index: 5; }
+    }
+
+    .toggle-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        transition: all 0.6s ease-in-out;
+        border-radius: 120px 0 0 80px;
+        z-index: 1000;
+    }
+
+    .container.active .toggle-container {
+        transform: translateX(-100%);
+        border-radius: 0 120px 80px 0;
+    }
+
+    .toggle {
+        background: linear-gradient(135deg, #ff5722, #f44336);
+        color: #ffffff;
+        position: relative;
+        left: -100%;
+        height: 100%;
+        width: 200%;
+        transform: translateX(0);
+        transition: all 0.6s ease-in-out;
+    }
+
+    .container.active .toggle {
+        transform: translateX(50%);
+    }
+
+    .toggle-panel {
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 30px;
+        text-align: center;
+        top: 0;
+        transition: all 0.6s ease-in-out;
+    }
+
+    .toggle-panel h2 {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .toggle-panel p {
+        font-size: 12px;
+        color: #f1f1f1;
+        margin-bottom: 20px;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 2px solid #ffffff;
+        color: #ffffff;
+        font-size: 13px;
+        padding: 10px 38px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .toggle-left {
+        transform: translateX(-20%);
+    }
+
+    .container.active .toggle-left {
+        transform: translateX(0);
+    }
+
+    .toggle-right {
+        right: 0;
+        transform: translateX(0);
+    }
+
+    .container.active .toggle-right {
+        transform: translateX(20%);
     }
 }
 
-/* Toggle Overlay Panel */
-.toggle-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    transition: all 0.6s ease-in-out;
-    border-radius: 40px 40px 0 0;
-    z-index: 1000;
-}
+/* ================= LAYOUT MOBILE (TAMPILAN VERTIKAL SEPERTI GAMBAR HP) ================= */
+@media (max-width: 767px) {
+    .container {
+        width: 380px;
+        min-height: 670px;
+    }
 
-.toggle {
-    background: linear-gradient(135deg, #2b1d1a, #3f1910);
-    height: 100%;
-    color: #ffffff;
-    position: relative;
-    text-align: center;
-}
+    .form-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    }
 
-.toggle-panel {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 30px;
-    transition: all 0.6s ease-in-out;
-}
+    .sign-in {
+        transform: translateX(0);
+        opacity: 1;
+        z-index: 2;
+    }
 
-.toggle-panel h1 {
-    font-size: 20px;
-    margin-bottom: 6px;
-}
+    .sign-up {
+        transform: translateX(100%);
+        opacity: 0;
+        z-index: 1;
+    }
 
-.toggle-panel p {
-    font-size: 12px;
-    color: #c5c7d0;
-    margin-bottom: 14px;
-}
+    .container.active .sign-in {
+        transform: translateX(-100%);
+        opacity: 0;
+        z-index: 1;
+    }
 
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid #ffffff;
-    color: #ffffff;
-    font-size: 13px;
-    padding: 10px 35px;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-}
+    .container.active .sign-up {
+        transform: translateX(0);
+        opacity: 1;
+        z-index: 2;
+    }
 
-.toggle-left {
-    transform: translateY(-100%);
-}
+    .toggle-container {
+        position: absolute;
+        width: 100%;
+        height: auto;
+        z-index: 100;
+        pointer-events: none;
+    }
 
-.container.active .toggle-left {
-    transform: translateY(0);
-}
+    .toggle-panel {
+        pointer-events: auto;
+        padding: 25px 20px;
+        text-align: center;
+    }
 
-.toggle-right {
-    transform: translateY(0);
-}
+    .toggle-right {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(145deg, #321d1b, #211516);
+        border-bottom-left-radius: 35px;
+        border-bottom-right-radius: 35px;
+        transition: opacity 0.4s ease;
+    }
 
-.container.active .toggle-right {
-    transform: translateY(100%);
-}
+    .toggle-left {
+        position: absolute;
+        bottom: -670px; /* Menyesuaikan posisi ke bawah form */
+        left: 0;
+        width: 100%;
+        background: linear-gradient(135deg, #ff5722, #f44336);
+        border-top-left-radius: 40px;
+        border-top-right-radius: 40px;
+        transition: opacity 0.4s ease;
+        opacity: 0;
+    }
 
-.status-msg {
-    margin-top: 12px;
-    font-size: 12px;
-    color: #ff4d4d;
-    min-height: 18px;
+    .container.active .toggle-right {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .container.active .toggle-left {
+        opacity: 1;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 2px solid #ffffff;
+        color: #ffffff;
+        font-size: 13px;
+        padding: 10px 35px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+    }
 }
 
