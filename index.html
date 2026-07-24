@@ -6,108 +6,63 @@
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Ngaos Al Falah">
+    <meta name="apple-mobile-web-app-title" content="NgaosPloso">
  
     <meta charset="UTF-8">
     <meta name="color-scheme" content="light">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOGIN NGAOS AL FALAH PLOSO</title>
 
-    <!-- FontAwesome Icons & Boxicons -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
-    <!-- Load Configuration First -->
-    <script src="js/config.js"></script>
-
-    <!-- Clerk JS SDK (Publishable Key Dipasang Direct) -->
+    <!-- Clerk JS SDK -->
     <script
       async
       crossorigin="anonymous"
-      data-clerk-publishable-key="pk_test_ZnVuLXBpZ2Vvbi02Mi5jbGVyay5hY2NvdW50cy5kZXYk"
+      id="clerk-sdk"
       src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js">
     </script>
 
     <link rel="stylesheet" href="css/login.css">
+    <style>
+        .logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    </style>
 </head>
 <body>
-
     <div class="background"></div>
-
-    <div class="container">
-        <!-- FORM LOGIN -->
-        <div class="form-box login">
-            <form id="loginForm" novalidate>
-                <div class="logo">
-                    <img src="logo-alfalah.png" alt="Logo Al Falah" onerror="this.style.display='none';">
-                </div>
-                <h1>NGAOS AL FALAH PLOSO</h1>
-                <p class="subtitle">TAFSIR JALALAIN DAN SHAHIH BUKHORI</p>
-                
-                <div class="input-box">
-                    <input type="text" id="username" placeholder="Username / Email" autocomplete="username" required>
-                    <i class='bx bxs-user'></i>
-                </div>
-                <div class="input-box">
-                    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
-                    <i class='bx bxs-lock-alt'></i>
-                </div>
-                
-                <div class="remember-box">
-                    <label><input type="checkbox" id="remember"> Remember Me</label>
-                </div>
-                
-                <button type="submit" class="btn">MASUK</button>
-                <div id="status-message" style="margin-top: 15px; font-size: 14px; font-weight: 600; text-align: center; display: none;"></div>
-
-                <p id="message" class="error-msg"></p>
-            </form>
+    <div class="login-box">
+        <div class="logo">
+            <img src="logo-alfalah.png" alt="Logo Al Falah" onerror="this.style.display='none';">
         </div>
-
-        <!-- FORM REGISTER -->
-        <div class="form-box register">
-            <form id="registerForm" novalidate>
-                <div class="logo">
-                    <img src="logo-alfalah.png" alt="Logo Al Falah" onerror="this.style.display='none';">
-                </div>
-                <h1>PENDAFTARAN</h1>
-                <p class="subtitle">BUAT AKUN NGAOS BARU</p>
-                
-                <div class="input-box">
-                    <input type="text" id="regUsername" placeholder="Username" required>
-                    <i class='bx bxs-user'></i>
-                </div>
-                <div class="input-box">
-                    <input type="email" id="regEmail" placeholder="Email" required>
-                    <i class='bx bxs-envelope'></i>
-                </div>
-                <div class="input-box">
-                    <input type="password" id="regPassword" placeholder="Password" required>
-                    <i class='bx bxs-lock-alt'></i>
-                </div>
-                
-                <button type="submit" class="btn">DAFTAR</button>
-                <p id="regMessage" class="error-msg"></p>
-            </form>
-        </div>
-
-        <!-- TOGGLE PANEL SLIDER -->
-        <div class="toggle-box">
-            <div class="toggle-panel toggle-left">
-                <h1>Selamat Datang!</h1>
-                <p>Belum memiliki akun Ngaos Al Falah Ploso?</p>
-                <button class="btn register-btn">Daftar Akun</button>
+        <h1>NGAOS AL FALAH PLOSO</h1>
+        <p>TAFSIR JALALAIN DAN SHAHIH BUKHARI</p>
+        
+        <form id="loginForm" novalidate>
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Username / Email" autocomplete="username" required>
             </div>
-
-            <div class="toggle-panel toggle-right">
-                <h1>Sampun Gadah Akun?</h1>
-                <p>Silakan masuk jika Anda sudah terdaftar.</p>
-                <button class="btn login-btn">Masuk</button>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
             </div>
-        </div>
+            <label class="remember">
+                <input type="checkbox" id="remember"> Remember Me
+            </label>
+            <button type="submit">LOGIN</button>
+            <p id="message"></p>
+        </form>
     </div>
 
-    <!-- Script Aplikasi (Crypto.js Dihapus) -->
+    <!-- Script Konfigurasi & Aplikasi -->
+    <script src="js/config.js"></script>
+    <script>
+      if (typeof CONFIG !== 'undefined' && CONFIG.CLERK_PUBLISHABLE_KEY) {
+        document.getElementById('clerk-sdk').setAttribute('data-clerk-publishable-key', CONFIG.CLERK_PUBLISHABLE_KEY);
+      }
+    </script>
+    <script src="js/crypto.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/login.js"></script>
     <script>
@@ -119,7 +74,6 @@
         });
       }
     </script>
-
 </body>
 </html>
 
