@@ -4,11 +4,14 @@
  * ----------------------------------------------------------------------------
  * File        : config.js
  * Folder      : /js
- * Version     : 1.0.0
+ * Version     : 2.0.0
  *
  * Description
  * ----------------------------------------------------------------------------
- * Global application configuration.
+ * Application configuration bridge.
+ *
+ * Membaca environment dan menyediakan konfigurasi
+ * untuk seluruh aplikasi.
  * ============================================================================
  */
 
@@ -20,68 +23,101 @@ window.NPC || {};
 
 
 
-NPC.Config = {
+(function(NPC){
 
 
-    app: {
+    if(!NPC.Env){
 
-        name:
-        "Ngaos Al Falah Ploso",
-
-        version:
-        "5.0.0",
-
-        environment:
-        "production"
-
-
-    },
-
-
-    auth: {
-
-
-        provider:
-        "clerk",
-
-
-        clerk: {
-
-            publishableKey:
-            "",
-
-        }
-
-
-    },
-
-
-    radio: {
-
-
-        name:
-        "Ngaos Radio",
-
-
-        streamUrl:
-        "",
-
-
-        autoPlay:
-        false
-
-
-    },
-
-
-    api: {
-
-
-        baseUrl:
-        "",
-
+        throw new Error(
+            "Environment belum dimuat. Pastikan env.js berada sebelum config.js"
+        );
 
     }
 
 
-};
+
+    NPC.Config = {
+
+
+
+        app:{
+
+
+            name:
+            "Ngaos Al Falah Ploso",
+
+
+            version:
+            "5.0.0",
+
+
+            mode:
+            NPC.Env.mode
+
+
+
+        },
+
+
+
+        auth:{
+
+
+            provider:
+            NPC.Env.auth.provider,
+
+
+            clerk:
+            {
+
+
+                publishableKey:
+                NPC.Env.auth.clerk.publishableKey
+
+
+            }
+
+
+        },
+
+
+
+        server:{
+
+
+            apiUrl:
+            NPC.Env.server.apiUrl,
+
+
+            websocketUrl:
+            NPC.Env.server.websocketUrl
+
+
+        },
+
+
+
+        radio:{
+
+
+            provider:
+            NPC.Env.radio.provider,
+
+
+            streamUrl:
+            NPC.Env.radio.streamUrl,
+
+
+            autoPlay:
+            false
+
+
+        }
+
+
+
+    };
+
+
+
+})(window.NPC);
