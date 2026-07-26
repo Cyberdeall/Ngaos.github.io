@@ -5,150 +5,292 @@
  * File        : reconnect.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Auto Reconnect Manager.
+ * Player Auto Reconnect Manager.
  *
- * Menangani koneksi ulang ketika stream terputus.
+ * Menangani percobaan koneksi ulang ketika stream terputus.
+ * Tidak mengontrol UI.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    if (!NPC.Player || !NPC.Player.Engine) {
-        throw new Error("Player Engine belum dimuat.");
-    }
+
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class ReconnectManager {
 
-        constructor() {
 
-            this.enabled = true;
 
-            this.retry = 0;
+        constructor(engine){
 
-            this.maxRetry = 10;
 
-            this.timer = null;
+            this.engine =
+                engine;
 
-            this.bind();
+
+            this.enabled =
+                true;
+
+
+            this.attempt =
+                0;
+
+
+            this.maxAttempt =
+                5;
+
+
+            this.timer =
+                null;
+
+
+            this.delay =
+                [
+                    3000,
+                    5000,
+                    10000,
+                    20000,
+                    30000
+                ];
+
 
         }
 
-        bind() {
 
-            NPC.Core.Events.on(
-                "player.error",
-                () => this.schedule()
-            );
+
+
+
+        start(){
+
+
+            this.enabled =
+                true;
+
 
         }
 
-        schedule() {
 
-            if (!this.enabled) {
-                return;
+
+
+
+        stop(){
+
+
+            this.enabled =
+                false;
+
+
+            this.clear();
+
+
+        }
+
+
+
+
+
+        clear(){
+
+
+            if(this.timer){
+
+
+                clearTimeout(
+                    this.timer
+                );
+
+
+                this.timer =
+                    null;
+
+
             }
 
-            if (this.retry >= this.maxRetry) {
 
-                NPC.Core.Events.emit(
+        }
+
+
+
+
+
+        schedule(){
+
+
+            if(
+                !this.enabled
+            ){
+
+                return;
+
+            }
+
+
+
+            if(
+                this.attempt >=
+                this.maxAttempt
+            ){
+
+
+                NPC.Core.Events?.emit(
                     "player.reconnect.failed"
                 );
 
+
                 return;
+
 
             }
 
-            this.retry++;
 
-            const delay = Math.min(
-                this.retry * 3000,
-                30000
-            );
 
-            clearTimeout(this.timer);
+            const wait =
+                this.delay[
+                    this.attempt
+                ];
 
-            this.timer = setTimeout(
-                () => this.reconnect(),
-                delay
-            );
 
-            NPC.Core.Events.emit(
+
+            this.attempt++;
+
+
+
+            NPC.Core.Events?.emit(
                 "player.reconnect.wait",
-                delay
+                wait
             );
+
+
+
+            this.timer =
+                setTimeout(
+                    ()=>{
+
+                        this.reconnect();
+
+                    },
+                    wait
+                );
+
 
         }
 
-        async reconnect() {
 
-            const engine = NPC.Player.Engine;
 
-            const url = engine.getSource();
 
-            if (!url) {
+
+        async reconnect(){
+
+
+            if(
+                !this.engine
+            ){
+
                 return;
+
             }
 
-            try {
 
-                engine.stop();
 
-                engine.setSource(url);
+            const source =
+                this.engine.getSource();
 
-                await engine.play();
 
-                this.retry = 0;
 
-                NPC.Core.Events.emit(
+            if(!source){
+
+                return;
+
+            }
+
+
+
+            try{
+
+
+                this.engine.load(
+                    source
+                );
+
+
+                await this.engine.play();
+
+
+
+                this.attempt =
+                    0;
+
+
+
+                NPC.Core.Events?.emit(
                     "player.reconnect.success"
                 );
 
-            } catch (error) {
+
+            }
+            catch(error){
+
+
+                NPC.Core.Events?.emit(
+                    "player.reconnect.error",
+                    error
+                );
+
 
                 this.schedule();
 
+
             }
 
-        }
-
-        reset() {
-
-            this.retry = 0;
-
-            clearTimeout(this.timer);
 
         }
 
-        enable() {
 
-            this.enabled = true;
+
+
+
+        reset(){
+
+
+            this.attempt =
+                0;
+
+
+            this.clear();
+
 
         }
 
-        disable() {
 
-            this.enabled = false;
-
-            this.reset();
-
-        }
 
     }
 
-    Object.freeze(ReconnectManager);
+
+
+
 
     NPC.Player.Reconnect =
-        new ReconnectManager();
+        ReconnectManager;
+
+
 
 })(window.NPC);
