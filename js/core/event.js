@@ -1,168 +1,160 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE (NPC)
+ * NGAOS PLATFORM CORE
  * ----------------------------------------------------------------------------
  * File        : events.js
  * Folder      : /js/core
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Event Bus System.
+ * Internal Application Event Bus.
  *
- * Modul komunikasi antar komponen aplikasi.
- *
- * Semua modul berkomunikasi melalui event,
- * bukan memanggil modul lain secara langsung.
+ * Sistem komunikasi antar modul tanpa dependency langsung.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
+
+
+
+    NPC.Core =
+    NPC.Core || {};
+
 
 
     const listeners = {};
 
 
+
     const Events = {
 
 
+
         /**
-         * Menambahkan listener event.
-         *
-         * @param {string} eventName
-         * @param {Function} callback
+         * Daftar listener
          */
-        on(eventName, callback) {
+        on(
+            event,
+            callback
+        ){
 
 
-            if (
-                typeof eventName !== "string" ||
+            if(
                 typeof callback !== "function"
-            ) {
+            ){
+
                 return false;
-            }
-
-
-            if (!listeners[eventName]) {
-
-                listeners[eventName] = [];
 
             }
 
 
-            listeners[eventName].push(callback);
+
+            if(
+                !listeners[event]
+            ){
+
+                listeners[event] = [];
+
+            }
+
+
+
+            listeners[event]
+            .push(callback);
+
 
 
             return true;
 
+
         },
 
 
 
+
+
         /**
-         * Menghapus listener.
-         *
-         * @param {string} eventName
-         * @param {Function} callback
+         * Hapus listener
          */
-        off(eventName, callback) {
+        off(
+            event,
+            callback
+        ){
 
 
-            if (!listeners[eventName]) {
+            if(
+                !listeners[event]
+            ){
+
                 return false;
-            }
-
-
-            if (!callback) {
-
-                delete listeners[eventName];
-
-                return true;
 
             }
 
 
-            listeners[eventName] =
-                listeners[eventName].filter(
-                    listener => listener !== callback
+
+            listeners[event] =
+
+                listeners[event]
+                .filter(
+                    fn => fn !== callback
                 );
+
 
 
             return true;
 
-        },
-
-
-
-        /**
-         * Listener sekali jalan.
-         *
-         * @param {string} eventName
-         * @param {Function} callback
-         */
-        once(eventName, callback) {
-
-
-            const wrapper = (...args) => {
-
-                callback(...args);
-
-                Events.off(
-                    eventName,
-                    wrapper
-                );
-
-            };
-
-
-            Events.on(
-                eventName,
-                wrapper
-            );
-
-
-            return wrapper;
 
         },
 
 
 
+
+
         /**
-         * Mengirim event.
-         *
-         * @param {string} eventName
-         * @param {*} payload
+         * Kirim event
          */
-        emit(eventName, payload = null) {
+        emit(
+            event,
+            data=null
+        ){
 
 
-            if (!listeners[eventName]) {
+            if(
+                !listeners[event]
+            ){
 
                 return false;
 
             }
 
 
-            listeners[eventName]
-                .slice()
-                .forEach(callback => {
+
+            listeners[event]
+            .forEach(
+                callback => {
 
 
-                    try {
+                    try{
 
 
-                        callback(payload);
+                        callback(data);
 
 
-                    } catch(error) {
+                    }
+                    catch(error){
 
 
                         console.error(
@@ -174,51 +166,56 @@
                     }
 
 
-                });
+                }
+            );
+
 
 
             return true;
 
-        },
-
-
-
-        /**
-         * Membersihkan semua event.
-         */
-        clear() {
-
-
-            Object.keys(listeners)
-                .forEach(
-                    key => delete listeners[key]
-                );
-
 
         },
 
 
+
+
+
         /**
-         * Mendapat daftar event aktif.
-         *
-         * @returns {Array}
+         * Hapus semua event
          */
-        list() {
+        clear(){
 
 
-            return Object.keys(listeners);
+            Object.keys(
+                listeners
+            )
+            .forEach(
+                key=>{
+
+                    delete listeners[key];
+
+                }
+            );
 
 
         }
 
 
+
+
     };
 
 
-    Object.freeze(Events);
+
+    Object.freeze(
+        Events
+    );
 
 
-    NPC.Core.Events = Events;
+
+    NPC.Core.Events =
+        Events;
+
 
 
 })(window.NPC);
