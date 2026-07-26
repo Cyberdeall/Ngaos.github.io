@@ -5,161 +5,336 @@
  * File        : engine.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Audio Engine.
+ * Audio Engine Core.
  *
- * Bertanggung jawab mengelola HTMLAudioElement.
- * File ini TIDAK menangani UI, Metadata, Volume maupun Reconnect.
+ * Mengelola HTML5 Audio.
+ * Tidak menangani UI.
+ * Tidak menangani metadata.
+ * Tidak menangani volume.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class AudioEngine {
 
-        constructor() {
 
-            this.audio = new Audio();
+        constructor(){
 
-            this.audio.preload = "none";
-            this.audio.autoplay = false;
-            this.audio.crossOrigin = "anonymous";
 
-            this.url = null;
+            this.audio =
+                new Audio();
 
-            this.playing = false;
 
-            this.ready = false;
+            this.audio.preload =
+                "none";
 
-            this.bindEvents();
 
-        }
+            this.audio.crossOrigin =
+                "anonymous";
 
-        bindEvents() {
 
-            this.audio.addEventListener("playing", () => {
+            this.source =
+                null;
 
-                this.playing = true;
 
-                NPC.Core.Events?.emit(
-                    "player.playing"
-                );
+            this.state =
+                "idle";
 
-            });
 
-            this.audio.addEventListener("pause", () => {
+            this.bind();
 
-                this.playing = false;
-
-                NPC.Core.Events?.emit(
-                    "player.pause"
-                );
-
-            });
-
-            this.audio.addEventListener("ended", () => {
-
-                this.playing = false;
-
-                NPC.Core.Events?.emit(
-                    "player.ended"
-                );
-
-            });
-
-            this.audio.addEventListener("error", (event) => {
-
-                this.playing = false;
-
-                NPC.Core.Events?.emit(
-                    "player.error",
-                    event
-                );
-
-            });
-
-            this.audio.addEventListener("loadedmetadata", () => {
-
-                this.ready = true;
-
-                NPC.Core.Events?.emit(
-                    "player.ready"
-                );
-
-            });
 
         }
 
-        setSource(url) {
 
-            if (!url) {
-                throw new Error("Stream URL kosong.");
+
+
+
+        bind(){
+
+
+            this.audio.addEventListener(
+                "playing",
+                ()=>{
+
+
+                    this.state =
+                        "playing";
+
+
+                    NPC.Core.Events?.emit(
+                        "player.playing"
+                    );
+
+
+                }
+            );
+
+
+
+            this.audio.addEventListener(
+                "pause",
+                ()=>{
+
+
+                    this.state =
+                        "paused";
+
+
+                    NPC.Core.Events?.emit(
+                        "player.paused"
+                    );
+
+
+                }
+            );
+
+
+
+            this.audio.addEventListener(
+                "error",
+                (error)=>{
+
+
+                    this.state =
+                        "error";
+
+
+                    NPC.Core.Events?.emit(
+                        "player.error",
+                        error
+                    );
+
+
+                }
+            );
+
+
+
+            this.audio.addEventListener(
+                "waiting",
+                ()=>{
+
+
+                    NPC.Core.Events?.emit(
+                        "player.buffering"
+                    );
+
+
+                }
+            );
+
+
+        }
+
+
+
+
+
+        load(url){
+
+
+            if(!url){
+
+                throw new Error(
+                    "Stream URL kosong."
+                );
+
             }
 
-            this.url = url;
 
-            this.audio.src = url;
+            this.source =
+                url;
+
+
+            this.audio.src =
+                url;
+
+
+            this.state =
+                "loaded";
+
+
+
+            NPC.Core.Events?.emit(
+                "player.loaded",
+                url
+            );
+
 
         }
 
-        async play() {
 
-            if (!this.url) {
-                throw new Error("Stream belum diset.");
-            }
+
+
+
+        async play(){
+
 
             await this.audio.play();
 
+
         }
 
-        pause() {
+
+
+
+
+        pause(){
+
 
             this.audio.pause();
 
+
         }
 
-        stop() {
+
+
+
+
+        stop(){
+
 
             this.audio.pause();
 
-            this.audio.currentTime = 0;
+
+            this.audio.removeAttribute(
+                "src"
+            );
+
+
+            this.audio.load();
+
+
+            this.state =
+                "stopped";
+
+
+            NPC.Core.Events?.emit(
+                "player.stopped"
+            );
+
 
         }
 
-        isPlaying() {
 
-            return this.playing;
+
+
+
+        volume(value){
+
+
+            if(value === undefined){
+
+                return this.audio.volume;
+
+            }
+
+
+            this.audio.volume =
+                Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        Number(value)
+                    )
+                );
+
 
         }
 
-        isReady() {
 
-            return this.ready;
+
+
+
+        muted(value){
+
+
+            if(value === undefined){
+
+                return this.audio.muted;
+
+            }
+
+
+            this.audio.muted =
+                Boolean(value);
+
 
         }
 
-        getAudio() {
+
+
+
+
+        playing(){
+
+
+            return (
+                !this.audio.paused &&
+                !this.audio.ended
+            );
+
+
+        }
+
+
+
+
+
+        getSource(){
+
+
+            return this.source;
+
+
+        }
+
+
+
+
+
+        getElement(){
+
 
             return this.audio;
 
+
         }
+
+
 
     }
 
-    Object.freeze(AudioEngine);
 
-    NPC.Player.Engine = new AudioEngine();
+
+
+
+    NPC.Player.Engine =
+        new AudioEngine();
+
+
 
 })(window.NPC);
