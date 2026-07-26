@@ -7,66 +7,94 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Ngaos Al Falah Ploso</title>
+<title>Ngaos Radio Player</title>
 
 
 <style>
 
+*{
+    box-sizing:border-box;
+}
+
+
 body{
 
     margin:0;
+
     min-height:100vh;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
+
     background:#111;
+
     font-family:Arial,sans-serif;
+
     color:white;
 
 }
 
 
-.player-box{
+
+.player{
 
     width:90%;
-    max-width:420px;
-    background:#1e1e1e;
-    padding:25px;
-    border-radius:20px;
+
+    max-width:400px;
+
+    padding:30px;
+
     text-align:center;
 
+    background:#222;
+
+    border-radius:20px;
+
 }
+
 
 
 h1{
 
-    font-size:22px;
+    font-size:24px;
 
 }
 
 
-#status{
+
+.status{
 
     margin:20px 0;
+
     color:#aaa;
 
 }
 
 
+
 button{
 
-    padding:14px 30px;
+    padding:15px 35px;
+
     border:none;
+
     border-radius:30px;
+
+    font-size:18px;
+
     cursor:pointer;
-    font-size:16px;
 
 }
+
 
 
 input{
 
     width:100%;
+
     margin-top:25px;
 
 }
@@ -74,101 +102,48 @@ input{
 
 </style>
 
+
 </head>
 
 
 <body>
 
 
-<div class="player-box">
+<div class="player">
 
 
 <h1>
-Ngaos Al Falah Ploso
+Ngaos Radio
 </h1>
 
 
-<div id="status">
+<div id="status" class="status">
 Siap
 </div>
 
 
-<button id="playButton">
+
+<button id="play">
 ▶ Play
 </button>
 
 
-<input
+
+<input 
 id="volume"
 type="range"
 min="0"
 max="1"
 step="0.01"
 value="1"
-/>
+>
+
+
+
+<audio id="audio"></audio>
 
 
 </div>
-
-
-
-
-
-<!-- CORE -->
-
-<script src="js/npc.js"></script>
-
-
-<script src="js/env.js"></script>
-
-<script src="js/config.js"></script>
-
-
-
-<script src="js/core/events.js"></script>
-
-<script src="js/core/logger.js"></script>
-
-
-
-
-<!-- AUTH -->
-
-<script src="js/auth/adapter.js"></script>
-
-<script src="js/auth/mapper.js"></script>
-
-<script src="js/auth/clerk.js"></script>
-
-<script src="js/auth/auth.js"></script>
-
-
-
-
-<!-- PLAYER -->
-
-<script src="js/player/engine.js"></script>
-
-<script src="js/player/metadata.js"></script>
-
-<script src="js/player/volume.js"></script>
-
-<script src="js/player/reconnect.js"></script>
-
-<script src="js/player/sleep.js"></script>
-
-<script src="js/player/statistics.js"></script>
-
-<script src="js/player/controller.js"></script>
-
-<script src="js/player/player.js"></script>
-
-
-
-
-<!-- APP -->
-
-<script src="js/app.js"></script>
 
 
 
@@ -176,118 +151,112 @@ value="1"
 <script>
 
 
-window.addEventListener(
-"DOMContentLoaded",
-async ()=>{
+const STREAM =
 
-
-    const button =
-    document.getElementById(
-        "playButton"
-    );
-
-
-    const status =
-    document.getElementById(
-        "status"
-    );
-
-
-    const volume =
-    document.getElementById(
-        "volume"
-    );
+"https://uk14freenew.listen2myradio.com/live.mp3?typeportmount=s1_27764_stream_367452469";
 
 
 
-    const stream =
-
-        NPC.Config.radio.streamUrl;
-
-
-
-    NPC.Player.load(
-        stream
-    );
+const audio =
+document.getElementById(
+"audio"
+);
 
 
 
-    button.onclick = async ()=>{
-
-
-        try{
-
-
-            if(
-                NPC.Player.isPlaying()
-            ){
-
-
-                NPC.Player.pause();
-
-
-                button.innerHTML =
-                "▶ Play";
-
-
-                status.innerHTML =
-                "Paused";
-
-
-            }
-            else{
-
-
-                await NPC.Player.play();
+const button =
+document.getElementById(
+"play"
+);
 
 
 
-                button.innerHTML =
-                "⏸ Pause";
+const status =
+document.getElementById(
+"status"
+);
 
 
-                status.innerHTML =
-                "Playing";
+
+const volume =
+document.getElementById(
+"volume"
+);
 
 
-            }
+
+audio.src =
+STREAM;
 
 
-        }
-        catch(error){
+
+button.onclick =
+async function(){
 
 
-            console.error(
-                error
-            );
+    try{
+
+
+        if(audio.paused){
+
+
+            await audio.play();
+
+
+            button.innerHTML =
+            "⏸ Pause";
 
 
             status.innerHTML =
-            "Gagal memutar radio";
+            "Sedang memutar";
+
+
+        }
+        else{
+
+
+            audio.pause();
+
+
+            button.innerHTML =
+            "▶ Play";
+
+
+            status.innerHTML =
+            "Berhenti";
 
 
         }
 
 
-    };
+    }
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        status.innerHTML =
+        "Gagal memutar stream";
+
+
+    }
+
+
+};
 
 
 
+volume.oninput =
+function(){
 
 
-    volume.oninput = ()=>{
+    audio.volume =
+    volume.value;
 
 
-        NPC.Player.volume(
-            volume.value
-        );
-
-
-    };
-
-
-
-});
+};
 
 
 
