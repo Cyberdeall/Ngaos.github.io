@@ -1,260 +1,237 @@
 /**
- * ======================================================================
+ * ============================================================================
  * NGAOS PLATFORM CORE (NPC)
- * ----------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * File        : config.js
  * Folder      : /js
- * Version     : 1.0.0
+ * Version     : 1.0.1
  * Author      : Fadil Ahmad & ChatGPT
  * License     : Private
  *
  * Description
- * ----------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Konfigurasi utama aplikasi.
  *
- * Seluruh pengaturan aplikasi wajib berada di file ini.
- * Jangan menulis konfigurasi di file lain.
- * ======================================================================
+ * Aturan:
+ * - Seluruh konfigurasi aplikasi hanya boleh berada di file ini.
+ * - Jangan menulis konfigurasi tetap di file lain.
+ * - File ini harus dimuat PALING PERTAMA.
+ * ============================================================================
  */
 
 "use strict";
 
-const AppConfig = Object.freeze({
+(function (window) {
 
-    // ==========================================================
-    // APPLICATION
-    // ==========================================================
-    APP: {
-        NAME: "NGAOS AL FALAH PLOSO",
-        DESCRIPTION: "Kajian Tafsir Jalalain & Shahih Bukhari",
-        VERSION: "1.0.0",
-        BUILD: "2026.07.26",
-        ENVIRONMENT: "production", // development | testing | production
-        AUTHOR: "Fadil Ahmad",
-        PLATFORM: "Ngaos Platform Core",
-        LICENSE: "Private"
-    },
+    const NPC = window.NPC = window.NPC || {};
 
-    // ==========================================================
-    // AUTHENTICATION
-    // ==========================================================
-    AUTH: {
+    const Config = Object.freeze({
 
-        PROVIDER: "clerk",
+        APP: Object.freeze({
 
-        LOGIN_PAGE: "index.html",
+            NAME: "NGAOS AL FALAH PLOSO",
 
-        PLAYER_PAGE: "player.html",
+            DESCRIPTION: "Kajian Tafsir Jalalain & Shahih Bukhari",
 
-        REQUIRE_ADMIN_APPROVAL: true,
+            VERSION: "1.0.1",
 
-        ENABLE_REGISTER: true,
+            BUILD: "2026.07.26",
 
-        ENABLE_LOGIN: true,
+            ENVIRONMENT: "production",
 
-        ENABLE_OTP: true,
+            AUTHOR: "Fadil Ahmad",
 
-        REMEMBER_ME: true,
+            PLATFORM: "Ngaos Platform Core",
 
-        MIN_PASSWORD_LENGTH: 8,
+            LICENSE: "Private"
 
-        MAX_LOGIN_ATTEMPTS: 5,
+        }),
 
-        LOCK_DURATION_MINUTES: 5
+        AUTH: Object.freeze({
 
-    },
+            PROVIDER: "clerk",
 
-    // ==========================================================
-    // CLERK
-    // ==========================================================
-    CLERK: {
+            LOGIN_PAGE: "index.html",
 
-        PUBLISHABLE_KEY:
-            "pk_test_ZnVuLXBpZ2Vvbi02Mi5jbGVyay5hY2NvdW50cy5kZXYk"
+            PLAYER_PAGE: "player.html",
 
-    },
+            ENABLE_LOGIN: true,
 
-    // ==========================================================
-    // PLAYER
-    // ==========================================================
-    PLAYER: {
+            ENABLE_REGISTER: true,
 
-        PROVIDER: "listen2myradio",
+            ENABLE_OTP: true,
 
-        STREAM_URL:
-            "https://b.alhastream.com:5125/radio",
+            REQUIRE_ADMIN_APPROVAL: true,
 
-        AUTO_PLAY: false,
+            REMEMBER_ME: true,
 
-        DEFAULT_VOLUME: 1.0,
+            MIN_PASSWORD_LENGTH: 8,
 
-        AUTO_RECONNECT: true,
+            MAX_LOGIN_ATTEMPTS: 5,
 
-        RECONNECT_DELAY: 5000,
+            LOCK_DURATION_MINUTES: 5
 
-        CONNECTION_TIMEOUT: 15000
+        }),
 
-    },
+        CLERK: Object.freeze({
 
-    // ==========================================================
-    // SESSION
-    // ==========================================================
-    SESSION: {
+            PUBLISHABLE_KEY:
+                "pk_test_ZnVuLXBpZ2Vvbi02Mi5jbGVyay5hY2NvdW50cy5kZXYk"
 
-        DURATION_HOURS: 4,
+        }),
 
-        WARNING_MINUTES: 5,
+        PLAYER: Object.freeze({
 
-        AUTO_REFRESH: true
+            PROVIDER: "listen2myradio",
 
-    },
+            STREAM_URL:
+                "https://b.alhastream.com:5125/radio",
 
-    // ==========================================================
-    // STORAGE
-    // ==========================================================
-    STORAGE: {
+            AUTO_PLAY: false,
 
-        PROVIDER: "localstorage",
+            DEFAULT_VOLUME: 1,
 
-        PREFIX: "npc",
+            AUTO_RECONNECT: true,
 
-        KEYS: {
+            RECONNECT_DELAY: 5000,
 
-            SESSION: "session",
+            CONNECTION_TIMEOUT: 15000
 
-            USER: "user",
+        }),
 
-            REMEMBER: "remember",
+        SESSION: Object.freeze({
 
-            SETTINGS: "settings",
+            DURATION_HOURS: 4,
 
-            LAST_LOGIN: "last_login"
+            WARNING_MINUTES: 5,
 
-        }
+            AUTO_REFRESH: true
 
-    },
+        }),
 
-    // ==========================================================
-    // OTP
-    // ==========================================================
-    OTP: {
+        OTP: Object.freeze({
 
-        LENGTH: 6,
+            LENGTH: 6,
 
-        EXPIRE_MINUTES: 5,
+            EXPIRE_MINUTES: 5,
 
-        RESEND_SECONDS: 60
+            RESEND_SECONDS: 60
 
-    },
+        }),
 
-    // ==========================================================
-    // UI
-    // ==========================================================
-    UI: {
+        STORAGE: Object.freeze({
 
-        ENABLE_ANIMATION: true,
+            PROVIDER: "localstorage",
 
-        ENABLE_RIPPLE: true,
+            PREFIX: "npc",
 
-        TOAST_DURATION: 4000,
+            KEYS: Object.freeze({
 
-        LOADING_DELAY: 300
+                SESSION: "session",
 
-    },
+                USER: "user",
 
-    // ==========================================================
-    // PWA
-    // ==========================================================
-    PWA: {
+                REMEMBER: "remember",
 
-        ENABLED: true,
+                SETTINGS: "settings",
 
-        CACHE_VERSION: "1.0.0",
+                LAST_LOGIN: "last_login"
 
-        OFFLINE_PAGE: "offline.html"
+            })
 
-    },
+        }),
 
-    // ==========================================================
-    // SECURITY
-    // ==========================================================
-    SECURITY: {
+        UI: Object.freeze({
 
-        REQUIRE_HTTPS: true,
+            ENABLE_ANIMATION: true,
 
-        HASH_SESSION: true,
+            ENABLE_RIPPLE: true,
 
-        ENCRYPT_LOCAL_STORAGE: false
+            TOAST_DURATION: 4000,
 
-    },
+            LOADING_DELAY: 300
 
-    // ==========================================================
-    // PLUGINS
-    // ==========================================================
-    PLUGINS: {
+        }),
 
-        AUTH: "clerk",
+        PWA: Object.freeze({
 
-        PLAYER: "listen2myradio",
+            ENABLED: true,
 
-        STORAGE: "localstorage",
+            CACHE_VERSION: "1.0.0",
 
-        NOTIFICATION: null,
+            OFFLINE_PAGE: "offline.html"
 
-        ANALYTICS: null
+        }),
 
-    },
+        SECURITY: Object.freeze({
 
-    // ==========================================================
-    // FEATURE FLAGS
-    // ==========================================================
-    FEATURES: {
+            REQUIRE_HTTPS: true,
 
-        LOGIN: true,
+            HASH_SESSION: true,
 
-        REGISTER: true,
+            ENCRYPT_LOCAL_STORAGE: false
 
-        PLAYER: true,
+        }),
 
-        OTP: true,
+        PLUGINS: Object.freeze({
 
-        REMEMBER_ME: true,
+            AUTH: "clerk",
 
-        PWA: true,
+            PLAYER: "listen2myradio",
 
-        OFFLINE_MODE: true
+            STORAGE: "localstorage",
 
-    },
+            NOTIFICATION: null,
 
-    // ==========================================================
-    // DEBUG
-    // ==========================================================
-    DEBUG: {
+            ANALYTICS: null
 
-        ENABLED: false,
+        }),
 
-        LOG_AUTH: false,
+        FEATURES: Object.freeze({
 
-        LOG_PLAYER: false,
+            LOGIN: true,
 
-        LOG_NETWORK: false,
+            REGISTER: true,
 
-        LOG_STORAGE: false,
+            PLAYER: true,
 
-        LOG_PLUGIN: false
+            OTP: true,
 
-    },
+            REMEMBER_ME: true,
 
-    // ==========================================================
-    // MAINTENANCE
-    // ==========================================================
-    MAINTENANCE: {
+            PWA: true,
 
-        ENABLED: false,
+            OFFLINE_MODE: true
 
-        MESSAGE:
-            "Aplikasi sedang dalam pemeliharaan. Silakan coba kembali beberapa saat lagi."
+        }),
 
-    }
+        DEBUG: Object.freeze({
 
-});
+            ENABLED: false,
+
+            LOG_AUTH: false,
+
+            LOG_PLAYER: false,
+
+            LOG_NETWORK: false,
+
+            LOG_STORAGE: false,
+
+            LOG_PLUGIN: false
+
+        }),
+
+        MAINTENANCE: Object.freeze({
+
+            ENABLED: false,
+
+            MESSAGE:
+                "Aplikasi sedang dalam pemeliharaan. Silakan coba kembali beberapa saat lagi."
+
+        })
+
+    });
+
+    NPC.Config = Config;
+
+})(window);
