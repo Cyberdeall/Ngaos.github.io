@@ -5,125 +5,222 @@
  * File        : volume.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Volume Manager.
+ * Player Volume Manager.
  *
- * Mengelola volume dan mute.
- * Tidak mengontrol tombol UI.
- * Tidak mengontrol play/pause.
+ * Mengatur volume dan mute audio.
+ * Tidak menangani UI.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    if (!NPC.Player || !NPC.Player.Engine) {
-        throw new Error("Player Engine belum dimuat.");
-    }
 
-    NPC.Player = NPC.Player || {};
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class VolumeManager {
 
-        constructor() {
 
-            this.audio = NPC.Player.Engine.getAudio();
 
-            this.volume = 1;
+        constructor(engine){
 
-            this.previousVolume = 1;
 
-            this.audio.volume = this.volume;
+            this.engine =
+                engine;
+
+
+            this.value =
+                1;
+
+
+            this.muted =
+                false;
+
 
         }
 
-        set(value) {
 
-            value = Number(value);
 
-            if (Number.isNaN(value)) {
+
+
+        set(value){
+
+
+            value =
+                Number(value);
+
+
+
+            if(
+                Number.isNaN(value)
+            ){
+
                 return;
+
             }
 
-            value = Math.max(0, Math.min(1, value));
 
-            this.volume = value;
 
-            this.audio.volume = value;
+            this.value =
+                Math.min(
+                    1,
+                    Math.max(
+                        0,
+                        value
+                    )
+                );
 
-            if (value > 0) {
-                this.previousVolume = value;
+
+
+            if(this.engine){
+
+                this.engine.volume(
+                    this.value
+                );
+
             }
+
+
 
             NPC.Core.Events?.emit(
                 "player.volume.changed",
-                value
+                this.value
             );
 
-        }
-
-        get() {
-
-            return this.volume;
 
         }
 
-        mute() {
 
-            if (this.volume > 0) {
-                this.previousVolume = this.volume;
+
+
+
+        get(){
+
+
+            return this.value;
+
+
+        }
+
+
+
+
+
+        mute(){
+
+
+            this.muted =
+                true;
+
+
+
+            if(this.engine){
+
+                this.engine.muted(
+                    true
+                );
+
             }
 
-            this.set(0);
+
 
             NPC.Core.Events?.emit(
-                "player.volume.mute"
+                "player.muted"
             );
+
 
         }
 
-        unmute() {
 
-            this.set(
-                this.previousVolume || 1
-            );
+
+
+
+        unmute(){
+
+
+            this.muted =
+                false;
+
+
+
+            if(this.engine){
+
+                this.engine.muted(
+                    false
+                );
+
+            }
+
+
 
             NPC.Core.Events?.emit(
-                "player.volume.unmute"
+                "player.unmuted"
             );
+
 
         }
 
-        toggleMute() {
 
-            if (this.volume === 0) {
+
+
+
+        toggle(){
+
+
+            if(this.muted){
+
                 this.unmute();
-            } else {
+
+            }else{
+
                 this.mute();
+
             }
 
-        }
-
-        isMuted() {
-
-            return this.volume === 0;
 
         }
+
+
+
+
+
+        isMuted(){
+
+
+            return this.muted;
+
+
+        }
+
+
 
     }
 
-    Object.freeze(VolumeManager);
+
+
+
 
     NPC.Player.Volume =
-        new VolumeManager();
+        VolumeManager;
+
+
 
 })(window.NPC);
