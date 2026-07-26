@@ -4,255 +4,234 @@
  * ----------------------------------------------------------------------------
  * File        : clerk.js
  * Folder      : /js/auth
- * Version     : 1.0.0
+ * Version     : 2.0.0
+ * Author      : Fadil Ahmad & ChatGPT
+ * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
  * Clerk Authentication Provider.
  *
- * Implementasi provider pertama.
+ * Provider ini mengimplementasikan NPC.Auth.Adapter.
+ * Seluruh pengelolaan Session, Event, UI, dan Navigation dilakukan
+ * oleh auth.js, bukan oleh provider.
  * ============================================================================
  */
 
 "use strict";
 
+(function (NPC) {
 
-(function(NPC){
-
-
-    if(!NPC){
-
-        throw new Error(
-            "NPC namespace belum tersedia."
-        );
-
+    if (!NPC) {
+        throw new Error("NPC namespace belum tersedia.");
     }
 
+    if (!NPC.Auth || !NPC.Auth.Adapter) {
+        throw new Error("Auth Adapter belum dimuat.");
+    }
 
-    NPC.Auth =
-        NPC.Auth || {};
+    class ClerkProvider extends NPC.Auth.Adapter {
 
+        constructor() {
 
+            super("clerk");
 
-    const ClerkProvider = {
+            this.client = null;
 
+        }
 
+        async init() {
 
-        name:
+            if (this.client) {
+                return true;
+            }
 
-        "clerk",
-
-
-
-
-        client:null,
-
-
-
-        async init(){
-
-
-            if(
-                typeof Clerk === "undefined"
-            ){
+            if (typeof Clerk === "undefined") {
 
                 console.warn(
-                    "Clerk SDK belum dimuat."
+                    "[NPC] Clerk SDK belum dimuat."
                 );
-
 
                 return false;
 
             }
 
-
-
-            try{
-
+            try {
 
                 await Clerk.load();
 
+                this.client = Clerk;
 
-
-                ClerkProvider.client =
-                    Clerk;
-
-
-
-                NPC.Core.Logger?.info(
-                    "Clerk berhasil diinisialisasi"
+                console.log(
+                    "[NPC] Clerk Provider siap."
                 );
-
 
                 return true;
 
+            } catch (error) {
 
-
-            }catch(error){
-
-
-                NPC.Core.Logger?.error(
-                    "Clerk gagal init",
+                console.error(
+                    "[NPC] Clerk gagal diinisialisasi.",
                     error
                 );
 
-
-                return false;
-
-
-            }
-
-
-        },
-
-
-
-
-
-        async login(){
-
-
-            if(
-                !ClerkProvider.client
-            ){
-
-                throw new Error(
-                    "Clerk belum siap."
-                );
-
-            }
-
-
-
-            return await ClerkProvider
-            .client
-            .openSignIn();
-
-
-        },
-
-
-
-
-
-        async register(){
-
-
-            if(
-                !ClerkProvider.client
-            ){
-
-                throw new Error(
-                    "Clerk belum siap."
-                );
-
-            }
-
-
-
-            return await ClerkProvider
-            .client
-            .openSignUp();
-
-
-        },
-
-
-
-
-
-        async logout(){
-
-
-            if(
-                !ClerkProvider.client
-            ){
-
                 return false;
 
             }
 
+        }
 
+        isReady() {
 
-            await ClerkProvider
-            .client
-            .signOut();
+            return this.client !== null;
 
+        }
+                /**
+         * Login menggunakan Clerk
+         * @returns {Promise<Object>}
+         */
+        async login() {
 
+            if (!this.isReady()) {
 
-            NPC.Core.Session.destroy();
-
-
-
-            return true;
-
-
-        },
-
-
-
-
-
-        async user(){
-
-
-            if(
-                !ClerkProvider.client
-            ){
-
-                return null;
+                throw new Error(
+                    "Clerk Provider belum diinisialisasi."
+                );
 
             }
 
+            try {
 
+                await this.client.openSignIn();
 
-            return ClerkProvider
-            .client
-            .user;
+                return this.getCurrentUser();
 
+            } catch (error) {
 
+                console.error(
+                    "[NPC] Login Clerk gagal.",
+                    error
+                );
 
-        },
+                throw error;
 
-
-
-
-
-        isReady(){
-
-
-            return (
-                ClerkProvider.client !== null
-            );
-
+            }
 
         }
 
 
 
-    };
+        /**
+         * Registrasi menggunakan Clerk
+         * @returns {Promise<Object>}
+         */
+        async register() {
+
+            if (!this.isReady()) {
+
+                throw new Error(
+                    "Clerk Provider belum diinisialisasi."
+                );
+
+            }
+
+            try {
+
+                await this.client.openSignUp();
+
+                return this.getCurrentUser();
+
+            } catch (error) {
+
+                console.error(
+                    "[NPC] Registrasi Clerk gagal.",
+                    error
+                );
+
+                throw error;
+
+            }
+
+        }
 
 
 
-    Object.freeze(
-        ClerkProvider
-    );
+        /**
+         * Ambil user yang sedang login
+         * @returns {Object|null}
+         */
+        getCurrentUser() {
+
+            if (!this.isReady()) {
+
+                return null;
+
+            }
+
+            return this.client.user || null;
+
+        }
+                /**
+         * Logout user
+         * @returns {Promise<boolean>}
+         */
+        async logout() {
+
+            if (!this.isReady()) {
+                return false;
+            }
+
+            try {
+
+                await this.client.signOut();
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "[NPC] Logout Clerk gagal.",
+                    error
+                );
+
+                throw error;
+
+            }
+
+        }
 
 
 
-    NPC.Auth.Clerk =
-        ClerkProvider;
+        /**
+         * Cek status autentikasi
+         * @returns {boolean}
+         */
+        isAuthenticated() {
+
+            if (!this.isReady()) {
+                return false;
+            }
+
+            return !!this.client.user;
+
+        }
+
+    }
 
 
 
-    /*
-       Mengganti adapter default
-       dengan Clerk provider
-    */
-
-    NPC.Auth.Provider =
-        ClerkProvider;
+    Object.freeze(ClerkProvider);
 
 
+
+    /**
+     * Registrasi provider.
+     *
+     * Provider aktif dipilih oleh:
+     * js/core/provider.js
+     *
+     * BUKAN oleh file ini.
+     */
+    NPC.Auth.Clerk = new ClerkProvider();
 
 })(window.NPC);
