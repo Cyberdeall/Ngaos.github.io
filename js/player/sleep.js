@@ -5,138 +5,227 @@
  * File        : sleep.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
  * Sleep Timer Manager.
  *
- * Mengatur penghentian player secara otomatis setelah waktu tertentu.
- * Tidak menangani UI dan tidak berhubungan langsung dengan Audio Engine.
+ * Mengatur penghentian otomatis player setelah waktu tertentu.
+ * Tidak mengontrol UI secara langsung.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class SleepTimer {
 
-        constructor() {
 
-            this.timer = null;
 
-            this.duration = 0;
+        constructor(){
 
-            this.startedAt = null;
 
-            this.active = false;
+            this.timer =
+                null;
+
+
+            this.remaining =
+                0;
+
+
+            this.active =
+                false;
+
 
         }
 
-        start(minutes) {
+
+
+
+
+        start(minutes){
+
 
             this.stop();
 
-            minutes = Number(minutes);
 
-            if (!Number.isFinite(minutes) || minutes <= 0) {
+
+            minutes =
+                Number(minutes);
+
+
+
+            if(
+                !Number.isFinite(minutes) ||
+                minutes <= 0
+            ){
+
                 return false;
+
             }
 
-            this.duration = minutes * 60000;
 
-            this.startedAt = Date.now();
 
-            this.active = true;
+            this.remaining =
+                minutes * 60;
 
-            this.timer = setTimeout(() => {
 
-                this.active = false;
 
-                this.timer = null;
+            this.active =
+                true;
 
-                NPC.Core.Events?.emit(
-                    "player.sleep.finished"
-                );
 
-            }, this.duration);
+
+            this.timer =
+                setInterval(()=>{
+
+
+                    this.remaining--;
+
+
+
+                    NPC.Core.Events?.emit(
+                        "player.sleep.tick",
+                        this.remaining
+                    );
+
+
+
+                    if(
+                        this.remaining <= 0
+                    ){
+
+                        this.finish();
+
+                    }
+
+
+
+                },1000);
+
+
+
 
             NPC.Core.Events?.emit(
                 "player.sleep.started",
                 {
-                    minutes,
-                    duration: this.duration
+                    minutes
                 }
             );
 
+
+
             return true;
 
+
         }
 
-        stop() {
 
-            if (this.timer) {
 
-                clearTimeout(this.timer);
 
-                this.timer = null;
 
-            }
+        finish(){
 
-            if (this.active) {
 
-                NPC.Core.Events?.emit(
-                    "player.sleep.cancelled"
+            this.stop();
+
+
+
+            NPC.Core.Events?.emit(
+                "player.sleep.finished"
+            );
+
+
+        }
+
+
+
+
+
+        stop(){
+
+
+            if(this.timer){
+
+
+                clearInterval(
+                    this.timer
                 );
 
+
+                this.timer =
+                    null;
+
+
             }
 
-            this.active = false;
 
-            this.duration = 0;
 
-            this.startedAt = null;
+            this.remaining =
+                0;
+
+
+
+            this.active =
+                false;
+
+
 
         }
 
-        isActive() {
+
+
+
+
+        isActive(){
+
 
             return this.active;
 
-        }
-
-        remaining() {
-
-            if (!this.active) {
-                return 0;
-            }
-
-            return Math.max(
-                0,
-                this.duration - (Date.now() - this.startedAt)
-            );
 
         }
 
-        getDuration() {
 
-            return this.duration;
+
+
+
+        getRemaining(){
+
+
+            return this.remaining;
+
 
         }
+
+
 
     }
 
-    Object.freeze(SleepTimer);
+
+
+
 
     NPC.Player.Sleep =
-        new SleepTimer();
+        SleepTimer;
+
+
 
 })(window.NPC);
