@@ -1,99 +1,143 @@
 /**
- * ============================================================
+ * ======================================================================
  * NGAOS PLATFORM CORE (NPC)
- * Constants
- * Version : 1.0.0
- * ============================================================
+ * ----------------------------------------------------------------------
+ * File        : constants.js
+ * Folder      : /js
+ * Version     : 1.0.0
+ * Author      : Fadil Ahmad & ChatGPT
+ * License     : Private
+ *
+ * Description
+ * ----------------------------------------------------------------------
  * Seluruh konstanta aplikasi.
+ *
+ * File ini berisi status, event, error code,
+ * regex, pesan sistem, HTTP status dan seluruh
+ * string tetap aplikasi.
+ *
  * Jangan menulis string tetap di file lain.
+ * ======================================================================
  */
+
+"use strict";
 
 const AppConstants = Object.freeze({
 
-    // ========================================================
-    // APP STATUS
-    // ========================================================
-    STATUS: {
+    VERSION: "1.0.0",
+
+    STATUS: Object.freeze({
 
         READY: "ready",
         LOADING: "loading",
-        ERROR: "error",
         SUCCESS: "success",
-        OFFLINE: "offline",
-        ONLINE: "online"
+        ERROR: "error",
+        ONLINE: "online",
+        OFFLINE: "offline"
 
-    },
+    }),
 
-    // ========================================================
-    // AUTH STATUS
-    // ========================================================
-    AUTH: {
+    AUTH: Object.freeze({
 
         SIGNED_OUT: "signed_out",
+
         SIGNING_IN: "signing_in",
+
         SIGNED_IN: "signed_in",
+
         REGISTERING: "registering",
+
         VERIFYING: "verifying",
+
         WAITING_APPROVAL: "waiting_approval",
+
         SESSION_EXPIRED: "session_expired"
 
-    },
+    }),
 
-    // ========================================================
-    // PLAYER STATUS
-    // ========================================================
-    PLAYER: {
+    PLAYER: Object.freeze({
 
         IDLE: "idle",
+
         CONNECTING: "connecting",
+
         CONNECTED: "connected",
+
         PLAYING: "playing",
+
         PAUSED: "paused",
+
         STOPPED: "stopped",
+
         BUFFERING: "buffering",
+
         RECONNECTING: "reconnecting",
+
         ERROR: "error"
 
-    },
+    }),
 
-    // ========================================================
-    // NETWORK STATUS
-    // ========================================================
-    NETWORK: {
-
-        ONLINE: "online",
-        OFFLINE: "offline",
-        SLOW: "slow"
-
-    },
-
-    // ========================================================
-    // EVENTS
-    // ========================================================
-    EVENTS: {
+    EVENTS: Object.freeze({
 
         APP_READY: "app.ready",
 
+        APP_ERROR: "app.error",
+
         USER_LOGIN: "user.login",
+
         USER_LOGOUT: "user.logout",
+
         USER_REGISTER: "user.register",
 
         PLAYER_READY: "player.ready",
+
         PLAYER_PLAY: "player.play",
+
         PLAYER_PAUSE: "player.pause",
+
         PLAYER_STOP: "player.stop",
 
+        PLAYER_ERROR: "player.error",
+
         NETWORK_ONLINE: "network.online",
+
         NETWORK_OFFLINE: "network.offline",
 
         SESSION_EXPIRED: "session.expired"
 
-    },
+    }),
 
-    // ========================================================
-    // ERROR CODE
-    // ========================================================
-    ERROR: {
+    STORAGE: Object.freeze({
+
+        LOCAL: "localstorage",
+
+        INDEXED_DB: "indexeddb",
+
+        MEMORY: "memory"
+
+    }),
+
+    HTTP: Object.freeze({
+
+        OK: 200,
+
+        CREATED: 201,
+
+        BAD_REQUEST: 400,
+
+        UNAUTHORIZED: 401,
+
+        FORBIDDEN: 403,
+
+        NOT_FOUND: 404,
+
+        TOO_MANY_REQUESTS: 429,
+
+        SERVER_ERROR: 500
+
+    }),
+
+    ERROR: Object.freeze({
 
         UNKNOWN: "unknown",
 
@@ -111,71 +155,34 @@ const AppConstants = Object.freeze({
 
         OTP_EXPIRED: "otp_expired",
 
-        APPROVAL_REQUIRED: "approval_required",
-
         SESSION_EXPIRED: "session_expired",
+
+        APPROVAL_REQUIRED: "approval_required",
 
         STREAM_OFFLINE: "stream_offline"
 
-    },
+    }),
 
-    // ========================================================
-    // SUCCESS MESSAGE
-    // ========================================================
-    SUCCESS: {
+    REGEX: Object.freeze({
 
-        LOGIN:
-            "Berhasil masuk.",
+        EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 
-        REGISTER:
-            "Pendaftaran berhasil. Silakan verifikasi akun Anda.",
+        USERNAME: /^[A-Za-z0-9._-]{3,30}$/,
 
-        OTP:
-            "Kode berhasil diverifikasi.",
+        OTP: /^[0-9]{6}$/
 
-        LOGOUT:
-            "Anda telah keluar dari aplikasi."
+    }),
 
-    },
+    MIME: Object.freeze({
 
-    // ========================================================
-    // FRIENDLY ERROR MESSAGE
-    // ========================================================
-    MESSAGES: {
+        MP3: "audio/mpeg",
 
-        INVALID_EMAIL:
-            "Alamat email tidak valid. Periksa kembali penulisannya.",
+        OGG: "audio/ogg",
 
-        WRONG_PASSWORD:
-            "Kata sandi yang Anda masukkan belum sesuai. Periksa kembali huruf besar dan kecilnya.",
+        AAC: "audio/aac",
 
-        EMAIL_EXISTS:
-            "Email sudah terdaftar. Silakan masuk menggunakan akun tersebut.",
+        JSON: "application/json"
 
-        EMAIL_NOT_FOUND:
-            "Email belum terdaftar. Silakan daftar terlebih dahulu.",
-
-        OTP_INVALID:
-            "Kode verifikasi salah. Periksa kembali kode yang dikirim ke email Anda.",
-
-        OTP_EXPIRED:
-            "Kode verifikasi telah kedaluwarsa. Silakan minta kode baru.",
-
-        APPROVAL_REQUIRED:
-            "Akun berhasil dibuat dan sedang menunggu persetujuan admin.",
-
-        SESSION_EXPIRED:
-            "Sesi Anda telah berakhir. Silakan masuk kembali.",
-
-        NETWORK:
-            "Tidak dapat terhubung ke internet. Periksa koneksi Anda.",
-
-        STREAM_OFFLINE:
-            "Siaran radio sedang tidak tersedia. Silakan coba beberapa saat lagi.",
-
-        UNKNOWN:
-            "Terjadi kesalahan yang tidak diketahui. Silakan coba kembali."
-
-    }
+    })
 
 });
