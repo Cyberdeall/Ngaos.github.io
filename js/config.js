@@ -1,65 +1,72 @@
 /**
- * ============================================================
+ * ======================================================================
  * NGAOS PLATFORM CORE (NPC)
- * Configuration
- * Version : 1.0.0
- * ============================================================
- * Seluruh konfigurasi aplikasi berada di file ini.
+ * ----------------------------------------------------------------------
+ * File        : config.js
+ * Folder      : /js
+ * Version     : 1.0.0
+ * Author      : Fadil Ahmad & ChatGPT
+ * License     : Private
+ *
+ * Description
+ * ----------------------------------------------------------------------
+ * Konfigurasi utama aplikasi.
+ *
+ * Seluruh pengaturan aplikasi wajib berada di file ini.
  * Jangan menulis konfigurasi di file lain.
+ * ======================================================================
  */
+
+"use strict";
 
 const AppConfig = Object.freeze({
 
-    // ========================================================
+    // ==========================================================
     // APPLICATION
-    // ========================================================
+    // ==========================================================
     APP: {
         NAME: "NGAOS AL FALAH PLOSO",
         DESCRIPTION: "Kajian Tafsir Jalalain & Shahih Bukhari",
         VERSION: "1.0.0",
-        BUILD: "2026.07",
-        ORGANIZATION: "Ngaos Al Falah",
-        AUTHOR: "Ngaos Platform Core",
+        BUILD: "2026.07.26",
+        ENVIRONMENT: "production", // development | testing | production
+        AUTHOR: "Fadil Ahmad",
+        PLATFORM: "Ngaos Platform Core",
         LICENSE: "Private"
     },
 
-    // ========================================================
-    // ENVIRONMENT
-    // ========================================================
-    ENV: {
-        MODE: "production", // development | testing | production
-    },
-
-    // ========================================================
+    // ==========================================================
     // AUTHENTICATION
-    // ========================================================
+    // ==========================================================
     AUTH: {
 
-        // Plugin aktif
         PROVIDER: "clerk",
 
-        // Redirect
         LOGIN_PAGE: "index.html",
+
         PLAYER_PAGE: "player.html",
 
-        // Persetujuan Admin
-        REQUIRE_APPROVAL: true,
+        REQUIRE_ADMIN_APPROVAL: true,
 
-        // Password
-        MIN_PASSWORD_LENGTH: 8,
+        ENABLE_REGISTER: true,
 
-        // Remember Me
+        ENABLE_LOGIN: true,
+
+        ENABLE_OTP: true,
+
         REMEMBER_ME: true,
 
-        // Login
-        MAX_LOGIN_ATTEMPT: 5,
+        MIN_PASSWORD_LENGTH: 8,
 
-        LOCK_TIME_MINUTES: 5
+        MAX_LOGIN_ATTEMPTS: 5,
+
+        LOCK_DURATION_MINUTES: 5
+
     },
 
-    // ========================================================
+    // ==========================================================
     // CLERK
-    // ========================================================
+    // ==========================================================
     CLERK: {
 
         PUBLISHABLE_KEY:
@@ -67,9 +74,9 @@ const AppConfig = Object.freeze({
 
     },
 
-    // ========================================================
+    // ==========================================================
     // PLAYER
-    // ========================================================
+    // ==========================================================
     PLAYER: {
 
         PROVIDER: "listen2myradio",
@@ -77,9 +84,9 @@ const AppConfig = Object.freeze({
         STREAM_URL:
             "https://b.alhastream.com:5125/radio",
 
-        AUTOPLAY: false,
+        AUTO_PLAY: false,
 
-        DEFAULT_VOLUME: 1,
+        DEFAULT_VOLUME: 1.0,
 
         AUTO_RECONNECT: true,
 
@@ -89,12 +96,12 @@ const AppConfig = Object.freeze({
 
     },
 
-    // ========================================================
+    // ==========================================================
     // SESSION
-    // ========================================================
+    // ==========================================================
     SESSION: {
 
-        TIMEOUT_HOURS: 4,
+        DURATION_HOURS: 4,
 
         WARNING_MINUTES: 5,
 
@@ -102,12 +109,35 @@ const AppConfig = Object.freeze({
 
     },
 
-    // ========================================================
-    // OTP
-    // ========================================================
-    OTP: {
+    // ==========================================================
+    // STORAGE
+    // ==========================================================
+    STORAGE: {
 
-        ENABLED: true,
+        PROVIDER: "localstorage",
+
+        PREFIX: "npc",
+
+        KEYS: {
+
+            SESSION: "session",
+
+            USER: "user",
+
+            REMEMBER: "remember",
+
+            SETTINGS: "settings",
+
+            LAST_LOGIN: "last_login"
+
+        }
+
+    },
+
+    // ==========================================================
+    // OTP
+    // ==========================================================
+    OTP: {
 
         LENGTH: 6,
 
@@ -117,60 +147,50 @@ const AppConfig = Object.freeze({
 
     },
 
-    // ========================================================
-    // STORAGE
-    // ========================================================
-    STORAGE: {
-
-        PROVIDER: "localstorage",
-
-        PREFIX: "npc_",
-
-        KEYS: {
-
-            SESSION: "session",
-
-            REMEMBER: "remember",
-
-            SETTINGS: "settings",
-
-            LAST_LOGIN: "last_login",
-
-            USER: "user"
-
-        }
-
-    },
-
-    // ========================================================
+    // ==========================================================
     // UI
-    // ========================================================
+    // ==========================================================
     UI: {
 
-        LOADING_DELAY: 300,
+        ENABLE_ANIMATION: true,
+
+        ENABLE_RIPPLE: true,
 
         TOAST_DURATION: 4000,
 
-        ANIMATION: true,
-
-        RIPPLE: true
+        LOADING_DELAY: 300
 
     },
 
-    // ========================================================
+    // ==========================================================
     // PWA
-    // ========================================================
+    // ==========================================================
     PWA: {
 
         ENABLED: true,
 
-        CACHE_VERSION: "v1"
+        CACHE_VERSION: "1.0.0",
+
+        OFFLINE_PAGE: "offline.html"
 
     },
 
-    // ========================================================
+    // ==========================================================
+    // SECURITY
+    // ==========================================================
+    SECURITY: {
+
+        REQUIRE_HTTPS: true,
+
+        HASH_SESSION: true,
+
+        ENCRYPT_LOCAL_STORAGE: false
+
+    },
+
+    // ==========================================================
     // PLUGINS
-    // ========================================================
+    // ==========================================================
     PLUGINS: {
 
         AUTH: "clerk",
@@ -185,22 +205,9 @@ const AppConfig = Object.freeze({
 
     },
 
-    // ========================================================
-    // SECURITY
-    // ========================================================
-    SECURITY: {
-
-        HASH_SESSION: true,
-
-        ENCRYPT_STORAGE: false,
-
-        REQUIRE_HTTPS: true
-
-    },
-
-    // ========================================================
-    // FEATURES
-    // ========================================================
+    // ==========================================================
+    // FEATURE FLAGS
+    // ==========================================================
     FEATURES: {
 
         LOGIN: true,
@@ -213,38 +220,40 @@ const AppConfig = Object.freeze({
 
         REMEMBER_ME: true,
 
-        APPROVAL: true,
+        PWA: true,
 
-        OFFLINE: true,
-
-        PWA: true
+        OFFLINE_MODE: true
 
     },
 
-    // ========================================================
+    // ==========================================================
     // DEBUG
-    // ========================================================
+    // ==========================================================
     DEBUG: {
 
         ENABLED: false,
 
+        LOG_AUTH: false,
+
+        LOG_PLAYER: false,
+
         LOG_NETWORK: false,
 
-        LOG_SESSION: false,
+        LOG_STORAGE: false,
 
         LOG_PLUGIN: false
 
     },
 
-    // ========================================================
+    // ==========================================================
     // MAINTENANCE
-    // ========================================================
+    // ==========================================================
     MAINTENANCE: {
 
         ENABLED: false,
 
         MESSAGE:
-            "Aplikasi sedang dalam pemeliharaan. Silakan coba beberapa saat lagi."
+            "Aplikasi sedang dalam pemeliharaan. Silakan coba kembali beberapa saat lagi."
 
     }
 
