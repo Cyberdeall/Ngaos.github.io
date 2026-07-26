@@ -4,12 +4,11 @@
  * ----------------------------------------------------------------------------
  * File        : translator.js
  * Folder      : /js/locales
- * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
+ * Version     : 2.0.0
  *
  * Description
  * ----------------------------------------------------------------------------
- * Internationalization Engine.
+ * Internationalization Manager.
  * ============================================================================
  */
 
@@ -28,98 +27,27 @@
     }
 
 
-    NPC.I18n =
-        NPC.I18n || {};
+
+    NPC.I18n = {
 
 
 
-    const I18n = {
-
-
-        language:
+        current:
         "id",
 
 
 
-        /**
-         * Mengambil teks
-         */
-        t(key){
-
-
-            let data =
-                NPC.Locale[
-                    I18n.language
-                ];
-
-
-
-            if(!data){
-
-                data =
-                    NPC.Locale.id;
-
-            }
-
-
-
-            const result =
-                key
-                .split(".")
-                .reduce(
-                    (obj,part)=>
-                    obj?.[part],
-                    data
-                );
-
-
-
-            if(result){
-
-                return result;
-
-            }
-
-
-
-            // fallback Indonesia
-
-            const fallback =
-                key
-                .split(".")
-                .reduce(
-                    (obj,part)=>
-                    obj?.[part],
-                    NPC.Locale.id
-                );
-
-
-
-            return (
-                fallback ||
-                key
-            );
-
-
-        },
-
-
-
-        /**
-         * Mengubah bahasa
-         */
         setLanguage(lang){
 
 
             if(
-                !NPC.Locale[lang]
+                !NPC.Locales[lang]
             ){
 
                 console.warn(
-                    "Language tidak tersedia:",
+                    "Bahasa tidak tersedia:",
                     lang
                 );
-
 
                 return false;
 
@@ -127,15 +55,29 @@
 
 
 
-            I18n.language =
-                lang;
+            NPC.I18n.current =
+            lang;
 
 
 
-            NPC.Core.Events?.emit(
-                "language.changed",
+            localStorage.setItem(
+                "npc_language",
                 lang
             );
+
+
+
+            if(
+                NPC.Core &&
+                NPC.Core.Events
+            ){
+
+                NPC.Core.Events.emit(
+                    "language.changed",
+                    lang
+                );
+
+            }
 
 
 
@@ -146,43 +88,96 @@
 
 
 
-        /**
-         * Bahasa aktif
-         */
-        current(){
 
 
-            return I18n.language;
+        getLanguage(){
+
+
+            return NPC.I18n.current;
 
 
         },
 
 
 
-        /**
-         * Daftar bahasa
-         */
-        available(){
 
 
-            return Object.keys(
-                NPC.Locale
+        t(key){
+
+
+            const lang =
+            NPC.I18n.current;
+
+
+
+            const dictionary =
+            NPC.Locales[lang];
+
+
+
+            if(!dictionary){
+
+                return key;
+
+            }
+
+
+
+            const parts =
+            key.split(".");
+
+
+
+            let result =
+            dictionary;
+
+
+
+            for(
+                const part of parts
+            ){
+
+                result =
+                result?.[part];
+
+            }
+
+
+
+            return result || key;
+
+
+        },
+
+
+
+
+
+        init(){
+
+
+            const saved =
+            localStorage.getItem(
+                "npc_language"
             );
+
+
+
+            if(saved){
+
+                NPC.I18n.setLanguage(
+                    saved
+                );
+
+            }
+
 
 
         }
 
 
+
     };
-
-
-
-    Object.freeze(I18n);
-
-
-
-    NPC.I18n =
-        I18n;
 
 
 
