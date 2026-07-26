@@ -5,11 +5,12 @@
  * File        : loading.js
  * Folder      : /js/ui
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
  *
  * Description
  * ----------------------------------------------------------------------------
- * Global Loading Overlay Manager.
+ * Loading State Controller.
+ *
+ * Mengelola status loading tombol dan proses aplikasi.
  * ============================================================================
  */
 
@@ -28,151 +29,201 @@
     }
 
 
-    NPC.UI = NPC.UI || {};
 
-
-    let overlay = null;
-
-
-
-    function create(){
-
-
-        if(overlay){
-
-            return;
-
-        }
-
-
-
-        overlay =
-            document.createElement(
-                "div"
-            );
-
-
-        overlay.className =
-            "npc-loading-overlay";
-
-
-        overlay.innerHTML = `
-
-            <div class="npc-loading-box">
-
-                <div class="npc-spinner"></div>
-
-                <div class="npc-loading-text">
-                    Memuat...
-                </div>
-
-            </div>
-
-        `;
-
-
-
-        document.body.appendChild(
-            overlay
-        );
-
-
-    }
-
-
-
-    function show(message="Memuat..."){
-
-
-        create();
-
-
-
-        const text =
-            overlay.querySelector(
-                ".npc-loading-text"
-            );
-
-
-        if(text){
-
-            text.textContent =
-                message;
-
-        }
-
-
-
-        overlay.classList.add(
-            "active"
-        );
-
-
-
-        NPC.Core.Events?.emit(
-            "loading.show",
-            message
-        );
-
-
-    }
-
-
-
-    function hide(){
-
-
-        if(!overlay){
-
-            return;
-
-        }
-
-
-
-        overlay.classList.remove(
-            "active"
-        );
-
-
-
-        NPC.Core.Events?.emit(
-            "loading.hide"
-        );
-
-
-    }
+    NPC.UI =
+    NPC.UI || {};
 
 
 
     const Loading = {
 
 
-        show,
+
+        activeCount:0,
 
 
-        hide,
+
+        show(target){
 
 
-        visible(){
+            if(
+                typeof target === "string"
+            ){
+
+                target =
+                document.querySelector(
+                    target
+                );
+
+            }
+
+
+
+            if(!target){
+
+                return false;
+
+            }
+
+
+
+            Loading.activeCount++;
+
+
+
+            target.disabled =
+            true;
+
+
+
+            target.classList
+            .add("loading");
+
+
+
+            const text =
+            target.querySelector(
+                ".btn-text"
+            );
+
+
+
+            const loader =
+            target.querySelector(
+                ".btn-loader"
+            );
+
+
+
+            if(text){
+
+                text.classList
+                .add("hidden");
+
+            }
+
+
+
+            if(loader){
+
+                loader.classList
+                .remove("hidden");
+
+            }
+
+
+
+            return true;
+
+
+        },
+
+
+
+
+
+        hide(target){
+
+
+            if(
+                typeof target === "string"
+            ){
+
+                target =
+                document.querySelector(
+                    target
+                );
+
+            }
+
+
+
+            if(!target){
+
+                return false;
+
+            }
+
+
+
+            Loading.activeCount =
+            Math.max(
+                0,
+                Loading.activeCount - 1
+            );
+
+
+
+            target.disabled =
+            false;
+
+
+
+            target.classList
+            .remove("loading");
+
+
+
+            const text =
+            target.querySelector(
+                ".btn-text"
+            );
+
+
+
+            const loader =
+            target.querySelector(
+                ".btn-loader"
+            );
+
+
+
+            if(text){
+
+                text.classList
+                .remove("hidden");
+
+            }
+
+
+
+            if(loader){
+
+                loader.classList
+                .add("hidden");
+
+            }
+
+
+
+            return true;
+
+
+        },
+
+
+
+
+
+        isLoading(){
 
 
             return (
-                overlay &&
-                overlay.classList.contains(
-                    "active"
-                )
+                Loading.activeCount > 0
             );
 
 
         }
 
 
+
     };
 
 
 
-    Object.freeze(Loading);
+    Object.freeze(
+        Loading
+    );
 
 
 
