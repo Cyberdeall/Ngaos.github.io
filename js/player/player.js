@@ -5,130 +5,255 @@
  * File        : player.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Player Facade.
+ * Public Player Interface.
  *
- * Seluruh modul aplikasi wajib menggunakan API pada file ini.
- * Jangan mengakses Engine, Volume ataupun Metadata secara langsung.
+ * Semua aplikasi menggunakan file ini.
+ * Modul internal tidak dipanggil langsung dari luar.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     const Player = {
 
-        play() {
 
-            return NPC.Player.Engine.play();
 
-        },
+        /**
+         * Load stream
+         */
+        load(url){
 
-        pause() {
 
-            return NPC.Player.Engine.pause();
+            return NPC.Player.Engine
+            .load(url);
 
-        },
-
-        stop() {
-
-            return NPC.Player.Engine.stop();
 
         },
 
-        toggle() {
 
-            if (NPC.Player.Engine.isPlaying()) {
-                return this.pause();
+
+
+
+        /**
+         * Play
+         */
+        async play(){
+
+
+            return await NPC.Player.Engine
+            .play();
+
+
+        },
+
+
+
+
+
+        /**
+         * Pause
+         */
+        pause(){
+
+
+            return NPC.Player.Engine
+            .pause();
+
+
+        },
+
+
+
+
+
+        /**
+         * Stop
+         */
+        stop(){
+
+
+            return NPC.Player.Engine
+            .stop();
+
+
+        },
+
+
+
+
+
+        /**
+         * Volume
+         */
+        volume(value){
+
+
+            if(
+                value === undefined
+            ){
+
+                return NPC.Player.Engine
+                .volume();
+
             }
 
-            return this.play();
+
+
+            return NPC.Player.Engine
+            .volume(value);
+
 
         },
 
-        source(url) {
 
-            if (url === undefined) {
-                return NPC.Player.Engine.getSource();
-            }
 
-            NPC.Player.Engine.setSource(url);
 
-        },
 
-        volume(value) {
+        /**
+         * Mute
+         */
+        mute(status=true){
 
-            if (value === undefined) {
-                return NPC.Player.Volume.get();
-            }
 
-            NPC.Player.Volume.set(value);
+            return NPC.Player.Engine
+            .muted(status);
+
 
         },
 
-        mute() {
 
-            NPC.Player.Volume.mute();
 
-        },
 
-        unmute() {
 
-            NPC.Player.Volume.unmute();
+        /**
+         * Metadata
+         */
+        metadata(){
 
-        },
 
-        metadata() {
+            return NPC.Player.Metadata
+            .get();
 
-            return NPC.Player.Metadata.get();
 
         },
 
-        statistics() {
 
-            return NPC.Player.Statistics.get();
 
-        },
 
-        sleep(minutes) {
 
-            NPC.Player.Sleep.start(minutes);
+        /**
+         * Sleep timer
+         */
+        sleep(minutes){
 
-        },
 
-        cancelSleep() {
+            return NPC.Player.Sleep
+            .start(minutes);
 
-            NPC.Player.Sleep.stop();
 
         },
 
-        isPlaying() {
 
-            return NPC.Player.Engine.isPlaying();
+
+
+
+        /**
+         * Cancel sleep
+         */
+        cancelSleep(){
+
+
+            return NPC.Player.Sleep
+            .stop();
+
 
         },
 
-        isReady() {
 
-            return NPC.Player.Engine.isReady();
+
+
+
+        /**
+         * Statistics
+         */
+        statistics(){
+
+
+            return NPC.Player.Statistics
+            .get();
+
+
+        },
+
+
+
+
+
+        /**
+         * Current source
+         */
+        source(){
+
+
+            return NPC.Player.Engine
+            .getSource();
+
+
+        },
+
+
+
+
+
+        /**
+         * Playing status
+         */
+        isPlaying(){
+
+
+            return NPC.Player.Engine
+            .playing();
+
 
         }
 
+
+
     };
 
-    Object.freeze(Player);
 
-    NPC.Player.API = Player;
+
+    Object.freeze(
+        Player
+    );
+
+
+
+    NPC.Player.API =
+        Player;
+
+
 
 })(window.NPC);
