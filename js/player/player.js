@@ -8,10 +8,9 @@
  *
  * Description
  * ----------------------------------------------------------------------------
- * Public Player Interface.
+ * Main Player Controller.
  *
- * Semua aplikasi menggunakan file ini.
- * Modul internal tidak dipanggil langsung dari luar.
+ * Interface utama aplikasi untuk audio streaming.
  * ============================================================================
  */
 
@@ -30,9 +29,12 @@
     }
 
 
-
     NPC.Player =
         NPC.Player || {};
+
+
+
+    let currentSource = null;
 
 
 
@@ -40,10 +42,39 @@
 
 
 
-        /**
-         * Load stream
-         */
+        async init(){
+
+
+            NPC.Core.Events?.emit(
+                "player.init"
+            );
+
+
+            return true;
+
+
+        },
+
+
+
+
+
         load(url){
+
+
+            if(!url){
+
+                throw new Error(
+                    "Stream URL kosong."
+                );
+
+            }
+
+
+
+            currentSource =
+                url;
+
 
 
             return NPC.Player.Engine
@@ -56,9 +87,6 @@
 
 
 
-        /**
-         * Play
-         */
         async play(){
 
 
@@ -72,9 +100,6 @@
 
 
 
-        /**
-         * Pause
-         */
         pause(){
 
 
@@ -88,9 +113,6 @@
 
 
 
-        /**
-         * Stop
-         */
         stop(){
 
 
@@ -104,18 +126,38 @@
 
 
 
-        /**
-         * Volume
-         */
+        toggle(){
+
+
+            if(
+                NPC.Player.Engine.playing()
+            ){
+
+                return this.pause();
+
+            }
+
+
+
+            return this.play();
+
+
+        },
+
+
+
+
+
         volume(value){
 
 
             if(
-                value === undefined
+                NPC.Player.Volume &&
+                typeof NPC.Player.Volume === "object"
             ){
 
-                return NPC.Player.Engine
-                .volume();
+                return NPC.Player.Volume
+                .set(value);
 
             }
 
@@ -131,14 +173,22 @@
 
 
 
-        /**
-         * Mute
-         */
-        mute(status=true){
+        mute(){
+
+
+            if(
+                NPC.Player.Volume
+            ){
+
+                return NPC.Player.Volume
+                .mute();
+
+            }
+
 
 
             return NPC.Player.Engine
-            .muted(status);
+            .muted(true);
 
 
         },
@@ -147,14 +197,47 @@
 
 
 
-        /**
-         * Metadata
-         */
+        unmute(){
+
+
+            if(
+                NPC.Player.Volume
+            ){
+
+                return NPC.Player.Volume
+                .unmute();
+
+            }
+
+
+
+            return NPC.Player.Engine
+            .muted(false);
+
+
+        },
+
+
+
+
+
+        source(){
+
+
+            return currentSource;
+
+
+        },
+
+
+
+
+
         metadata(){
 
 
             return NPC.Player.Metadata
-            .get();
+            ?.get();
 
 
         },
@@ -163,46 +246,11 @@
 
 
 
-        /**
-         * Sleep timer
-         */
-        sleep(minutes){
-
-
-            return NPC.Player.Sleep
-            .start(minutes);
-
-
-        },
-
-
-
-
-
-        /**
-         * Cancel sleep
-         */
-        cancelSleep(){
-
-
-            return NPC.Player.Sleep
-            .stop();
-
-
-        },
-
-
-
-
-
-        /**
-         * Statistics
-         */
         statistics(){
 
 
             return NPC.Player.Statistics
-            .get();
+            ?.get();
 
 
         },
@@ -211,14 +259,11 @@
 
 
 
-        /**
-         * Current source
-         */
-        source(){
+        sleep(minutes){
 
 
-            return NPC.Player.Engine
-            .getSource();
+            return NPC.Player.Sleep
+            ?.start(minutes);
 
 
         },
@@ -227,14 +272,24 @@
 
 
 
-        /**
-         * Playing status
-         */
+        reconnect(){
+
+
+            return NPC.Player.Reconnect
+            ?.schedule();
+
+
+        },
+
+
+
+
+
         isPlaying(){
 
 
             return NPC.Player.Engine
-            .playing();
+            ?.playing();
 
 
         }
@@ -251,8 +306,11 @@
 
 
 
-    NPC.Player.API =
-        Player;
+    NPC.Player =
+    Object.assign(
+        NPC.Player,
+        Player
+    );
 
 
 
