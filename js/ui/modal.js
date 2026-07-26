@@ -5,11 +5,12 @@
  * File        : modal.js
  * Folder      : /js/ui
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
  *
  * Description
  * ----------------------------------------------------------------------------
- * Universal Modal Manager.
+ * Modal Controller.
+ *
+ * Mengontrol modal aplikasi tanpa bergantung pada halaman tertentu.
  * ============================================================================
  */
 
@@ -28,247 +29,157 @@
     }
 
 
-    NPC.UI = NPC.UI || {};
 
-
-    let overlay = null;
-
-
-
-    function create(){
-
-
-        if(overlay){
-
-            return;
-
-        }
-
-
-
-        overlay =
-            document.createElement(
-                "div"
-            );
-
-
-        overlay.className =
-            "npc-modal-overlay";
-
-
-        overlay.innerHTML = `
-
-            <div class="npc-modal">
-
-                <div class="npc-modal-header">
-
-                    <h3 class="npc-modal-title"></h3>
-
-                    <button class="npc-modal-close">
-                        ×
-                    </button>
-
-                </div>
-
-
-                <div class="npc-modal-body"></div>
-
-
-                <div class="npc-modal-footer"></div>
-
-
-            </div>
-
-        `;
-
-
-
-        document.body.appendChild(
-            overlay
-        );
-
-
-
-        overlay
-        .querySelector(
-            ".npc-modal-close"
-        )
-        .onclick =
-        close;
-
-
-    }
-
-
-
-    function open(options={}){
-
-
-        create();
-
-
-
-        const title =
-            overlay.querySelector(
-                ".npc-modal-title"
-            );
-
-
-        const body =
-            overlay.querySelector(
-                ".npc-modal-body"
-            );
-
-
-        const footer =
-            overlay.querySelector(
-                ".npc-modal-footer"
-            );
-
-
-
-        title.textContent =
-            options.title || "";
-
-
-
-        body.innerHTML =
-            options.content || "";
-
-
-
-        footer.innerHTML =
-            options.footer || "";
-
-
-
-        overlay.classList.add(
-            "active"
-        );
-
-
-    }
-
-
-
-    function close(){
-
-
-        if(overlay){
-
-            overlay.classList.remove(
-                "active"
-            );
-
-        }
-
-
-    }
+    NPC.UI =
+    NPC.UI || {};
 
 
 
     const Modal = {
 
 
-        open,
+
+        get(id){
 
 
-        close,
-
-
-
-        alert(message,title="Informasi"){
-
-
-            open({
-
-                title,
-
-                content:
-                `<p>${message}</p>`,
-
-                footer:
-                `
-                <button
-                class="npc-modal-ok">
-                OK
-                </button>
-                `
-
-            });
-
-
-
-            overlay
-            .querySelector(
-                ".npc-modal-ok"
-            )
-            ?.addEventListener(
-                "click",
-                close
+            return document.getElementById(
+                id
             );
 
 
         },
 
 
-        confirm(
-            message,
-            onConfirm,
-            title="Konfirmasi"
-        ){
-
-
-            open({
-
-                title,
-
-                content:
-                `<p>${message}</p>`,
-
-                footer:
-                `
-                <button
-                class="npc-modal-cancel">
-                Batal
-                </button>
-
-                <button
-                class="npc-modal-confirm">
-                Ya
-                </button>
-                `
-
-            });
 
 
 
-            overlay
-            .querySelector(
-                ".npc-modal-cancel"
-            )
-            ?.addEventListener(
-                "click",
-                close
+        open(id){
+
+
+            const modal =
+            Modal.get(id);
+
+
+
+            if(!modal){
+
+                console.warn(
+                    "Modal tidak ditemukan:",
+                    id
+                );
+
+                return false;
+
+            }
+
+
+
+            modal.classList
+            .remove("hidden");
+
+
+
+            modal.setAttribute(
+                "aria-hidden",
+                "false"
             );
 
 
 
-            overlay
-            .querySelector(
-                ".npc-modal-confirm"
+            return true;
+
+
+        },
+
+
+
+
+
+        close(id){
+
+
+            const modal =
+            Modal.get(id);
+
+
+
+            if(!modal){
+
+                return false;
+
+            }
+
+
+
+            modal.classList
+            .add("hidden");
+
+
+
+            modal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+
+            return true;
+
+
+        },
+
+
+
+
+
+        toggle(id){
+
+
+            const modal =
+            Modal.get(id);
+
+
+
+            if(!modal){
+
+                return false;
+
+            }
+
+
+
+            if(
+                modal.classList
+                .contains("hidden")
+            ){
+
+                return Modal.open(id);
+
+            }
+
+
+
+            return Modal.close(id);
+
+
+        },
+
+
+
+
+
+        closeAll(){
+
+
+            document
+            .querySelectorAll(
+                ".modal-overlay"
             )
-            ?.addEventListener(
-                "click",
-                ()=>{
+            .forEach(
+                modal=>{
 
-                    close();
-
-                    if(onConfirm){
-
-                        onConfirm();
-
-                    }
+                    modal.classList
+                    .add("hidden");
 
                 }
             );
@@ -277,11 +188,14 @@
         }
 
 
+
     };
 
 
 
-    Object.freeze(Modal);
+    Object.freeze(
+        Modal
+    );
 
 
 
