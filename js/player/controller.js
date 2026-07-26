@@ -5,137 +5,217 @@
  * File        : controller.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
  * Player Controller.
  *
- * Menghubungkan Event Bus dengan UI aplikasi.
- * Controller tidak mengontrol Audio secara langsung.
+ * Menjadi penghubung event player dengan UI.
+ * Tidak mengontrol audio secara langsung.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class PlayerController {
 
-        constructor() {
 
-            this.bindEvents();
+
+        constructor(){
+
+
+            this.bind();
+
 
         }
 
-        bindEvents() {
 
-            const Events = NPC.Core.Events;
 
-            if (!Events) {
+
+
+        bind(){
+
+
+            if(
+                !NPC.Core.Events
+            ){
+
                 return;
+
             }
 
-            Events.on(
+
+
+            NPC.Core.Events.on(
+
                 "player.playing",
-                () => this.onPlaying()
+
+                ()=>{
+
+                    this.emitUI(
+                        "playing"
+                    );
+
+                }
+
             );
 
-            Events.on(
-                "player.pause",
-                () => this.onPause()
+
+
+            NPC.Core.Events.on(
+
+                "player.paused",
+
+                ()=>{
+
+                    this.emitUI(
+                        "paused"
+                    );
+
+                }
+
             );
 
-            Events.on(
-                "player.stop",
-                () => this.onStop()
+
+
+            NPC.Core.Events.on(
+
+                "player.stopped",
+
+                ()=>{
+
+                    this.emitUI(
+                        "stopped"
+                    );
+
+                }
+
             );
 
-            Events.on(
+
+
+            NPC.Core.Events.on(
+
                 "player.error",
-                (error) => this.onError(error)
+
+                (error)=>{
+
+                    this.emitUI(
+                        "error",
+                        error
+                    );
+
+                }
+
             );
 
-            Events.on(
-                "player.metadata.changed",
-                (metadata) => this.onMetadata(metadata)
+
+
+            NPC.Core.Events.on(
+
+                "player.metadata.updated",
+
+                (data)=>{
+
+                    this.emitUI(
+                        "metadata",
+                        data
+                    );
+
+                }
+
             );
 
-            Events.on(
-                "player.sleep.finished",
-                () => this.onSleepFinished()
-            );
 
         }
 
-        onPlaying() {
+
+
+
+
+        emitUI(event,data=null){
+
 
             NPC.Core.Events.emit(
-                "ui.player.playing"
+
+                "ui.player." + event,
+
+                data
+
             );
+
 
         }
 
-        onPause() {
 
-            NPC.Core.Events.emit(
-                "ui.player.pause"
-            );
 
-        }
 
-        onStop() {
 
-            NPC.Core.Events.emit(
-                "ui.player.stop"
-            );
+        play(){
+
+
+            NPC.Player.Engine.play();
+
 
         }
 
-        onError(error) {
 
-            NPC.UI.Toast?.error(
-                error?.message ||
-                NPC.I18n?.t("player.error") ||
-                "Player Error"
-            );
 
-        }
 
-        onMetadata(metadata) {
 
-            NPC.Core.Events.emit(
-                "ui.player.metadata",
-                metadata
-            );
+        pause(){
+
+
+            NPC.Player.Engine.pause();
+
 
         }
 
-        onSleepFinished() {
 
-            NPC.Core.Events.emit(
-                "player.stop.request"
-            );
 
-            NPC.UI.Toast?.info(
-                NPC.I18n?.t("player.sleep_finished") ||
-                "Sleep timer selesai."
-            );
+
+
+        stop(){
+
+
+            NPC.Player.Engine.stop();
+
 
         }
+
+
+
+
 
     }
 
-    Object.freeze(PlayerController);
+
+
+
 
     NPC.Player.Controller =
+
         new PlayerController();
+
+
 
 })(window.NPC);
