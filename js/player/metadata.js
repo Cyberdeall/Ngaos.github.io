@@ -5,38 +5,42 @@
  * File        : metadata.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * Metadata Manager.
+ * Player Metadata Manager.
  *
- * Mengelola metadata lagu yang sedang diputar.
- * Tidak melakukan request jaringan secara langsung.
- * Data diperoleh dari adapter/service yang akan dibuat kemudian.
+ * Mengelola informasi lagu/siaran.
+ * Tidak mengambil data langsung dari server.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class MetadataManager {
 
-        constructor() {
 
-            this.reset();
 
-        }
+        constructor(){
 
-        reset() {
 
             this.data = {
 
@@ -48,102 +52,162 @@
 
                 artwork: "",
 
-                presenter: "",
-
-                listeners: 0,
+                station: "",
 
                 updatedAt: null
 
             };
 
+
         }
 
-        set(data = {}) {
+
+
+
+
+        set(data = {}){
+
 
             this.data = {
 
+
                 ...this.data,
+
 
                 ...data,
 
-                updatedAt: Date.now()
+
+                updatedAt:
+                    Date.now()
+
 
             };
 
+
+
             NPC.Core.Events?.emit(
-                "player.metadata.changed",
+
+                "player.metadata.updated",
+
                 this.get()
+
             );
+
 
         }
 
-        get() {
 
-            return Object.freeze({
+
+
+
+        get(){
+
+
+            return {
 
                 ...this.data
 
-            });
+            };
+
 
         }
 
-        clear() {
 
-            this.reset();
+
+
+
+        clear(){
+
+
+            this.data = {
+
+
+                title: "",
+
+                artist: "",
+
+                album: "",
+
+                artwork: "",
+
+                station: "",
+
+                updatedAt: null
+
+
+            };
+
+
 
             NPC.Core.Events?.emit(
+
                 "player.metadata.cleared"
+
             );
+
 
         }
 
-        title() {
+
+
+
+
+        title(){
+
 
             return this.data.title;
 
+
         }
 
-        artist() {
+
+
+
+
+        artist(){
+
 
             return this.data.artist;
 
-        }
-
-        album() {
-
-            return this.data.album;
 
         }
 
-        artwork() {
+
+
+
+
+        artwork(){
+
 
             return this.data.artwork;
 
-        }
-
-        presenter() {
-
-            return this.data.presenter;
 
         }
 
-        listeners() {
 
-            return this.data.listeners;
+
+
+
+        station(){
+
+
+            return this.data.station;
+
 
         }
 
-        updatedAt() {
 
-            return this.data.updatedAt;
-
-        }
 
     }
 
-    Object.freeze(MetadataManager);
+
+
+
 
     NPC.Player.Metadata =
+
         new MetadataManager();
+
+
 
 })(window.NPC);
