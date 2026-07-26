@@ -10,12 +10,12 @@
  *
  * Description
  * ----------------------------------------------------------------------------
- * Bootstrap Namespace.
+ * Bootstrap namespace aplikasi.
  *
- * File ini membuat namespace global aplikasi.
- * Tidak boleh berisi konfigurasi ataupun logika aplikasi.
+ * File ini hanya bertugas membuat namespace global `window.NPC`.
+ * Tidak boleh berisi konfigurasi, logika aplikasi, maupun implementasi modul.
  *
- * File ini WAJIB dimuat PALING PERTAMA.
+ * File ini WAJIB dimuat paling pertama sebelum file JavaScript lainnya.
  * ============================================================================
  */
 
@@ -23,11 +23,12 @@
 
 (function (window) {
 
+    // Jangan menimpa namespace jika sudah ada.
     if (window.NPC) {
         return;
     }
 
-    const NPC = {
+    window.NPC = {
 
         Version: {},
 
@@ -48,9 +49,5 @@
         Utils: {}
 
     };
-
-    Object.seal(NPC);
-
-    window.NPC = NPC;
 
 })(window);
