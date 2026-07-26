@@ -5,11 +5,10 @@
  * File        : toast.js
  * Folder      : /js/ui
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
  *
  * Description
  * ----------------------------------------------------------------------------
- * Toast Notification Manager.
+ * Notification Toast System.
  * ============================================================================
  */
 
@@ -28,164 +27,171 @@
     }
 
 
-    NPC.UI = NPC.UI || {};
 
-
-
-    let container = null;
-
-
-
-    function createContainer(){
-
-
-        if(container){
-
-            return;
-
-        }
-
-
-        container =
-            document.createElement(
-                "div"
-            );
-
-
-        container.className =
-            "npc-toast-container";
-
-
-        document.body.appendChild(
-            container
-        );
-
-
-    }
-
-
-
-    function show(
-        message,
-        type="info",
-        duration=4000
-    ){
-
-
-        createContainer();
-
-
-
-        const toast =
-            document.createElement(
-                "div"
-            );
-
-
-
-        toast.className =
-            `npc-toast ${type}`;
-
-
-
-        toast.textContent =
-            message;
-
-
-
-        container.appendChild(
-            toast
-        );
-
-
-
-        setTimeout(()=>{
-
-
-            toast.classList.add(
-                "hide"
-            );
-
-
-            setTimeout(()=>{
-
-                toast.remove();
-
-            },300);
-
-
-
-        },duration);
-
-
-
-    }
+    NPC.UI =
+    NPC.UI || {};
 
 
 
     const Toast = {
 
 
-        success(message,duration){
 
-            show(
-                message,
-                "success",
-                duration
-            );
-
-        },
+        container:null,
 
 
-        error(message,duration){
 
-            show(
-                message,
-                "error",
-                duration
-            );
-
-        },
+        init(){
 
 
-        warning(message,duration){
+            if(
+                Toast.container
+            ){
 
-            show(
-                message,
-                "warning",
-                duration
-            );
-
-        },
-
-
-        info(message,duration){
-
-            show(
-                message,
-                "info",
-                duration
-            );
-
-        },
-
-
-        clear(){
-
-            if(container){
-
-                container.innerHTML="";
+                return;
 
             }
+
+
+
+            const div =
+            document.createElement(
+                "div"
+            );
+
+
+
+            div.id =
+            "npcToastContainer";
+
+
+
+            div.className =
+            "npc-toast-container";
+
+
+
+            document.body
+            .appendChild(div);
+
+
+
+            Toast.container =
+            div;
+
+
+        },
+
+
+
+
+
+        show(
+            message,
+            type="info",
+            duration=3000
+        ){
+
+
+            Toast.init();
+
+
+
+            const item =
+            document.createElement(
+                "div"
+            );
+
+
+
+            item.className =
+            "npc-toast npc-toast-"+type;
+
+
+
+            item.textContent =
+            message;
+
+
+
+            Toast.container
+            .appendChild(item);
+
+
+
+            setTimeout(()=>{
+
+
+                item.classList.add(
+                    "hide"
+                );
+
+
+
+                setTimeout(()=>{
+
+
+                    item.remove();
+
+
+                },300);
+
+
+
+            },duration);
+
+
+
+        },
+
+
+
+
+
+        success(message){
+
+
+            Toast.show(
+                message,
+                "success"
+            );
+
+
+        },
+
+
+
+
+
+        error(message){
+
+
+            Toast.show(
+                message,
+                "error"
+            );
+
+
+        },
+
+
+
+
+
+        info(message){
+
+
+            Toast.show(
+                message,
+                "info"
+            );
+
 
         }
 
 
+
     };
-
-
-
-    Object.freeze(Toast);
 
 
 
