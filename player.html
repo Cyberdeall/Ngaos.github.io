@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NGAOS Player</title>
+
+
+<style>
+
+body{
+
+    margin:0;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#111;
+
+    color:white;
+
+    font-family:Arial, sans-serif;
+
+}
+
+
+.player{
+
+    width:90%;
+
+    max-width:420px;
+
+    background:#1d1d1d;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    text-align:center;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.5);
+
+}
+
+
+
+.logo{
+
+    width:120px;
+
+    height:120px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    margin-bottom:20px;
+
+}
+
+
+
+.title{
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.status{
+
+    color:#aaa;
+
+    margin-bottom:25px;
+
+}
+
+
+
+button{
+
+    border:0;
+
+    padding:14px 25px;
+
+    border-radius:30px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    background:white;
+
+    color:#111;
+
+}
+
+
+
+button:hover{
+
+    opacity:.8;
+
+}
+
+
+
+input[type=range]{
+
+    width:100%;
+
+    margin-top:25px;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="player">
+
+
+<img
+class="logo"
+src="assets/logo.png"
+alt="NGAOS">
+
+
+<div class="title">
+
+NGAOS Radio
+
+</div>
+
+
+<div id="status" class="status">
+
+Siap
+
+</div>
+
+
+
+<button id="play">
+
+▶ Play
+
+</button>
+
+
+
+<input
+
+id="volume"
+
+type="range"
+
+min="0"
+
+max="1"
+
+step="0.01"
+
+value="1"
+
+>
+
+
+
+</div>
+
+
+
+
+<!-- CORE -->
+
+<script src="js/npc.js"></script>
+
+
+<script src="js/core/events.js"></script>
+
+<script src="js/core/logger.js"></script>
+
+
+
+<!-- AUTH -->
+
+<script src="js/auth/adapter.js"></script>
+
+<script src="js/auth/mapper.js"></script>
+
+<script src="js/auth/clerk.js"></script>
+
+<script src="js/auth/auth.js"></script>
+
+
+
+<!-- PLAYER CORE -->
+
+<script src="js/player/engine.js"></script>
+
+<script src="js/player/metadata.js"></script>
+
+<script src="js/player/volume.js"></script>
+
+<script src="js/player/reconnect.js"></script>
+
+<script src="js/player/sleep.js"></script>
+
+<script src="js/player/statistics.js"></script>
+
+<script src="js/player/controller.js"></script>
+
+<script src="js/player/player.js"></script>
+
+
+
+<!-- APP -->
+
+<script src="js/app.js"></script>
+
+
+
+<script>
+
+
+/*
+|--------------------------------------------------------------------------
+| STREAM CONFIG
+|--------------------------------------------------------------------------
+*/
+
+
+const STREAM_URL =
+
+"https://uk14freenew.listen2myradio.com/live.mp3?typeportmount=s1_27764_stream_367452469";
+
+
+
+
+
+window.addEventListener(
+
+"DOMContentLoaded",
+
+async ()=>{
+
+
+    const btn =
+    document.getElementById("play");
+
+
+    const volume =
+    document.getElementById("volume");
+
+
+    const status =
+    document.getElementById("status");
+
+
+
+    NPC.Player.load(
+        STREAM_URL
+    );
+
+
+
+    btn.onclick = async ()=>{
+
+
+        try{
+
+
+            if(
+                NPC.Player.isPlaying()
+            ){
+
+
+                NPC.Player.pause();
+
+
+                btn.innerHTML =
+                "▶ Play";
+
+
+                status.innerHTML =
+                "Paused";
+
+
+            }
+            else{
+
+
+                await NPC.Player.play();
+
+
+                btn.innerHTML =
+                "⏸ Pause";
+
+
+                status.innerHTML =
+                "Playing";
+
+
+            }
+
+
+
+        }
+        catch(error){
+
+
+            console.error(error);
+
+
+            status.innerHTML =
+            "Gagal memutar stream";
+
+
+        }
+
+
+    };
+
+
+
+
+
+    volume.oninput = ()=>{
+
+
+        NPC.Player.volume(
+
+            volume.value
+
+        );
+
+
+    };
+
+
+
+}
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>
