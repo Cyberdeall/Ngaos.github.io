@@ -1,15 +1,16 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM UI
+ * NGAOS PLATFORM UI CORE
  * ----------------------------------------------------------------------------
  * File        : ui.js
  * Folder      : /js/ui
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
  *
  * Description
  * ----------------------------------------------------------------------------
- * UI Manager utama aplikasi.
+ * UI Framework Core.
+ *
+ * Pengelola komponen antarmuka aplikasi.
  * ============================================================================
  */
 
@@ -17,6 +18,7 @@
 
 
 (function(NPC){
+
 
     if(!NPC){
 
@@ -27,90 +29,222 @@
     }
 
 
-    NPC.UI = NPC.UI || {};
+
+    NPC.UI =
+    NPC.UI || {};
+
 
 
     const UI = {
 
 
-        init(){
 
-            NPC.Core.Logger?.info(
-                "UI System initialized"
-            );
+        select(selector){
 
-
-            NPC.Core.Events?.emit(
-                "ui.ready"
-            );
-
-        },
-
-
-        get(selector){
 
             return document.querySelector(
                 selector
             );
 
+
+        },
+
+
+
+
+
+        selectAll(selector){
+
+
+            return document.querySelectorAll(
+                selector
+            );
+
+
         },
 
 
-        getAll(selector){
 
-            return [
-                ...document.querySelectorAll(selector)
-            ];
-
-        },
 
 
         show(element){
 
-            if(element){
 
-                element.classList.remove(
-                    "hidden"
-                );
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
 
             }
 
+
+
+            if(element){
+
+                element.style.display =
+                "";
+
+            }
+
+
         },
+
+
+
 
 
         hide(element){
 
-            if(element){
 
-                element.classList.add(
-                    "hidden"
-                );
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
 
             }
+
+
+
+            if(element){
+
+                element.style.display =
+                "none";
+
+            }
+
 
         },
 
 
-        toggle(element){
 
-            if(element){
 
-                element.classList.toggle(
-                    "hidden"
-                );
+
+        addClass(
+            element,
+            className
+        ){
+
+
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
 
             }
 
+
+
+            element?.classList
+            .add(className);
+
+
+        },
+
+
+
+
+
+        removeClass(
+            element,
+            className
+        ){
+
+
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
+
+            }
+
+
+
+            element?.classList
+            .remove(className);
+
+
+        },
+
+
+
+
+
+        toggleClass(
+            element,
+            className
+        ){
+
+
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
+
+            }
+
+
+
+            element?.classList
+            .toggle(className);
+
+
+        },
+
+
+
+
+
+        text(
+            element,
+            value
+        ){
+
+
+            if(
+                typeof element === "string"
+            ){
+
+                element =
+                UI.select(element);
+
+            }
+
+
+
+            if(element){
+
+                element.textContent =
+                value;
+
+            }
+
+
         }
+
+
 
 
     };
 
 
+
     Object.freeze(UI);
 
 
-    NPC.UI.Core = UI;
+
+    NPC.UI.Core =
+    UI;
+
 
 
 })(window.NPC);
