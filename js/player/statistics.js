@@ -5,140 +5,227 @@
  * File        : statistics.js
  * Folder      : /js/player
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
  * Player Statistics Manager.
  *
- * Menyimpan statistik penggunaan player selama aplikasi berjalan.
- * Tidak melakukan penyimpanan database maupun local storage.
+ * Menghitung statistik penggunaan player.
+ * Tidak menyimpan database.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+(function(NPC){
+
+
+    if(!NPC){
+
+        throw new Error(
+            "NPC namespace belum tersedia."
+        );
+
     }
 
-    NPC.Player = NPC.Player || {};
+
+
+    NPC.Player =
+        NPC.Player || {};
+
+
 
     class StatisticsManager {
 
-        constructor() {
+
+
+        constructor(){
+
 
             this.reset();
 
-            this.bindEvents();
+
+            this.bind();
+
+
 
         }
 
-        reset() {
+
+
+
+
+        bind(){
+
+
+            NPC.Core.Events?.on(
+
+                "player.playing",
+
+                ()=>{
+
+                    this.data.play++;
+
+                }
+
+            );
+
+
+
+            NPC.Core.Events?.on(
+
+                "player.paused",
+
+                ()=>{
+
+                    this.data.pause++;
+
+                }
+
+            );
+
+
+
+            NPC.Core.Events?.on(
+
+                "player.stopped",
+
+                ()=>{
+
+                    this.data.stop++;
+
+                }
+
+            );
+
+
+
+            NPC.Core.Events?.on(
+
+                "player.error",
+
+                ()=>{
+
+                    this.data.error++;
+
+                }
+
+            );
+
+
+
+            NPC.Core.Events?.on(
+
+                "player.reconnect.success",
+
+                ()=>{
+
+                    this.data.reconnect++;
+
+                }
+
+            );
+
+
+
+            NPC.Core.Events?.on(
+
+                "player.metadata.updated",
+
+                ()=>{
+
+                    this.data.metadata++;
+
+                }
+
+            );
+
+
+        }
+
+
+
+
+
+        reset(){
+
 
             this.data = {
 
-                playCount: 0,
 
-                pauseCount: 0,
+                play:0,
 
-                stopCount: 0,
 
-                reconnectCount: 0,
+                pause:0,
 
-                errorCount: 0,
 
-                metadataUpdateCount: 0,
+                stop:0,
 
-                listeningTime: 0,
 
-                lastError: null,
+                error:0,
 
-                startedAt: null
+
+                reconnect:0,
+
+
+                metadata:0,
+
+
+                started:
+                    Date.now()
+
 
             };
 
-        }
-
-        bindEvents() {
-
-            NPC.Core.Events.on("player.playing", () => {
-
-                this.data.playCount++;
-
-                this.data.startedAt = Date.now();
-
-            });
-
-            NPC.Core.Events.on("player.pause", () => {
-
-                this.data.pauseCount++;
-
-                this.calculateListeningTime();
-
-            });
-
-            NPC.Core.Events.on("player.stop", () => {
-
-                this.data.stopCount++;
-
-                this.calculateListeningTime();
-
-            });
-
-            NPC.Core.Events.on("player.error", (error) => {
-
-                this.data.errorCount++;
-
-                this.data.lastError = error || null;
-
-            });
-
-            NPC.Core.Events.on("player.reconnect.success", () => {
-
-                this.data.reconnectCount++;
-
-            });
-
-            NPC.Core.Events.on("player.metadata.changed", () => {
-
-                this.data.metadataUpdateCount++;
-
-            });
 
         }
 
-        calculateListeningTime() {
 
-            if (!this.data.startedAt) {
-                return;
-            }
 
-            this.data.listeningTime +=
-                Date.now() - this.data.startedAt;
 
-            this.data.startedAt = null;
 
-        }
+        get(){
 
-        get() {
 
-            return Object.freeze({
+            return {
 
                 ...this.data
 
-            });
+            };
+
 
         }
 
+
+
+
+
+        listeningTime(){
+
+
+            return (
+
+                Date.now()
+                -
+                this.data.started
+
+            );
+
+
+        }
+
+
+
     }
 
-    Object.freeze(StatisticsManager);
+
+
+
 
     NPC.Player.Statistics =
-        new StatisticsManager();
+        StatisticsManager;
+
+
 
 })(window.NPC);
