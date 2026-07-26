@@ -1,27 +1,27 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE (NPC)
+ * NGAOS PLATFORM CORE
  * ----------------------------------------------------------------------------
  * File        : session.js
  * Folder      : /js/core
  * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
  *
  * Description
  * ----------------------------------------------------------------------------
- * User Session Manager.
+ * User Session Management.
  *
- * Mengelola sesi pengguna tanpa bergantung pada provider autentikasi.
+ * Mengelola session internal aplikasi.
+ * Tidak bergantung pada provider authentication.
  * ============================================================================
  */
 
 "use strict";
 
-(function (NPC) {
+
+(function(NPC){
 
 
-    if (!NPC) {
+    if(!NPC){
 
         throw new Error(
             "NPC namespace belum tersedia."
@@ -31,8 +31,8 @@
 
 
 
-    const SESSION_KEY =
-        "user_session";
+    NPC.Core =
+    NPC.Core || {};
 
 
 
@@ -40,61 +40,64 @@
 
 
 
-        /**
-         * Membuat session baru
-         *
-         * @param {Object} user
-         */
-        create(user) {
+        key:
+
+        "npc_session",
 
 
-            const session = {
+
+        lifetime:
+
+        1000 * 60 * 60 * 24 * 7,
 
 
-                id:
-                NPC.Core.Utils.uuid(),
 
 
-                user,
+
+        save(user){
+
+
+            if(!user){
+
+                return false;
+
+            }
+
+
+
+            const data = {
+
+
+                user:user,
 
 
                 created:
+
                 Date.now(),
 
 
-                expires:
+                expired:
 
-                Date.now() +
-                (
-                    (NPC.Config?.SESSION?.HOURS || 4)
-                    *
-                    60
-                    *
-                    60
-                    *
-                    1000
-                )
+                Date.now()
+                +
+                Session.lifetime
 
 
             };
 
 
 
-            NPC.Core.Storage.set(
-                SESSION_KEY,
-                session
+            localStorage.setItem(
+
+                Session.key,
+
+                JSON.stringify(data)
+
             );
 
 
 
-            NPC.Core.Events?.emit(
-                "session.created",
-                session
-            );
-
-
-
-            return session;
+            return true;
 
 
         },
@@ -102,14 +105,76 @@
 
 
 
-        /**
-         * Mendapatkan session
-         */
-        get() {
+
+        get(){
 
 
-            return NPC.Core.Storage.get(
-                SESSION_KEY,
+            const raw =
+            localStorage.getItem(
+                Session.key
+            );
+
+
+
+            if(!raw){
+
+                return null;
+
+            }
+
+
+
+            try{
+
+
+                const data =
+                JSON.parse(raw);
+
+
+
+                if(
+                    Date.now()
+                    >
+                    data.expired
+                ){
+
+                    Session.destroy();
+
+                    return null;
+
+                }
+
+
+
+                return data.user;
+
+
+
+            }
+            catch(error){
+
+
+                Session.destroy();
+
+
+                return null;
+
+
+            }
+
+
+        },
+
+
+
+
+
+        exists(){
+
+
+            return (
+                Session.get()
+                !==
                 null
             );
 
@@ -119,136 +184,12 @@
 
 
 
-        /**
-         * Mengecek session aktif
-         */
-        isActive() {
 
+        destroy(){
 
-            const session =
-                Session.get();
 
-
-
-            if (!session) {
-
-                return false;
-
-            }
-
-
-
-            if (
-                Date.now()
-                >
-                session.expires
-            ) {
-
-
-                Session.destroy();
-
-
-                return false;
-
-
-            }
-
-
-
-            return true;
-
-
-        },
-
-
-
-
-        /**
-         * Mengambil user aktif
-         */
-        user() {
-
-
-            if (
-                !Session.isActive()
-            ) {
-
-                return null;
-
-            }
-
-
-
-            return Session.get().user;
-
-
-        },
-
-
-
-
-        /**
-         * Perpanjang session
-         */
-        refresh() {
-
-
-            const session =
-                Session.get();
-
-
-
-            if (!session) {
-
-                return false;
-
-            }
-
-
-
-            session.expires =
-                Date.now()
-                +
-                (
-                    (NPC.Config?.SESSION?.HOURS || 4)
-                    *
-                    60
-                    *
-                    60
-                    *
-                    1000
-                );
-
-
-
-            NPC.Core.Storage.set(
-                SESSION_KEY,
-                session
-            );
-
-
-            return true;
-
-
-        },
-
-
-
-
-        /**
-         * Hapus session
-         */
-        destroy() {
-
-
-            NPC.Core.Storage.remove(
-                SESSION_KEY
-            );
-
-
-
-            NPC.Core.Events?.emit(
-                "session.destroyed"
+            localStorage.removeItem(
+                Session.key
             );
 
 
@@ -257,34 +198,29 @@
 
 
 
-        /**
-         * Status session
-         */
-        status() {
+
+        refresh(user){
 
 
-            return {
+            Session.destroy();
 
 
-                active:
-                Session.isActive(),
-
-
-                user:
-                Session.user()
-
-
-            };
+            return Session.save(
+                user
+            );
 
 
         }
+
 
 
     };
 
 
 
-    Object.freeze(Session);
+    Object.freeze(
+        Session
+    );
 
 
 
