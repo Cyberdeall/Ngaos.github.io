@@ -10,8 +10,8 @@
  * ----------------------------------------------------------------------------
  * Player Controller.
  *
- * Menjadi penghubung event player dengan UI.
- * Tidak mengontrol audio secara langsung.
+ * Interface antara aplikasi dan Player API.
+ * Tidak mengelola audio secara langsung.
  * ============================================================================
  */
 
@@ -36,147 +36,17 @@
 
 
 
-    class PlayerController {
+    const Controller = {
 
 
 
-        constructor(){
+        async play(){
 
 
-            this.bind();
+            return await NPC.Player.API.play();
 
 
-        }
-
-
-
-
-
-        bind(){
-
-
-            if(
-                !NPC.Core.Events
-            ){
-
-                return;
-
-            }
-
-
-
-            NPC.Core.Events.on(
-
-                "player.playing",
-
-                ()=>{
-
-                    this.emitUI(
-                        "playing"
-                    );
-
-                }
-
-            );
-
-
-
-            NPC.Core.Events.on(
-
-                "player.paused",
-
-                ()=>{
-
-                    this.emitUI(
-                        "paused"
-                    );
-
-                }
-
-            );
-
-
-
-            NPC.Core.Events.on(
-
-                "player.stopped",
-
-                ()=>{
-
-                    this.emitUI(
-                        "stopped"
-                    );
-
-                }
-
-            );
-
-
-
-            NPC.Core.Events.on(
-
-                "player.error",
-
-                (error)=>{
-
-                    this.emitUI(
-                        "error",
-                        error
-                    );
-
-                }
-
-            );
-
-
-
-            NPC.Core.Events.on(
-
-                "player.metadata.updated",
-
-                (data)=>{
-
-                    this.emitUI(
-                        "metadata",
-                        data
-                    );
-
-                }
-
-            );
-
-
-        }
-
-
-
-
-
-        emitUI(event,data=null){
-
-
-            NPC.Core.Events.emit(
-
-                "ui.player." + event,
-
-                data
-
-            );
-
-
-        }
-
-
-
-
-
-        play(){
-
-
-            NPC.Player.Engine.play();
-
-
-        }
+        },
 
 
 
@@ -185,10 +55,10 @@
         pause(){
 
 
-            NPC.Player.Engine.pause();
+            return NPC.Player.API.pause();
 
 
-        }
+        },
 
 
 
@@ -197,24 +67,100 @@
         stop(){
 
 
-            NPC.Player.Engine.stop();
+            return NPC.Player.API.stop();
+
+
+        },
+
+
+
+
+
+        toggle(){
+
+
+            if(
+                NPC.Player.API.isPlaying()
+            ){
+
+                return this.pause();
+
+            }
+
+
+            return this.play();
+
+
+        },
+
+
+
+
+
+        volume(value){
+
+
+            return NPC.Player.API.volume(
+                value
+            );
+
+
+        },
+
+
+
+
+
+        mute(){
+
+
+            return NPC.Player.API.mute(
+                true
+            );
+
+
+        },
+
+
+
+
+
+        unmute(){
+
+
+            return NPC.Player.API.mute(
+                false
+            );
+
+
+        },
+
+
+
+
+
+        metadata(){
+
+
+            return NPC.Player.API.metadata();
 
 
         }
 
 
 
+    };
 
 
-    }
 
-
+    Object.freeze(
+        Controller
+    );
 
 
 
     NPC.Player.Controller =
-
-        new PlayerController();
+        Controller;
 
 
 
