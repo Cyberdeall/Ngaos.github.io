@@ -7,7 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>NGAOS Player</title>
+<title>Ngaos Al Falah Ploso</title>
 
 
 <style>
@@ -15,123 +15,64 @@
 body{
 
     margin:0;
-
     min-height:100vh;
-
     display:flex;
-
     justify-content:center;
-
     align-items:center;
-
     background:#111;
-
+    font-family:Arial,sans-serif;
     color:white;
 
-    font-family:Arial, sans-serif;
-
 }
 
 
-.player{
+.player-box{
 
     width:90%;
-
     max-width:420px;
-
-    background:#1d1d1d;
-
+    background:#1e1e1e;
     padding:25px;
-
-    border-radius:18px;
-
+    border-radius:20px;
     text-align:center;
 
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.5);
-
 }
 
 
-
-.logo{
-
-    width:120px;
-
-    height:120px;
-
-    border-radius:50%;
-
-    object-fit:cover;
-
-    margin-bottom:20px;
-
-}
-
-
-
-.title{
+h1{
 
     font-size:22px;
 
-    font-weight:bold;
-
-    margin-bottom:8px;
-
 }
 
 
+#status{
 
-.status{
-
+    margin:20px 0;
     color:#aaa;
 
-    margin-bottom:25px;
-
 }
-
 
 
 button{
 
-    border:0;
-
-    padding:14px 25px;
-
+    padding:14px 30px;
+    border:none;
     border-radius:30px;
-
     cursor:pointer;
-
     font-size:16px;
 
-    background:white;
-
-    color:#111;
-
 }
 
 
-
-button:hover{
-
-    opacity:.8;
-
-}
-
-
-
-input[type=range]{
+input{
 
     width:100%;
-
     margin-top:25px;
 
 }
 
 
-
 </style>
-
 
 </head>
 
@@ -139,57 +80,36 @@ input[type=range]{
 <body>
 
 
-<div class="player">
+<div class="player-box">
 
 
-<img
-class="logo"
-src="assets/logo.png"
-alt="NGAOS">
+<h1>
+Ngaos Al Falah Ploso
+</h1>
 
 
-<div class="title">
-
-NGAOS Radio
-
-</div>
-
-
-<div id="status" class="status">
-
+<div id="status">
 Siap
-
 </div>
 
 
-
-<button id="play">
-
+<button id="playButton">
 ▶ Play
-
 </button>
 
 
-
 <input
-
 id="volume"
-
 type="range"
-
 min="0"
-
 max="1"
-
 step="0.01"
-
 value="1"
-
->
-
+/>
 
 
 </div>
+
 
 
 
@@ -199,9 +119,16 @@ value="1"
 <script src="js/npc.js"></script>
 
 
+<script src="js/env.js"></script>
+
+<script src="js/config.js"></script>
+
+
+
 <script src="js/core/events.js"></script>
 
 <script src="js/core/logger.js"></script>
+
 
 
 
@@ -217,7 +144,8 @@ value="1"
 
 
 
-<!-- PLAYER CORE -->
+
+<!-- PLAYER -->
 
 <script src="js/player/engine.js"></script>
 
@@ -237,57 +165,54 @@ value="1"
 
 
 
+
 <!-- APP -->
 
 <script src="js/app.js"></script>
 
 
 
+
 <script>
 
 
-/*
-|--------------------------------------------------------------------------
-| STREAM CONFIG
-|--------------------------------------------------------------------------
-*/
-
-
-const STREAM_URL =
-
-"https://uk14freenew.listen2myradio.com/live.mp3?typeportmount=s1_27764_stream_367452469";
-
-
-
-
-
 window.addEventListener(
-
 "DOMContentLoaded",
-
 async ()=>{
 
 
-    const btn =
-    document.getElementById("play");
-
-
-    const volume =
-    document.getElementById("volume");
+    const button =
+    document.getElementById(
+        "playButton"
+    );
 
 
     const status =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
 
 
-
-    NPC.Player.load(
-        STREAM_URL
+    const volume =
+    document.getElementById(
+        "volume"
     );
 
 
 
-    btn.onclick = async ()=>{
+    const stream =
+
+        NPC.Config.radio.streamUrl;
+
+
+
+    NPC.Player.load(
+        stream
+    );
+
+
+
+    button.onclick = async ()=>{
 
 
         try{
@@ -301,7 +226,7 @@ async ()=>{
                 NPC.Player.pause();
 
 
-                btn.innerHTML =
+                button.innerHTML =
                 "▶ Play";
 
 
@@ -316,7 +241,8 @@ async ()=>{
                 await NPC.Player.play();
 
 
-                btn.innerHTML =
+
+                button.innerHTML =
                 "⏸ Pause";
 
 
@@ -327,16 +253,17 @@ async ()=>{
             }
 
 
-
         }
         catch(error){
 
 
-            console.error(error);
+            console.error(
+                error
+            );
 
 
             status.innerHTML =
-            "Gagal memutar stream";
+            "Gagal memutar radio";
 
 
         }
@@ -352,9 +279,7 @@ async ()=>{
 
 
         NPC.Player.volume(
-
             volume.value
-
         );
 
 
@@ -362,9 +287,8 @@ async ()=>{
 
 
 
-}
+});
 
-);
 
 
 </script>
