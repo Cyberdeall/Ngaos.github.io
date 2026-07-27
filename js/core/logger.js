@@ -1,192 +1,80 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE (NPC)
- * ----------------------------------------------------------------------------
- * File        : logger.js
- * Folder      : /js/core
- * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
- *
- * Description
- * ----------------------------------------------------------------------------
- * Central Logging System.
- *
- * Semua pencatatan aplikasi melalui modul ini.
+ * NGAOS PLATFORM
+ * Core Logger
+ * ============================================================================
+ * File    : logger.js
+ * Folder  : /js/core
+ * Version : 5.0.0
  * ============================================================================
  */
 
 "use strict";
 
+window.NPC = window.NPC || {};
+
 (function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
-    }
-
-
-    const LEVEL = Object.freeze({
-
-        INFO: "INFO",
-        WARN: "WARN",
-        ERROR: "ERROR",
-        DEBUG: "DEBUG"
-
-    });
-
-
+    const DEBUG = Boolean(
+        NPC.Config &&
+        NPC.Config.DEBUG &&
+        NPC.Config.DEBUG.ENABLED
+    );
 
     function timestamp() {
-
-        return new Date()
-            .toISOString();
-
+        return new Date().toISOString();
     }
 
+    function write(level, ...args) {
 
+        if (!DEBUG && level === "DEBUG") {
+            return;
+        }
 
-    function output(level, message, data = null) {
-
-
-        const prefix =
-            `[NPC ${level}] ${timestamp()}`;
-
+        const prefix = `[${timestamp()}] [${level}]`;
 
         switch (level) {
 
-
-            case LEVEL.ERROR:
-
-                console.error(
-                    prefix,
-                    message,
-                    data ?? ""
-                );
-
+            case "ERROR":
+                console.error(prefix, ...args);
                 break;
 
-
-            case LEVEL.WARN:
-
-                console.warn(
-                    prefix,
-                    message,
-                    data ?? ""
-                );
-
+            case "WARN":
+                console.warn(prefix, ...args);
                 break;
 
-
-            case LEVEL.DEBUG:
-
-                if (
-                    NPC.Config &&
-                    NPC.Config.DEBUG &&
-                    NPC.Config.DEBUG.ENABLED
-                ) {
-
-                    console.debug(
-                        prefix,
-                        message,
-                        data ?? ""
-                    );
-
-                }
-
+            case "INFO":
+                console.info(prefix, ...args);
                 break;
-
 
             default:
-
-                console.log(
-                    prefix,
-                    message,
-                    data ?? ""
-                );
+                console.log(prefix, ...args);
 
         }
-
 
     }
 
+    function debug(...args) {
+        write("DEBUG", ...args);
+    }
 
+    function info(...args) {
+        write("INFO", ...args);
+    }
 
-    const Logger = {
+    function warn(...args) {
+        write("WARN", ...args);
+    }
 
+    function error(...args) {
+        write("ERROR", ...args);
+    }
 
-        info(message, data = null) {
-
-            output(
-                LEVEL.INFO,
-                message,
-                data
-            );
-
-        },
-
-
-        warn(message, data = null) {
-
-            output(
-                LEVEL.WARN,
-                message,
-                data
-            );
-
-        },
-
-
-        error(message, data = null) {
-
-            output(
-                LEVEL.ERROR,
-                message,
-                data
-            );
-
-        },
-
-
-        debug(message, data = null) {
-
-            output(
-                LEVEL.DEBUG,
-                message,
-                data
-            );
-
-        },
-
-
-        group(title, callback) {
-
-
-            console.group(
-                `[NPC] ${title}`
-            );
-
-
-            try {
-
-                callback();
-
-            } finally {
-
-                console.groupEnd();
-
-            }
-
-
-        }
-
-
-    };
-
-
-    Object.freeze(Logger);
-
-
-    NPC.Core.Logger = Logger;
-
+    NPC.Logger = Object.freeze({
+        debug,
+        info,
+        warn,
+        error
+    });
 
 })(window.NPC);
