@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ngaos / Ngaji App</title>
+
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/player.css">
+
+  <script async crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="logo">
+      <h2 data-i18n="app_title">Ngaos App</h2>
+    </div>
+
+    <div class="nav-controls">
+      <select id="langSwitcher" class="lang-select">
+        <option value="id">Bahasa Indonesia</option>
+        <option value="en">English</option>
+      </select>
+
+      <div id="authContainer" class="auth-buttons">
+        <button id="btnLogin" class="btn btn-secondary" data-i18n="login">Masuk</button>
+        <button id="btnRegister" class="btn btn-primary" data-i18n="register">Daftar</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="errorDisplay" class="error-banner" style="display: none;"></div>
+
+  <main class="main-content">
+    <section class="hero-section">
+      <h1 data-i18n="welcome">Selamat Datang di Aplikasi Ngaji</h1>
+      <p data-i18n="hero_subtitle">Dengarkan lantunan ayat suci Al-Qur'an kapan saja.</p>
+    </section>
+
+    <section class="player-container">
+      <div class="search-box">
+        <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Cari surah atau bacaan...">
+      </div>
+
+      <div class="controls-panel">
+        <button id="btnTogglePlay" class="btn btn-circle" disabled>▶</button>
+        <div class="track-info">
+          <span id="currentTrackTitle" data-i18n="no_track_selected">Belum ada audio dipilih</span>
+        </div>
+      </div>
+
+      <div id="trackList" class="track-list">
+        </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
