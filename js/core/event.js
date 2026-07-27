@@ -1,221 +1,103 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE
- * ----------------------------------------------------------------------------
- * File        : events.js
- * Folder      : /js/core
- * Version     : 1.0.0
- *
- * Description
- * ----------------------------------------------------------------------------
- * Internal Application Event Bus.
- *
- * Sistem komunikasi antar modul tanpa dependency langsung.
+ * NGAOS PLATFORM
+ * Core Event Bus
+ * ============================================================================
+ * File    : events.js
+ * Folder  : /js/core
+ * Version : 5.0.0
  * ============================================================================
  */
 
 "use strict";
 
+window.NPC = window.NPC || {};
 
-(function(NPC){
+(function (NPC) {
 
+    const listeners = new Map();
 
-    if(!NPC){
+    function on(event, callback) {
 
-        throw new Error(
-            "NPC namespace belum tersedia."
-        );
+        if (typeof callback !== "function") {
+            throw new TypeError("Callback harus berupa function.");
+        }
+
+        if (!listeners.has(event)) {
+            listeners.set(event, new Set());
+        }
+
+        listeners.get(event).add(callback);
+
+        return () => off(event, callback);
+    }
+
+    function once(event, callback) {
+
+        const unsubscribe = on(event, (...args) => {
+            unsubscribe();
+            callback(...args);
+        });
 
     }
 
+    function off(event, callback) {
 
+        if (!listeners.has(event)) {
+            return;
+        }
 
-    NPC.Core =
-    NPC.Core || {};
+        listeners.get(event).delete(callback);
 
+        if (listeners.get(event).size === 0) {
+            listeners.delete(event);
+        }
 
+    }
 
-    const listeners = {};
+    function emit(event, payload = null) {
 
+        if (!listeners.has(event)) {
+            return;
+        }
 
+        listeners.get(event).forEach(listener => {
 
-    const Events = {
+            try {
 
+                listener(payload);
 
+            } catch (error) {
 
-        /**
-         * Daftar listener
-         */
-        on(
-            event,
-            callback
-        ){
-
-
-            if(
-                typeof callback !== "function"
-            ){
-
-                return false;
-
-            }
-
-
-
-            if(
-                !listeners[event]
-            ){
-
-                listeners[event] = [];
+                console.error(error);
 
             }
 
+        });
 
+    }
 
-            listeners[event]
-            .push(callback);
+    function clear(event = null) {
 
+        if (event === null) {
 
-
-            return true;
-
-
-        },
-
-
-
-
-
-        /**
-         * Hapus listener
-         */
-        off(
-            event,
-            callback
-        ){
-
-
-            if(
-                !listeners[event]
-            ){
-
-                return false;
-
-            }
-
-
-
-            listeners[event] =
-
-                listeners[event]
-                .filter(
-                    fn => fn !== callback
-                );
-
-
-
-            return true;
-
-
-        },
-
-
-
-
-
-        /**
-         * Kirim event
-         */
-        emit(
-            event,
-            data=null
-        ){
-
-
-            if(
-                !listeners[event]
-            ){
-
-                return false;
-
-            }
-
-
-
-            listeners[event]
-            .forEach(
-                callback => {
-
-
-                    try{
-
-
-                        callback(data);
-
-
-                    }
-                    catch(error){
-
-
-                        console.error(
-                            "[NPC Event Error]",
-                            error
-                        );
-
-
-                    }
-
-
-                }
-            );
-
-
-
-            return true;
-
-
-        },
-
-
-
-
-
-        /**
-         * Hapus semua event
-         */
-        clear(){
-
-
-            Object.keys(
-                listeners
-            )
-            .forEach(
-                key=>{
-
-                    delete listeners[key];
-
-                }
-            );
-
+            listeners.clear();
+            return;
 
         }
 
+        listeners.delete(event);
 
+    }
 
+    NPC.Events = Object.freeze({
 
-    };
+        on,
+        once,
+        off,
+        emit,
+        clear
 
-
-
-    Object.freeze(
-        Events
-    );
-
-
-
-    NPC.Core.Events =
-        Events;
-
-
+    });
 
 })(window.NPC);
