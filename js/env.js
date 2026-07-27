@@ -1,96 +1,135 @@
 /**
  * ============================================================================
  * NGAOS PLATFORM ENVIRONMENT
- * ----------------------------------------------------------------------------
- * File        : env.js
- * Folder      : /js
- * Version     : 1.0.0
+ * ============================================================================
+ * File      : env.js
+ * Folder    : /js
+ * Version   : 5.0.0
  *
- * Description
- * ----------------------------------------------------------------------------
- * Environment configuration layer.
- *
- * Tempat konfigurasi yang berubah saat deployment.
+ * Semua konfigurasi aplikasi berada di file ini.
+ * Jika ingin mengganti server, proxy, Clerk, atau pengaturan player,
+ * cukup ubah file ini.
  * ============================================================================
  */
 
 "use strict";
 
+window.NPC = window.NPC || {};
 
-window.NPC =
-window.NPC || {};
+(function (NPC) {
 
+    NPC.Env = Object.freeze({
 
+        // ==========================================================
+        // APPLICATION
+        // ==========================================================
+        mode: "production",
 
-NPC.Env = {
+        app: {
+            name: "NGAOS AL FALAH PLOSO",
+            description: "TAFSIR JALALAIN DAN SHAHIH BUKHARI",
+            version: "5.0.0"
+        },
 
+        // ==========================================================
+        // AUTHENTICATION
+        // ==========================================================
+        auth: {
 
-    mode:
+            provider: "clerk",
 
-    "production",
+            clerk: {
 
+                publishableKey:
+                    "pk_test_ZnVuLXBpZ2Vvbi02Mi5jbGVyay5hY2NvdW50cy5kZXYk"
 
+            }
 
-    debug:
+        },
 
-    false,
+        // ==========================================================
+        // RADIO
+        // ==========================================================
+        radio: {
 
+            provider: "listen2myradio",
 
+            streamUrl:
+                "https://b.alhastream.com:5125/radio",
 
-    auth:{
+            metadataUrl: "",
 
+            mountPoint: ""
 
-        provider:
+        },
 
-        "clerk",
+        // ==========================================================
+        // NETWORK
+        // ==========================================================
+        network: {
 
+            proxy: "",
 
-        clerk:{
+            apiUrl: "",
 
+            websocketUrl: "",
 
-            publishableKey:
+            timeout: 15000
 
-            ""
+        },
 
+        // ==========================================================
+        // PLAYER
+        // ==========================================================
+        player: {
+
+            autoPlay: false,
+
+            defaultVolume: 1,
+
+            muted: false,
+
+            reconnect: true,
+
+            reconnectDelay: 5000,
+
+            preload: "none"
+
+        },
+
+        // ==========================================================
+        // SESSION
+        // ==========================================================
+        session: {
+
+            durationHours: 4,
+
+            sessionKey: "radio_session",
+
+            rememberKey: "remember_username"
+
+        },
+
+        // ==========================================================
+        // ROUTES
+        // ==========================================================
+        routes: {
+
+            login: "index.html",
+
+            player: "player.html"
+
+        },
+
+        // ==========================================================
+        // DEBUG
+        // ==========================================================
+        debug: {
+
+            enabled: false
 
         }
 
+    });
 
-    },
-
-
-
-    server:{
-
-
-        apiUrl:
-
-        "",
-
-
-        websocketUrl:
-
-        ""
-
-
-    },
-
-
-
-    radio:{
-
-
-        provider:
-
-        "listen2myradio",
-
-
-        streamUrl:
-
-        ""
-
-    }
-
-
-
-};
+})(window.NPC);
