@@ -1,218 +1,149 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE (NPC)
- * ----------------------------------------------------------------------------
- * File        : storage.js
- * Folder      : /js/core
- * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
+ * NGAOS PLATFORM
+ * Core Storage
+ * ============================================================================
+ * File    : storage.js
+ * Folder  : /js/core
+ * Version : 5.0.0
  *
- * Description
- * ----------------------------------------------------------------------------
- * Central Storage Manager.
- *
- * Semua penyimpanan aplikasi melalui modul ini.
+ * Wrapper untuk LocalStorage.
+ * Seluruh modul wajib menggunakan NPC.Storage.
+ * Jangan akses localStorage secara langsung.
  * ============================================================================
  */
 
 "use strict";
 
+window.NPC = window.NPC || {};
+
 (function (NPC) {
 
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
+    const PREFIX = "NPC::";
+
+    function buildKey(key) {
+        return PREFIX + String(key);
     }
 
+    function set(key, value) {
 
-    const PREFIX =
-        "npc_";
+        try {
 
-
-    function makeKey(key) {
-
-        return PREFIX + key;
-
-    }
-
-
-    const Storage = {
-
-
-        /**
-         * Simpan data
-         *
-         * @param {string} key
-         * @param {*} value
-         */
-        set(key, value) {
-
-
-            try {
-
-
-                localStorage.setItem(
-
-                    makeKey(key),
-
-                    JSON.stringify(value)
-
-                );
-
-
-                return true;
-
-
-            } catch(error) {
-
-
-                NPC.Core.Logger?.error(
-                    "Storage gagal menyimpan",
-                    error
-                );
-
-
-                return false;
-
-            }
-
-        },
-
-
-
-        /**
-         * Ambil data
-         *
-         * @param {string} key
-         * @param {*} fallback
-         */
-        get(key, fallback = null) {
-
-
-            try {
-
-
-                const data =
-                    localStorage.getItem(
-                        makeKey(key)
-                    );
-
-
-                if (data === null) {
-
-                    return fallback;
-
-                }
-
-
-                return JSON.parse(data);
-
-
-            } catch(error) {
-
-
-                return fallback;
-
-            }
-
-        },
-
-
-
-        /**
-         * Hapus data
-         */
-        remove(key) {
-
-
-            try {
-
-
-                localStorage.removeItem(
-                    makeKey(key)
-                );
-
-
-                return true;
-
-
-            } catch(error) {
-
-
-                return false;
-
-            }
-
-        },
-
-
-
-        /**
-         * Cek data tersedia
-         */
-        has(key) {
-
-
-            return (
-                localStorage.getItem(
-                    makeKey(key)
-                ) !== null
+            localStorage.setItem(
+                buildKey(key),
+                JSON.stringify(value)
             );
 
-        },
+            return true;
 
+        } catch (error) {
 
+            NPC.Logger?.error(
+                "Storage.set() gagal.",
+                error
+            );
 
-        /**
-         * Bersihkan seluruh data aplikasi
-         */
-        clear() {
-
-
-            Object.keys(localStorage)
-
-                .filter(
-                    key =>
-                    key.startsWith(PREFIX)
-                )
-
-                .forEach(
-                    key =>
-                    localStorage.removeItem(key)
-                );
-
-
-        },
-
-
-        /**
-         * Daftar key aktif
-         */
-        keys() {
-
-
-            return Object.keys(localStorage)
-
-                .filter(
-                    key =>
-                    key.startsWith(PREFIX)
-                )
-
-                .map(
-                    key =>
-                    key.replace(PREFIX, "")
-                );
+            return false;
 
         }
 
+    }
 
-    };
+    function get(key, defaultValue = null) {
 
+        try {
 
-    Object.freeze(Storage);
+            const value = localStorage.getItem(
+                buildKey(key)
+            );
 
+            if (value === null) {
+                return defaultValue;
+            }
 
-    NPC.Core.Storage = Storage;
+            return JSON.parse(value);
 
+        } catch (error) {
+
+            NPC.Logger?.error(
+                "Storage.get() gagal.",
+                error
+            );
+
+            return defaultValue;
+
+        }
+
+    }
+
+    function has(key) {
+
+        return localStorage.getItem(
+            buildKey(key)
+        ) !== null;
+
+    }
+
+    function remove(key) {
+
+        try {
+
+            localStorage.removeItem(
+                buildKey(key)
+            );
+
+            return true;
+
+        } catch (error) {
+
+            NPC.Logger?.error(
+                "Storage.remove() gagal.",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+    function clear() {
+
+        try {
+
+            Object.keys(localStorage)
+
+                .filter(key => key.startsWith(PREFIX))
+
+                .forEach(key => {
+
+                    localStorage.removeItem(key);
+
+                });
+
+            return true;
+
+        } catch (error) {
+
+            NPC.Logger?.error(
+                "Storage.clear() gagal.",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+    NPC.Storage = Object.freeze({
+
+        set,
+        get,
+        has,
+        remove,
+        clear
+
+    });
 
 })(window.NPC);
