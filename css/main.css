@@ -1,0 +1,42 @@
+/* Styling Global & Variabel Warna */
+:root {
+  --primary-color: #0d9488;
+  --primary-hover: #0f766e;
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --error-bg: #fef2f2;
+  --error-text: #991b1b;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.main-content {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.hero-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.hero-section h1 {
+  color: var(--primary-color);
+  font-size: 2rem;
+}
+
