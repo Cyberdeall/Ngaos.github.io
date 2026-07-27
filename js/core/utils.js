@@ -1,41 +1,32 @@
 /**
  * ============================================================================
- * NGAOS PLATFORM CORE (NPC)
- * ----------------------------------------------------------------------------
- * File        : utils.js
- * Folder      : /js/core
- * Version     : 1.0.0
- * Author      : Fadil Ahmad & ChatGPT
- * License     : Private
+ * NGAOS PLATFORM
+ * Core Utilities
+ * ============================================================================
+ * File    : utils.js
+ * Folder  : /js/core
+ * Version : 5.0.0
  *
- * Description
- * ----------------------------------------------------------------------------
- * Utility functions yang digunakan oleh seluruh sistem.
- *
- * Modul ini tidak boleh bergantung kepada modul lain.
+ * Kumpulan fungsi utilitas umum.
+ * Tidak bergantung pada UI maupun Player.
  * ============================================================================
  */
 
 "use strict";
 
+window.NPC = window.NPC || {};
+
 (function (NPC) {
-
-    if (!NPC) {
-        throw new Error("NPC namespace belum tersedia.");
-    }
-
 
     const Utils = {
 
         /**
-         * Membuat ID unik.
-         *
-         * @returns {string}
+         * Generate UUID v4
          */
         uuid() {
 
             return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-                .replace(/[xy]/g, function (c) {
+                .replace(/[xy]/g, c => {
 
                     const r = Math.random() * 16 | 0;
                     const v = c === "x"
@@ -48,32 +39,25 @@
 
         },
 
-
         /**
-         * Delay asynchronous.
-         *
-         * @param {number} ms
-         * @returns {Promise}
+         * Delay Promise
          */
-        sleep(ms) {
+        sleep(ms = 0) {
 
             return new Promise(resolve => {
+
                 setTimeout(resolve, ms);
+
             });
 
         },
 
-
         /**
-         * Debounce function.
-         *
-         * @param {Function} fn
-         * @param {number} delay
-         * @returns {Function}
+         * Debounce
          */
         debounce(fn, delay = 300) {
 
-            let timer;
+            let timer = null;
 
             return function (...args) {
 
@@ -89,15 +73,10 @@
 
         },
 
-
         /**
-         * Throttle function.
-         *
-         * @param {Function} fn
-         * @param {number} limit
-         * @returns {Function}
+         * Throttle
          */
-        throttle(fn, limit = 300) {
+        throttle(fn, limit = 200) {
 
             let waiting = false;
 
@@ -107,9 +86,9 @@
                     return;
                 }
 
-                fn.apply(this, args);
-
                 waiting = true;
+
+                fn.apply(this, args);
 
                 setTimeout(() => {
 
@@ -121,147 +100,110 @@
 
         },
 
-
         /**
-         * Clone object aman.
-         *
-         * @param {*} value
-         * @returns {*}
+         * Deep Clone
          */
-        deepClone(value) {
+        clone(value) {
 
-            if (
-                value === null ||
-                typeof value !== "object"
-            ) {
-
-                return value;
-
-            }
-
-
-            return JSON.parse(
-                JSON.stringify(value)
-            );
+            return structuredClone(value);
 
         },
 
-
         /**
-         * Parsing JSON aman.
-         *
-         * @param {string} value
-         * @param {*} fallback
-         * @returns {*}
+         * Deep Merge
          */
-        safeJSONParse(value, fallback = null) {
+        merge(target = {}, source = {}) {
 
-            try {
+            const output = { ...target };
 
-                return JSON.parse(value);
+            Object.keys(source).forEach(key => {
 
-            } catch (error) {
+                if (
+                    source[key] &&
+                    typeof source[key] === "object" &&
+                    !Array.isArray(source[key])
+                ) {
 
-                return fallback;
+                    output[key] = Utils.merge(
+                        output[key] || {},
+                        source[key]
+                    );
 
-            }
+                } else {
+
+                    output[key] = source[key];
+
+                }
+
+            });
+
+            return output;
 
         },
 
-
         /**
-         * Mengecek object kosong.
-         *
-         * @param {*} value
-         * @returns {boolean}
+         * Apakah object kosong
          */
         isEmpty(value) {
 
-            if (value === null || value === undefined) {
+            if (value == null) {
                 return true;
             }
-
-
-            if (typeof value === "string") {
-                return value.trim().length === 0;
-            }
-
 
             if (Array.isArray(value)) {
                 return value.length === 0;
             }
 
-
             if (typeof value === "object") {
                 return Object.keys(value).length === 0;
             }
 
-
-            return false;
-
-        },
-
-
-        /**
-         * Format tanggal Indonesia.
-         *
-         * @param {Date|string|number} date
-         * @returns {string}
-         */
-        formatDate(date) {
-
-            try {
-
-                return new Intl.DateTimeFormat(
-                    "id-ID",
-                    {
-                        dateStyle: "full",
-                        timeStyle: "short"
-                    }
-                ).format(
-                    new Date(date)
-                );
-
-
-            } catch (error) {
-
-                return "-";
-
-            }
+            return value === "";
 
         },
 
+        /**
+         * Format tanggal Indonesia
+         */
+        formatDate(date = new Date()) {
+
+            return new Intl.DateTimeFormat(
+                "id-ID",
+                {
+                    dateStyle: "full",
+                    timeStyle: "medium"
+                }
+            ).format(date);
+
+        },
 
         /**
-         * Membatasi panjang text.
-         *
-         * @param {string} text
-         * @param {number} length
-         * @returns {string}
+         * Clamp number
          */
-        truncate(text, length = 50) {
+        clamp(value, min, max) {
 
-            if (!text) {
-                return "";
-            }
+            return Math.min(
+                Math.max(value, min),
+                max
+            );
 
+        },
 
-            if (text.length <= length) {
-                return text;
-            }
+        /**
+         * Random Integer
+         */
+        random(min, max) {
 
-
-            return text.substring(0, length) + "...";
+            return Math.floor(
+                Math.random() * (max - min + 1)
+            ) + min;
 
         }
 
     };
 
-
     Object.freeze(Utils);
 
-
-    NPC.Core.Utils = Utils;
-
+    NPC.Utils = Utils;
 
 })(window.NPC);
